@@ -15,9 +15,9 @@ async function login() {
     });
 
     const result = await response.text();
-
+    //result = 'ok';
     if (result === 'ok') {
-        window.location.href = '/home';
+        window.location.href = '/homePage';
     } else {
         document.getElementById('error-msg').style.display = 'block';
         document.getElementById('error-msg').innerText = 'Invalid email or password';

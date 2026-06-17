@@ -9,9 +9,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
 async function loadHomeStats() {
     try {
-        const res = await fetch("/stats/home");
+        const res = await fetch("/stats/home");  // ← changed from /homePage
 
-        // If Spring Security redirects to /login (302 → text/html), treat as auth error
         if (!res.ok || res.redirected) {
             window.location.href = "/login";
             return;
@@ -34,14 +33,13 @@ function renderTotalUsers(total) {
     animateCount(el, 0, total, 1200);
 }
 
-/** Animates a number counting up over `duration` ms */
 function animateCount(el, from, to, duration) {
     const startTime = performance.now();
 
     function tick(now) {
         const elapsed  = now - startTime;
         const progress = Math.min(elapsed / duration, 1);
-        const eased    = 1 - Math.pow(1 - progress, 3);   // ease-out cubic
+        const eased    = 1 - Math.pow(1 - progress, 3);
         el.textContent = Math.round(from + (to - from) * eased).toLocaleString();
 
         if (progress < 1) requestAnimationFrame(tick);
@@ -108,7 +106,6 @@ function showError() {
 }
 
 // ── Security helper ────────────────────────────────────────────────
-/** Escapes HTML to prevent XSS when inserting server data into innerHTML */
 function escHtml(str) {
     return String(str)
         .replace(/&/g, "&amp;")

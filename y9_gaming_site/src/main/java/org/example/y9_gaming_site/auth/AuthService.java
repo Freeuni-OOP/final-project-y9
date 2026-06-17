@@ -14,7 +14,7 @@ public class AuthService {
 
     public User login(String email, String password) {
         // ვეძებთ იუზერს email-ით
-        User user = userRepository.findByEmail(email)
+        User user = userRepository.findByUsername(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         // ვამოწმებთ პაროლს პირდაპირ (hashing-ს შემდეგ დავამატებთ)
