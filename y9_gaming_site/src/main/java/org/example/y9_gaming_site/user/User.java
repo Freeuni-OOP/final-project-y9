@@ -1,6 +1,9 @@
 package org.example.y9_gaming_site.user;
 
+import org.example.y9_gaming_site.model.Achievements;
 import jakarta.persistence.*;
+
+import java.util.List;
 
 @Entity
 @Table(name = "users")
@@ -23,4 +26,15 @@ public class User {
 
     public String getPassword() { return password; }
     public void setPassword(String password) { this.password = password; }
+
+    @ManyToMany
+    @JoinTable(
+            name = "user_achievements",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "achievement_id")
+    )
+    private List<Achievements> achievements;
+
+    public List<Achievements> getAchievements() { return achievements; }
+    public void setAchievements(List<Achievements> achievements) { this.achievements = achievements; }
 }
