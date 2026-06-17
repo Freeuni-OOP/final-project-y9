@@ -1,6 +1,7 @@
 package org.example.y9_gaming_site.user;
 
 
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,15 +13,17 @@ import java.util.Random;
 public class UserService {
     private final UserRepository userRepository;
     private final Random random = new Random();
+    private final BCryptPasswordEncoder passwordEncoder;
 
+    public UserService(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder) {
 
-    public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
 
     public User addNewUser(User user) throws Exception {
-        String passwordRegex = "^(?=.*[0-9])(?=.*[A-Z])(?=.*[a-z]).{8,}$";
+        String passwordRegex = "^(?=.*[@#$%^&+=!*?<>/'{}])(?=.*[0-9])(?=.*[A-Z])(?=.*[a-z]).{8,}$";
         if (user.getPassword() == null || !user.getPassword().matches(passwordRegex)) {
             throw new Exception("Password must be at least 8 characters long. It must contain at least one number, one uppercase letter and one lowercase letter.");
         }
@@ -29,8 +32,8 @@ public class UserService {
             List<String> usernameSuggestions = generateSuggestions(user.getUsername());
             throw new Exception("This Username is already taken, you can try one of these: " + String.join(", ", usernameSuggestions));
         }
-
-
+        String hashedPassword = passwordEncoder.encode(user.getPassword());
+        user.setPassword(hashedPassword);
         return userRepository.save(user);
     }
 
