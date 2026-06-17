@@ -24,12 +24,11 @@ public class AuthController {
     public String login(@RequestBody LoginRequest request,
                         HttpSession session) {
         try {
-            User user = authService.login(
+            String token = authService.login(
                     request.getEmail(),
                     request.getPassword()
             );
-            session.setAttribute("userId", user.getId());
-            session.setAttribute("username", user.getUsername());
+            session.setAttribute("token", token);
             return "ok";
         } catch (Exception e) {
             return "error:" + e.getMessage();
