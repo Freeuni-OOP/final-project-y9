@@ -2,6 +2,7 @@ package org.example.y9_gaming_site;
 
 
 import junit.framework.TestCase;
+import org.example.y9_gaming_site.security.ContentModerator;
 import org.example.y9_gaming_site.user.User;
 import org.example.y9_gaming_site.user.UserService;
 import org.example.y9_gaming_site.user.UserRepository;
@@ -123,5 +124,28 @@ public class UserRegisterTests extends TestCase {
         String invalidUser = org.example.y9_gaming_site.security.TokenUtil.validateTokenAndGetUsername(tamperedToken);
         assertNull("A tampered token must return null user authentication", invalidUser);
     }
+
+    public void test7(){
+        assertFalse(ContentModerator.isFlagged("mesatia"));
+        assertFalse(ContentModerator.isFlagged("pixelart_gamer"));
+    }
+
+
+    public void test8(){
+        assertTrue(ContentModerator.isFlagged("admin"));
+        assertTrue(ContentModerator.isFlagged("h4ck"));
+    }
+
+
+    public void test9(){
+        assertTrue(ContentModerator.isFlagged("h4ck"));
+        assertTrue(ContentModerator.isFlagged("xX_h4ck_Xx"));
+    }
+
+    public void test10(){
+        assertTrue(ContentModerator.isFlagged("hhhaaaaccckkkkkkk"));
+        assertTrue(ContentModerator.isFlagged("adm||nnnnnnnnn"));
+    }
+
 }
 
