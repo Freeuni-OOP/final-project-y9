@@ -9,19 +9,16 @@ public class AuthService {
     private final UserRepository userRepository;
 
     public AuthService(UserRepository userRepository) {
-        this.userRepository = userRepository;
+        this.userRepository=userRepository;
     }
 
-    public User login(String email, String password) {
-        // ვეძებთ იუზერს email-ით
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        // ვამოწმებთ პაროლს პირდაპირ (hashing-ს შემდეგ დავამატებთ)
-        if (!password.equals(user.getPassword())) {
+    public User login(String userName, String password){
+        User user = userRepository.findByEmail(userName).orElseThrow(
+                () -> new RuntimeException("User not found"));
+        if(!password.equals(user.getPassword())){
             throw new RuntimeException("Wrong password");
         }
-
         return user;
     }
+
 }

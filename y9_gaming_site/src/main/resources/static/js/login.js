@@ -1,5 +1,5 @@
 async function login() {
-    const email = document.getElementById('email').value;
+    const email = document.getElementById('password').value;
     const password = document.getElementById('password').value;
 
     if (!email || !password) {
