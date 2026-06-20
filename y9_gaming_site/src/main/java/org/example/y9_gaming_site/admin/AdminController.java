@@ -18,8 +18,6 @@ public class AdminController {
     public AdminController(AdminService adminService) {
         this.adminService = adminService;
     }
-
-    // ── Dashboard ──────────────────────────────────────────────
     @GetMapping("/dashboard")
     public String dashboard(Model model) {
         model.addAttribute("users", adminService.getAllUsers());
@@ -28,7 +26,7 @@ public class AdminController {
         return "admin/dashboard";
     }
 
-    // ── Users ──────────────────────────────────────────────────
+
     @GetMapping("/users")
     public String viewAllUsers(Model model) {
         model.addAttribute("users", adminService.getAllUsers());
@@ -67,7 +65,6 @@ public class AdminController {
         return "redirect:/admin/users";
     }
 
-    // ── Announcements ──────────────────────────────────────────
     @GetMapping("/announcements")
     public String viewAnnouncements(Model model) {
         model.addAttribute("announcements", adminService.getAllAnnouncements());
@@ -90,7 +87,7 @@ public class AdminController {
         return "redirect:/admin/announcements";
     }
 
-    // ── Challenges ─────────────────────────────────────────────
+
     @GetMapping("/challenges")
     public String viewChallenges(Model model) {
         model.addAttribute("challenges", adminService.getAllChallenges());

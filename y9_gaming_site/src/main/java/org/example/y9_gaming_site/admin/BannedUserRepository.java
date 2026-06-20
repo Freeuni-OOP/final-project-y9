@@ -6,6 +6,6 @@ import java.util.Optional;
 
 @Repository
 public interface BannedUserRepository extends JpaRepository<BannedUser, Long> {
-    Optional<BannedUser> findByUserId(Long userId);
-    boolean existsByUserId(Long userId);
+    Optional<BannedUser> findById(Long userId);
+    boolean existsById(Long userId);
 }

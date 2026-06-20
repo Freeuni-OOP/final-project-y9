@@ -64,7 +64,7 @@ public class AdminService {
 
 
     public void unbanUser(Long id) {
-        BannedUser bannedUser = bannedUserRepository.findByUserId(id)
+        BannedUser bannedUser = bannedUserRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Banned user not found"));
         User user = new User();
         user.setAge(bannedUser.getAge());
