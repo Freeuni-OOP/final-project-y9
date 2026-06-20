@@ -1,52 +1,55 @@
 package org.example.y9_gaming_site;
 
-
 import junit.framework.TestCase;
 import org.example.y9_gaming_site.security.ContentModerator;
+import org.example.y9_gaming_site.security.TokenUtil;
 import org.example.y9_gaming_site.user.User;
 import org.example.y9_gaming_site.user.UserService;
 import org.example.y9_gaming_site.user.UserRepository;
+import org.example.y9_gaming_site.user.UserRegisterDto;
 import org.mockito.Mockito;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-
-import java.util.Optional;
-
 
 public class UserRegisterTests extends TestCase {
     private UserRepository mockRepository;
     private UserService userService;
-    private User validUser;
+    private UserRegisterDto validUserDto;
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
         mockRepository = Mockito.mock(UserRepository.class);
-        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-        userService = new UserService(mockRepository, encoder);
-        validUser = new User();
-        validUser.setUsername("mesatia");
-        validUser.setEmail("mesatia@gmail.com");
-        validUser.setPassword("mesatiaMagaria123!");
+        userService = new UserService(mockRepository);
+
+        validUserDto = new UserRegisterDto();
+        validUserDto.setUsername("mesatia");
+        validUserDto.setEmail("mesatia@gmail.com");
+        validUserDto.setPassword("mesatiaMagaria123!");
+        validUserDto.setBirthDate("2005-02-12");
     }
 
     public void test0(){
-        validUser.setId(4L);
-        assertTrue(validUser.getId()==4L);
+        User user = new User();
+        user.setId(4L);
+        assertTrue(user.getId() == 4L);
     }
 
     public void test1() throws Exception {
-        Mockito.when(mockRepository.findByUsername("mesatia")).thenReturn(Optional.empty());
-        Mockito.when(mockRepository.save(validUser)).thenReturn(validUser);
-        User savedUser = userService.addNewUser(validUser);
-        assertNotNull(savedUser);
-        assertEquals("mesatia", savedUser.getUsername());
+        Mockito.when(mockRepository.existsByUsername("mesatia")).thenReturn(false);
+        Mockito.when(mockRepository.existsByEmail("mesatia@gmail.com")).thenReturn(false);
+
+        try {
+            userService.addNewUser(validUserDto);
+        } catch (Exception e) {
+            fail("Should not have thrown any exception for valid data");
+        }
+
+        Mockito.verify(mockRepository, Mockito.times(1)).save(Mockito.any(User.class));
     }
 
-
     public void test2() {
-        validUser.setPassword("123");
+        validUserDto.setPassword("123");
         try {
-            userService.addNewUser(validUser);
+            userService.addNewUser(validUserDto);
             fail("Should have thrown an exception for a weak password!");
         } catch (Exception e) {
             assertTrue(e.getMessage().contains("Password must be at least 8 characters long"));
@@ -54,38 +57,37 @@ public class UserRegisterTests extends TestCase {
     }
 
     public void test3(){
-        User existingUser = new User();
-        existingUser.setUsername("mesatia");
-        Mockito.when(mockRepository.findByUsername("mesatia")).thenReturn(Optional.of(existingUser));
-        User newUser = new User();
+        Mockito.when(mockRepository.existsByUsername("mesatia")).thenReturn(true);
+
+        UserRegisterDto newUser = new UserRegisterDto();
         newUser.setUsername("mesatia");
         newUser.setPassword("laLalaLa1234#");
         newUser.setEmail("mesat23@freeuni.edu.ge");
+
         try {
             userService.addNewUser(newUser);
             fail("Should have thrown an exception for a used username");
         } catch (Exception e) {
-            assertTrue(e.getMessage().contains("This Username is already taken"));
+            assertTrue(e.getMessage().contains("Username is already taken"));
         }
     }
 
     public void test4() {
-        User existingUser = new User();
-        existingUser.setUsername("mesatia");
-        Mockito.when(mockRepository.findByUsername("mesatia")).thenReturn(Optional.of(existingUser));
-        Mockito.when(mockRepository.findByUsername(Mockito.anyString())).thenReturn(Optional.empty());
-        Mockito.when(mockRepository.findByUsername("mesatia")).thenReturn(Optional.of(existingUser));
-        User newUser = new User();
+        Mockito.when(mockRepository.existsByUsername("mesatia")).thenReturn(true);
+        Mockito.when(mockRepository.existsByUsername(Mockito.anyString())).thenReturn(false);
+        Mockito.when(mockRepository.existsByUsername("mesatia")).thenReturn(true);
+        UserRegisterDto newUser = new UserRegisterDto();
         newUser.setUsername("mesatia");
         newUser.setPassword("laLalaLa1234#");
         newUser.setEmail("test@freeuni.edu.ge");
+
         try {
             userService.addNewUser(newUser);
             fail("Should have thrown an exception for a taken username");
         } catch (Exception e) {
             String message = e.getMessage();
-            assertTrue(message.contains("This Username is already taken, you can try one of these: "));
-            String suggestionsPart = message.substring(message.indexOf("these: ") + 7);
+            assertTrue(message.contains("Similar available Options: "));
+            String suggestionsPart = message.substring(message.indexOf("Options: ") + 9);
             String[] suggestions = suggestionsPart.split(", ");
             assertEquals("Should provide exactly 3 suggestions", 3, suggestions.length);
             for (String suggestion : suggestions) {
@@ -101,16 +103,22 @@ public class UserRegisterTests extends TestCase {
     }
 
     public void test5() throws Exception {
-        Mockito.when(mockRepository.findByUsername("uniqueUser")).thenReturn(Optional.empty());
-        Mockito.when(mockRepository.save(Mockito.any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        User user = new User();
-        user.setUsername("coolerMesatia");
-        user.setEmail("meeesaaatiaaaa@gmail.com");
-        user.setPassword("dzalianMagariParoli123!");
-        User savedUser = userService.addNewUser(user);
-        assertNotNull(savedUser);
-        assertFalse(savedUser.getPassword().equals("dzalianMagariParoli123!"));
-        assertTrue(savedUser.getPassword().startsWith("$2a$"));
+        Mockito.when(mockRepository.existsByUsername("coolerMesatia")).thenReturn(false);
+        Mockito.when(mockRepository.existsByEmail("meeesaaatiaaaa@gmail.com")).thenReturn(false);
+
+        UserRegisterDto dto = new UserRegisterDto();
+        dto.setUsername("coolerMesatia");
+        dto.setEmail("meeesaaatiaaaa@gmail.com");
+        dto.setPassword("dzalianMagariParoli123!");
+
+        Mockito.doAnswer(invocation -> {
+            User savedUser = invocation.getArgument(0);
+            assertFalse(savedUser.getPassword().equals("dzalianMagariParoli123!"));
+            assertNotNull(savedUser.getSalt());
+            return null;
+        }).when(mockRepository).save(Mockito.any(User.class));
+
+        userService.addNewUser(dto);
     }
 
     public void test6() {
@@ -130,12 +138,10 @@ public class UserRegisterTests extends TestCase {
         assertFalse(ContentModerator.isFlagged("pixelart_gamer"));
     }
 
-
     public void test8(){
         assertTrue(ContentModerator.isFlagged("admin"));
         assertTrue(ContentModerator.isFlagged("h4ck"));
     }
-
 
     public void test9(){
         assertTrue(ContentModerator.isFlagged("h4ck"));
@@ -146,6 +152,4 @@ public class UserRegisterTests extends TestCase {
         assertTrue(ContentModerator.isFlagged("hhhaaaaccckkkkkkk"));
         assertTrue(ContentModerator.isFlagged("adm||nnnnnnnnn"));
     }
-
 }
-

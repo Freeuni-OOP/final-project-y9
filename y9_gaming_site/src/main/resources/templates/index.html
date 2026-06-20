@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Y9 Gaming Portal</title>
+    <style>
+        body {
+            background-color: #0f0f1a;
+            color: #ffffff;
+            font-family: sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .card {
+            background-color: #16162a;
+            padding: 30px;
+            border-radius: 8px;
+            width: 350px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 14px;
+            color: #aaa;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            background-color: #0f0f1a;
+            border: 1px solid #33335c;
+            color: white;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #00d2ff;
+            border: none;
+            color: #0f0f1a;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .btn-guest {
+            background-color: transparent;
+            border: 2px solid #00d2ff;
+            color: #00d2ff;
+            margin-top: 10px;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 14px;
+            color: #888;
+        }
+        .link {
+            color: #00d2ff;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<div id="loginView" class="card">
+    <h2 style="text-align: center; margin-bottom: 20px; color: #00d2ff;">Login</h2>
+    <form id="loginForm">
+        <div class="form-group">
+            <label>Username</label>
+            <input type="text" id="loginUser" required>
+        </div>
+        <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="loginPass" required>
+        </div>
+        <button type="submit">Log In</button>
+    </form>
+
+    <button id="guestBtn" class="btn-guest">Join as Guest</button>
+
+    <div class="footer">
+        Don't have an account? <span class="link" id="toRegisterLink">Sign Up</span>
+    </div>
+</div>
+
+<div id="registerView" class="card hidden">
+    <h2 style="text-align: center; margin-bottom: 20px; color: #00d2ff;">Sign Up</h2>
+    <form id="registerForm">
+        <div class="form-group">
+            <label>Username</label>
+            <input type="text" id="regUser" required>
+        </div>
+        <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="regEmail" required>
+        </div>
+        <div class="form-group">
+            <label>Birth Date</label>
+            <input type="date" id="regBirth" required>
+        </div>
+        <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="regPass" required>
+        </div>
+        <button type="submit">Register</button>
+    </form>
+
+    <div class="footer">
+        Already have an account? <span class="link" id="toLoginLink">Log In</span>
+    </div>
+</div>
+
+<script>
+    const API = 'http://localhost:8080/api/users';
+
+    const loginView = document.getElementById('loginView');
+    const registerView = document.getElementById('registerView');
+
+    // View Toggle Controls
+    document.getElementById('toRegisterLink').addEventListener('click', () => {
+        loginView.classList.add('hidden');
+        registerView.classList.remove('hidden');
+    });
+
+    document.getElementById('toLoginLink').addEventListener('click', () => {
+        registerView.classList.add('hidden');
+        loginView.classList.remove('hidden');
+    });
+
+    // Shared Session Save Handler
+    function saveSession(data) {
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('username', data.username);
+        localStorage.setItem('role', data.role);
+        alert("Success! Authenticated as: " + data.username);
+    }
+
+    // Form Submission Actions
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const body = {
+            username: document.getElementById('loginUser').value,
+            password: document.getElementById('loginPass').value
+        };
+        try {
+            const res = await fetch(`${API}/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            });
+            if (res.ok) {
+                saveSession(await res.json());
+            } else {
+                alert("Invalid username or password.");
+            }
+        } catch (err) {
+            alert("Server connection failed.");
+        }
+    });
+
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const body = {
+            username: document.getElementById('regUser').value,
+            email: document.getElementById('regEmail').value,
+            birthDate: document.getElementById('regBirth').value,
+            password: document.getElementById('regPass').value
+        };
+        try {
+            const res = await fetch(API, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            });
+            if (res.ok) {
+                alert("Registered successfully!");
+                registerView.classList.add('hidden');
+                loginView.classList.remove('hidden');
+            } else {
+                const errMsg = await res.text();
+                alert(errMsg || "Registration failed.");
+            }
+        } catch (err) {
+            alert("Server connection failed.");
+        }
+    });
+
+    document.getElementById('guestBtn').addEventListener('click', async () => {
+        try {
+            const res = await fetch(`${API}/guest`, { method: 'POST' });
+            if (res.ok) {
+                saveSession(await res.json());
+            } else {
+                alert("Could not initialize guest session.");
+            }
+        } catch (err) {
+            alert("Server connection failed.");
+        }
+    });
+</script>
+</body>
+</html>

@@ -1,56 +1,80 @@
 package org.example.y9_gaming_site.user;
 
-
-
-
 import org.example.y9_gaming_site.security.ContentModerator;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.example.y9_gaming_site.security.PasswordUtil;
 import org.springframework.stereotype.Service;
+import java.time.LocalDate;
+import java.time.Period;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.Random;
-
-
-
+import java.util.UUID;
 
 @Service
 public class UserService {
+
     private final UserRepository userRepository;
     private final Random random = new Random();
-    private final BCryptPasswordEncoder passwordEncoder;
 
-
-    public UserService(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder) {
-
-
+    public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
     }
 
-
-
-
-    public User addNewUser(User user) throws Exception {
-        if (ContentModerator.isFlagged(user.getUsername())) {
+    public void addNewUser(UserRegisterDto dto) throws Exception {
+        if (ContentModerator.isFlagged(dto.getUsername())) {
             throw new IllegalArgumentException("Username contains inappropriate language or violates safety guidelines.");
         }
+
         String passwordRegex = "^(?=.*[@#$%^&+=!*?<>/'{}])(?=.*[0-9])(?=.*[A-Z])(?=.*[a-z]).{8,}$";
-        if (user.getPassword() == null || !user.getPassword().matches(passwordRegex)) {
-            throw new Exception("Password must be at least 8 characters long. It must contain at least one number, one uppercase letter and one lowercase letter.");
+        if (dto.getPassword() == null || !dto.getPassword().matches(passwordRegex)) {
+            throw new Exception("Password must be at least 8 characters long. It must contain at least one number, one uppercase letter, one lowercase letter, and one special character.");
         }
-        Optional<User> existingUser = userRepository.findByUsername(user.getUsername());
-        if (existingUser.isPresent()) {
-            List<String> usernameSuggestions = generateSuggestions(user.getUsername());
-            throw new Exception("This Username is already taken, you can try one of these: " + String.join(", ", usernameSuggestions));
+
+        if (userRepository.existsByEmail(dto.getEmail())) {
+            throw new IllegalArgumentException("An account with this email already exists.");
         }
-        String hashedPassword = passwordEncoder.encode(user.getPassword());
-        user.setPassword(hashedPassword);
-        return userRepository.save(user);
+
+        if (userRepository.existsByUsername(dto.getUsername())) {
+            List<String> list = generateSuggestions(dto.getUsername());
+            throw new IllegalArgumentException("Username is already taken. Similar available Options: " + String.join(", ", list));
+        }
+
+        if (dto.getBirthDate() == null || dto.getBirthDate().isBlank()) {
+            throw new IllegalArgumentException("Birth date is required.");
+        }
+
+        User user = new User();
+        user.setUsername(dto.getUsername());
+        user.setEmail(dto.getEmail());
+        user.setRole(Role.USER);
+
+        LocalDate birthDate = LocalDate.parse(dto.getBirthDate());
+        int calculatedAge = Period.between(birthDate, LocalDate.now()).getYears();
+        user.setAge(calculatedAge);
+
+        String key = PasswordUtil.generateKey();
+        user.setSalt(key);
+        user.setPassword(PasswordUtil.hashPassword(dto.getPassword(), key));
+
+        userRepository.save(user);
     }
 
+    public User createGuestUser() {
+        User guest = new User();
+        String uniqueId = UUID.randomUUID().toString().substring(0, 8);
 
+        guest.setUsername("Guest_" + uniqueId);
+        guest.setEmail(uniqueId + "@guest.y9gaming.local");
 
+        String key = PasswordUtil.generateKey();
+        guest.setSalt(key);
+        guest.setPassword(PasswordUtil.hashPassword(UUID.randomUUID().toString(), key));
+
+        guest.setAge(0);
+        guest.setRole(Role.GUEST);
+
+        return userRepository.save(guest);
+    }
 
     private List<String> generateSuggestions(String name) {
         List<String> suggestions = new ArrayList<>();
@@ -65,15 +89,12 @@ public class UserService {
                 String tmp = generateAdjectives();
                 option = tmp + name;
             }
-            if (!userRepository.findByUsername(option).isPresent() && !suggestions.contains(option)) {
+            if (!userRepository.existsByUsername(option) && !suggestions.contains(option)) {
                 suggestions.add(option);
             }
         }
         return suggestions;
     }
-
-
-
 
     private String generateAdjectives() {
         String[] adjectives = {
@@ -84,5 +105,3 @@ public class UserService {
         return adjectives[randomIndex];
     }
 }
-
-
