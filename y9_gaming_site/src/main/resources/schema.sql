@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS users (
     avatar VARCHAR(255),
     role VARCHAR(20) DEFAULT 'USER',
     birth_date DATE NOT NULL,
+    isBanned BOOLEAN NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 
     );
@@ -76,3 +77,14 @@ CREATE TABLE IF NOT EXISTS announcements (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (admin_id) REFERENCES users(id)
     );
+
+CREATE TABLE IF NOT EXISTS challenges (
+                                             id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                                             title VARCHAR(255) NOT NULL,
+    description TEXT NOT NULL,
+    reward TEXT NOT NULL,
+    admin_id BIGINT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (admin_id) REFERENCES users(id)
+    );
+
