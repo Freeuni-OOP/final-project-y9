@@ -74,3 +74,24 @@ CREATE TABLE IF NOT EXISTS announcements (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (admin_id) REFERENCES users(id)
     );
+
+CREATE TABLE IF NOT EXISTS challenges (
+                                             id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                                             title VARCHAR(255) NOT NULL,
+    description TEXT NOT NULL,
+    reward TEXT NOT NULL,
+    admin_id BIGINT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (admin_id) REFERENCES users(id)
+    );
+
+CREATE TABLE IF NOT EXISTS banned_users (
+                                     id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                                     username VARCHAR(50) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    email VARCHAR(100) UNIQUE,
+    avatar VARCHAR(255),
+    role VARCHAR(20) DEFAULT 'USER',
+    reason TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );

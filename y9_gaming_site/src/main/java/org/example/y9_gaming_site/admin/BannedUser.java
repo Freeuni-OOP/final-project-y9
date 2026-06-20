@@ -1,12 +1,10 @@
-package org.example.y9_gaming_site.user;
+package org.example.y9_gaming_site.admin;
 
 import jakarta.persistence.*;
-import java.util.List;
-
+import org.example.y9_gaming_site.user.Role;
 @Entity
-@Table(name = "users")
-public class User {
-
+@Table(name = "banned_users")
+public class BannedUser {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -21,6 +19,8 @@ public class User {
     private String password;
 
     private String salt;
+
+    private String reason;
 
     private int age;
 
@@ -48,7 +48,11 @@ public class User {
     public int getAge() { return age; }
     public void setAge(int age) { this.age = age; }
 
+    public String getReason() {return reason;}
+    public void setReason(String reason){this.reason = reason;}
+
     public Role getRole() { return role; }
     public void setRole(Role role) { this.role = role; }
 
 }
+
