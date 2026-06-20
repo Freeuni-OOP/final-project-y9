@@ -15,8 +15,9 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/css/**", "/js/**", "/img/**", "/favicon.ico").permitAll()
+                        .requestMatchers("/", "/css/**", "/js/**", "/img/**", "/visualExternals/**", "/favicon.ico").permitAll()
                         .requestMatchers("/login", "/register", "/guest").permitAll()
+                        .requestMatchers("/api/users/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .logout(logout -> logout
@@ -27,4 +28,3 @@ public class SecurityConfig {
         return http.build();
     }
 }
-
