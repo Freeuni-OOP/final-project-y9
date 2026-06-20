@@ -5,7 +5,9 @@ CREATE TABLE IF NOT EXISTS users (
     email VARCHAR(100) UNIQUE,
     avatar VARCHAR(255),
     role VARCHAR(20) DEFAULT 'USER',
+    birth_date DATE NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+
     );
 
 

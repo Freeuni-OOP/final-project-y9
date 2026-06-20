@@ -4,7 +4,6 @@ import org.example.y9_gaming_site.security.ContentModerator;
 import org.example.y9_gaming_site.security.PasswordUtil;
 import org.springframework.stereotype.Service;
 import java.time.LocalDate;
-import java.time.Period;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -39,7 +38,7 @@ public class UserService {
             throw new IllegalArgumentException("Username is already taken. Similar available Options: " + String.join(", ", list));
         }
 
-        if (dto.getBirthDate() == null || dto.getBirthDate().isBlank()) {
+        if (dto.getBirthDate() == null) {
             throw new IllegalArgumentException("Birth date is required.");
         }
 
@@ -47,10 +46,7 @@ public class UserService {
         user.setUsername(dto.getUsername());
         user.setEmail(dto.getEmail());
         user.setRole(Role.USER);
-
-        LocalDate birthDate = LocalDate.parse(dto.getBirthDate());
-        int calculatedAge = Period.between(birthDate, LocalDate.now()).getYears();
-        user.setAge(calculatedAge);
+        user.setBirthDate(dto.getBirthDate());
 
         String key = PasswordUtil.generateKey();
         user.setSalt(key);
@@ -70,7 +66,7 @@ public class UserService {
         guest.setSalt(key);
         guest.setPassword(PasswordUtil.hashPassword(UUID.randomUUID().toString(), key));
 
-        guest.setAge(0);
+        guest.setBirthDate(LocalDate.of(1970, 1, 1));
         guest.setRole(Role.GUEST);
 
         return userRepository.save(guest);
@@ -98,8 +94,10 @@ public class UserService {
 
     private String generateAdjectives() {
         String[] adjectives = {
-                "Epic", "Shadow", "Cyber", "Cosmic", "Ghost",
-                "TheReal", "Amazing", "TheOneAndOnly"
+                "Epic", "Shadow", "Cyber", "Cosmic", "SixSeven",
+                "TheReal", "Amazing", "TheOneAndOnly", "TheRealSlim",
+                "TungTungTung"
+
         };
         int randomIndex = random.nextInt(adjectives.length);
         return adjectives[randomIndex];

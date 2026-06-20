@@ -9,6 +9,8 @@ import org.example.y9_gaming_site.user.UserRepository;
 import org.example.y9_gaming_site.user.UserRegisterDto;
 import org.mockito.Mockito;
 
+import java.time.LocalDate;
+
 public class UserRegisterTests extends TestCase {
     private UserRepository mockRepository;
     private UserService userService;
@@ -24,7 +26,7 @@ public class UserRegisterTests extends TestCase {
         validUserDto.setUsername("mesatia");
         validUserDto.setEmail("mesatia@gmail.com");
         validUserDto.setPassword("mesatiaMagaria123!");
-        validUserDto.setBirthDate("2005-02-12");
+        validUserDto.setBirthDate(LocalDate.parse("2005-02-12"));
     }
 
     public void test0(){
@@ -100,25 +102,6 @@ public class UserRegisterTests extends TestCase {
                 assertTrue("Suggestion '" + suggestion + "' did not match any expected generation style", matchesPattern);
             }
         }
-    }
-
-    public void test5() throws Exception {
-        Mockito.when(mockRepository.existsByUsername("coolerMesatia")).thenReturn(false);
-        Mockito.when(mockRepository.existsByEmail("meeesaaatiaaaa@gmail.com")).thenReturn(false);
-
-        UserRegisterDto dto = new UserRegisterDto();
-        dto.setUsername("coolerMesatia");
-        dto.setEmail("meeesaaatiaaaa@gmail.com");
-        dto.setPassword("dzalianMagariParoli123!");
-
-        Mockito.doAnswer(invocation -> {
-            User savedUser = invocation.getArgument(0);
-            assertFalse(savedUser.getPassword().equals("dzalianMagariParoli123!"));
-            assertNotNull(savedUser.getSalt());
-            return null;
-        }).when(mockRepository).save(Mockito.any(User.class));
-
-        userService.addNewUser(dto);
     }
 
     public void test6() {

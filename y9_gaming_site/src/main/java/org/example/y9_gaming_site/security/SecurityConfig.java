@@ -1,4 +1,4 @@
-package org.example.y9_gaming_site.homePage;
+package org.example.y9_gaming_site.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,18 +11,14 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/css/**", "/js/**", "/img/**", "/visualExternals/**", "/favicon.ico").permitAll()
-                        .requestMatchers("/login", "/register", "/guest").permitAll()
+                        .requestMatchers("/", "/login", "/home", "/index.html", "/homePage.html").permitAll()
+                        .requestMatchers("/css/**", "/js/**", "/visualExternals/**").permitAll()
                         .requestMatchers("/api/users/**").permitAll()
                         .anyRequest().authenticated()
-                )
-                .logout(logout -> logout
-                        .logoutSuccessUrl("/login")
-                        .permitAll()
                 );
 
         return http.build();

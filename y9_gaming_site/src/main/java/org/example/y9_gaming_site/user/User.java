@@ -2,6 +2,8 @@ package org.example.y9_gaming_site.user;
 
 import org.example.y9_gaming_site.model.Achievements;
 import jakarta.persistence.*;
+import java.time.LocalDate;
+import java.time.Period;
 import java.util.List;
 
 @Entity
@@ -23,7 +25,8 @@ public class User {
 
     private String salt;
 
-    private int age;
+    @Column(name = "birth_date", nullable = false)
+    private LocalDate birthDate;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -52,12 +55,19 @@ public class User {
     public String getSalt() { return salt; }
     public void setSalt(String salt) { this.salt = salt; }
 
-    public int getAge() { return age; }
-    public void setAge(int age) { this.age = age; }
+    public LocalDate getBirthDate() { return birthDate; }
+    public void setBirthDate(LocalDate birthDate) { this.birthDate = birthDate; }
 
     public Role getRole() { return role; }
     public void setRole(Role role) { this.role = role; }
 
     public List<Achievements> getAchievements() { return achievements; }
     public void setAchievements(List<Achievements> achievements) { this.achievements = achievements; }
+
+    public int getAge() {
+        if (this.birthDate == null) {
+            return 0;
+        }
+        return Period.between(this.birthDate, LocalDate.now()).getYears();
+    }
 }
