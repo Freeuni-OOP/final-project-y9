@@ -17,7 +17,9 @@ public class UserAchievement {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
 
     private Long id; //unique identifier
+    @Column(name="user_id", insertable = false, updatable = false)
     private Long userId; //unique identifier of user who achieved
+    @Column(name="achievement_id", insertable = false, updatable = false)
     private Long achievementId; //unique identifier of achievement which was achieved
     private LocalDateTime earnedTime; //to know which was the latest achievement
 
