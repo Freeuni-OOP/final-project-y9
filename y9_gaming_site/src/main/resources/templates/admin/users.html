@@ -1,10 +1,82 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Admin - Users</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bitcount+Grid+Double+Ink&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif;
+            color: #fff;
+            display: flex;
+            min-height: 100vh;
+            position: relative;
+            background: linear-gradient(135deg, #523b5c 0%, #523b5c 10%, #6a4b6a 70%, #5a2c5e 100%); }  .sidebar { width: 220px; min-height: 100vh; background: rgba(71,44,82,0.82); backdrop-filter: blur(12px); padding: 30px 20px; position: fixed; border-right: 1px solid rgba(255,255,255,0.1); box-shadow: 4px 0 20px rgba(145,60,143,0.3); }
+        .sidebar { width: 220px; min-height: 100vh; background: rgba(71,44,82,0.82); backdrop-filter: blur(12px); padding: 30px 20px; position: fixed; border-right: 1px solid rgba(255,255,255,0.1); box-shadow: 4px 0 20px rgba(145,60,143,0.3); }
+        .sidebar h2 { font-family: "Bitcount Grid Double Ink", monospace; color: #e194d5; margin-bottom: 30px; font-size: 20px; letter-spacing: 2px; }
+        .sidebar a { display: block; color: #aaa; text-decoration: none; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.08); font-size: 14px; transition: color 0.2s; }
+        .sidebar a:hover { color: #e194d5; }
+        .sidebar a.danger { color: #ff6b6b; margin-top: 20px; border-bottom: none; }
+        .main { margin-left: 220px; padding: 40px; flex: 1; }
+        h1 { font-family: "Bitcount Grid Double Ink", monospace; color: #e194d5; font-size: 28px; letter-spacing: 2px; margin-bottom: 30px; }
+        table { width: 100%; border-collapse: collapse; background: rgba(71,44,82,0.6); backdrop-filter: blur(8px); border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.08); }
+        th { background: rgba(145,60,143,0.4); padding: 14px 16px; text-align: left; color: #e194d5; font-size: 13px; letter-spacing: 0.8px; text-transform: uppercase; }
+        td { padding: 13px 16px; border-bottom: 1px solid rgba(255,255,255,0.06); color: #ccc; font-size: 14px; vertical-align: middle; }
+        tr:last-child td { border-bottom: none; }
+        .actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+        .btn { padding: 7px 14px; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: bold; transition: opacity 0.2s; }
+        .btn:hover { opacity: 0.85; }
+        .btn-red { background: rgba(255,68,68,0.85); color: white; }
+        .btn-blue { background: rgba(154,78,171,0.95); color: white; }
+        .btn-orange { background: rgba(255,140,0,0.85); color: white; }
+        select { background: rgba(71,44,82,0.9); color: white; border: 1px solid rgba(197,158,239,0.5); padding: 7px; border-radius: 6px; font-size: 13px; }
+        input[type="text"] { background: rgba(71,44,82,0.9); color: white; border: 1px solid rgba(197,158,239,0.5); padding: 7px; border-radius: 6px; font-size: 13px; width: 120px; }
+        .alert { background: rgba(71,44,82,0.82); border-left: 4px solid #e194d5; padding: 12px 20px; border-radius: 8px; margin-bottom: 20px; color: #e194d5; font-size: 14px; }
+    </style>
 </head>
 <body>
 
+<div class="sidebar">
+    <h2>⚙ ADMIN</h2>
+    <a th:href="@{/admin/dashboard}">📊 Dashboard</a>
+    <a th:href="@{/admin/users}">👥 Users</a>
+    <a th:href="@{/admin/announcements}">📢 Announcements</a>
+    <a th:href="@{/admin/challenges}">🏆 Challenges</a>
+    <a th:href="@{/admin/users/banned}">🚫 Banned Users</a>
+    <a th:href="@{/}" class="danger">← Back to Site</a>
+</div>
+
+<div class="main">
+    <h1>USERS</h1>
+    <div th:if="${message}" class="alert" th:text="${message}"></div>
+    <table>
+        <tr><th>ID</th><th>Username</th><th>Email</th><th>Role</th><th>Actions</th></tr>
+        <tr th:each="user : ${users}">
+            <td th:text="${user.id}"></td>
+            <td th:text="${user.username}"></td>
+            <td th:text="${user.email}"></td>
+            <td th:text="${user.role}"></td>
+            <td>
+                <div class="actions">
+                    <form th:action="@{/admin/users/{id}/role(id=${user.id})}" method="post" style="display:flex;gap:6px;align-items:center;">
+                        <select name="role">
+                            <option value="USER">USER</option>
+                            <option value="ADMIN">ADMIN</option>
+                        </select>
+                        <button class="btn btn-blue" type="submit">Set</button>
+                    </form>
+                    <form th:action="@{/admin/users/{id}/ban(id=${user.id})}" method="post" style="display:flex;gap:6px;align-items:center;">
+                        <input type="text" name="reason" placeholder="Reason">
+                        <button class="btn btn-orange" type="submit">Ban</button>
+                    </form>
+                    <form th:action="@{/admin/users/{id}/delete(id=${user.id})}" method="post"
+                          onsubmit="return confirm('Delete this user?')">
+                        <button class="btn btn-red" type="submit">Delete</button>
+                    </form>
+                </div>
+            </td>
+        </tr>
+    </table>
+</div>
 </body>
 </html>

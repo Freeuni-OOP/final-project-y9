@@ -7,4 +7,82 @@
 <body>
 
 </body>
+</html><!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bitcount+Grid+Double+Ink&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif;
+            color: #fff;
+            display: flex;
+            min-height: 100vh;
+            position: relative;
+            background: linear-gradient(135deg, #523b5c 0%, #523b5c 10%, #6a4b6a 70%, #5a2c5e 100%); }  .sidebar { width: 220px; min-height: 100vh; background: rgba(71,44,82,0.82); backdrop-filter: blur(12px); padding: 30px 20px; position: fixed; border-right: 1px solid rgba(255,255,255,0.1); box-shadow: 4px 0 20px rgba(145,60,143,0.3); }
+        .sidebar { width: 220px; min-height: 100vh; background: rgba(71,44,82,0.82); backdrop-filter: blur(12px); padding: 30px 20px; position: fixed; border-right: 1px solid rgba(255,255,255,0.1); box-shadow: 4px 0 20px rgba(145,60,143,0.3); }
+        .sidebar h2 { font-family: "Bitcount Grid Double Ink", monospace; color: #e194d5; margin-bottom: 30px; font-size: 20px; letter-spacing: 2px; }
+        .sidebar a { display: block; color: #aaa; text-decoration: none; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.08); font-size: 14px; letter-spacing: 0.5px; transition: color 0.2s; }
+        .sidebar a:hover { color: #e194d5; }
+        .sidebar a.danger { color: #ff6b6b; margin-top: 20px; border-bottom: none; }
+        .main { margin-left: 220px; padding: 40px; flex: 1; }
+        h1 { font-family: "Bitcount Grid Double Ink", monospace; color: #e194d5; font-size: 28px; letter-spacing: 2px; margin-bottom: 30px; }
+        .cards { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 40px; }
+        .stat-card { background: rgba(71,44,82,0.82); backdrop-filter: blur(12px); border-radius: 16px; padding: 25px 30px; min-width: 160px; text-align: center; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 10px 40px rgba(145,60,143,0.3); }
+        .stat-card .number { font-size: 40px; color: #e194d5; font-weight: bold; font-family: "Bitcount Grid Double Ink", monospace; }
+        .stat-card .label { color: #aaa; margin-top: 5px; font-size: 13px; letter-spacing: 0.5px; }
+        .section h2 { font-family: "Bitcount Grid Double Ink", monospace; color: #d07fd8; font-size: 20px; margin-bottom: 15px; letter-spacing: 1px; }
+        table { width: 100%; border-collapse: collapse; background: rgba(71,44,82,0.6); backdrop-filter: blur(8px); border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.08); }
+        th { background: rgba(145,60,143,0.4); padding: 14px 16px; text-align: left; color: #e194d5; font-size: 13px; letter-spacing: 0.8px; text-transform: uppercase; }
+        td { padding: 13px 16px; border-bottom: 1px solid rgba(255,255,255,0.06); color: #ccc; font-size: 14px; }
+        tr:last-child td { border-bottom: none; }
+        .alert { background: rgba(71,44,82,0.82); border-left: 4px solid #e194d5; padding: 12px 20px; border-radius: 8px; margin-bottom: 20px; color: #e194d5; font-size: 14px; }
+    </style>
+</head>
+<body>
+
+
+<div class="sidebar">
+    <h2>⚙ ADMIN</h2>
+    <a th:href="@{/admin/dashboard}">📊 Dashboard</a>
+    <a th:href="@{/admin/users}">👥 Users</a>
+    <a th:href="@{/admin/announcements}">📢 Announcements</a>
+    <a th:href="@{/admin/challenges}">🏆 Challenges</a>
+    <a th:href="@{/admin/banned-users}">🚫 Banned Users</a>
+    <a th:href="@{/}" class="danger">← Back to Site</a>
+</div>
+
+<div class="main">
+    <h1>DASHBOARD</h1>
+    <div th:if="${message}" class="alert" th:text="${message}"></div>
+
+    <div class="cards">
+        <div class="stat-card">
+            <div class="number" th:text="${users.size()}">0</div>
+            <div class="label">Total Users</div>
+        </div>
+        <div class="stat-card">
+            <div class="number" th:text="${announcements.size()}">0</div>
+            <div class="label">Announcements</div>
+        </div>
+        <div class="stat-card">
+            <div class="number" th:text="${challenges.size()}">0</div>
+            <div class="label">Challenges</div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>RECENT USERS</h2>
+        <table>
+            <tr><th>Username</th><th>Email</th><th>Role</th></tr>
+            <tr th:each="user : ${users}">
+                <td th:text="${user.username}"></td>
+                <td th:text="${user.email}"></td>
+                <td th:text="${user.role}"></td>
+            </tr>
+        </table>
+    </div>
+</div>
+</body>
 </html>

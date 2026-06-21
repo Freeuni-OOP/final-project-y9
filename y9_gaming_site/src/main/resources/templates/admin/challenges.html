@@ -1,10 +1,80 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Admin - Challenges</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bitcount+Grid+Double+Ink&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif;
+            color: #fff;
+            display: flex;
+            min-height: 100vh;
+            position: relative;
+            background: linear-gradient(135deg, #523b5c 0%, #523b5c 10%, #6a4b6a 70%, #5a2c5e 100%); }  .sidebar { width: 220px; min-height: 100vh; background: rgba(71,44,82,0.82); backdrop-filter: blur(12px); padding: 30px 20px; position: fixed; border-right: 1px solid rgba(255,255,255,0.1); box-shadow: 4px 0 20px rgba(145,60,143,0.3); }
+        .sidebar { width: 220px; min-height: 100vh; background: rgba(71,44,82,0.82); backdrop-filter: blur(12px); padding: 30px 20px; position: fixed; border-right: 1px solid rgba(255,255,255,0.1); box-shadow: 4px 0 20px rgba(145,60,143,0.3); }
+        .sidebar h2 { font-family: "Bitcount Grid Double Ink", monospace; color: #e194d5; margin-bottom: 30px; font-size: 20px; letter-spacing: 2px; }
+        .sidebar a { display: block; color: #aaa; text-decoration: none; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.08); font-size: 14px; transition: color 0.2s; }
+        .sidebar a:hover { color: #e194d5; }
+        .sidebar a.danger { color: #ff6b6b; margin-top: 20px; border-bottom: none; }
+        .main { margin-left: 220px; padding: 40px; flex: 1; }
+        h1 { font-family: "Bitcount Grid Double Ink", monospace; color: #e194d5; font-size: 28px; letter-spacing: 2px; margin-bottom: 30px; }
+        .form-card { background: rgba(71,44,82,0.82); backdrop-filter: blur(12px); padding: 30px; border-radius: 16px; margin-bottom: 30px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 10px 40px rgba(145,60,143,0.3); }
+        .form-card h2 { font-family: "Bitcount Grid Double Ink", monospace; color: #d07fd8; margin-bottom: 20px; letter-spacing: 1px; }
+        input[type="text"], textarea { width: 100%; padding: 12px; background: rgba(181,181,220,0.15); border: 1px solid #c59eef; color: white; border-radius: 6px; font-size: 14px; margin-bottom: 14px; outline: none; transition: border-color 0.3s; }
+        input[type="text"]:focus, textarea:focus { border-color: #e765e0; }
+        textarea { height: 80px; resize: vertical; font-family: 'Segoe UI', sans-serif; }
+        .btn { padding: 12px 24px; background: rgba(154,78,171,0.95); border: none; color: white; font-weight: bold; border-radius: 6px; cursor: pointer; font-size: 14px; transition: background 0.3s; }
+        .btn:hover { background: #e194d5; }
+        .btn-red { background: rgba(255,68,68,0.85); color: white; padding: 7px 14px; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; }
+        table { width: 100%; border-collapse: collapse; background: rgba(71,44,82,0.6); backdrop-filter: blur(8px); border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.08); }
+        th { background: rgba(145,60,143,0.4); padding: 14px 16px; text-align: left; color: #e194d5; font-size: 13px; letter-spacing: 0.8px; text-transform: uppercase; }
+        td { padding: 13px 16px; border-bottom: 1px solid rgba(255,255,255,0.06); color: #ccc; font-size: 14px; }
+        tr:last-child td { border-bottom: none; }
+        .alert { background: rgba(71,44,82,0.82); border-left: 4px solid #e194d5; padding: 12px 20px; border-radius: 8px; margin-bottom: 20px; color: #e194d5; font-size: 14px; }
+    </style>
 </head>
 <body>
 
+
+<div class="sidebar">
+    <h2>⚙ ADMIN</h2>
+    <a th:href="@{/admin/dashboard}">📊 Dashboard</a>
+    <a th:href="@{/admin/users}">👥 Users</a>
+    <a th:href="@{/admin/announcements}">📢 Announcements</a>
+    <a th:href="@{/admin/challenges}">🏆 Challenges</a>
+    <a th:href="@{/admin/users/banned}">🚫 Banned Users</a>
+    <a th:href="@{/}" class="danger">← Back to Site</a>
+</div>
+
+<div class="main">
+    <h1>CHALLENGES</h1>
+    <div th:if="${message}" class="alert" th:text="${message}"></div>
+
+    <div class="form-card">
+        <h2>NEW CHALLENGE</h2>
+        <form th:action="@{/admin/challenges/create}" method="post">
+            <input type="text" name="title" placeholder="Title" required>
+            <textarea name="description" placeholder="Description" required></textarea>
+            <input type="text" name="reward" placeholder="Reward (e.g. 100 points)" required>
+            <button class="btn" type="submit">Create Challenge</button>
+        </form>
+    </div>
+
+    <table>
+        <tr><th>Title</th><th>Description</th><th>Reward</th><th>Action</th></tr>
+        <tr th:each="c : ${challenges}">
+            <td th:text="${c.title}"></td>
+            <td th:text="${c.description}"></td>
+            <td th:text="${c.reward}"></td>
+            <td>
+                <form th:action="@{/admin/challenges/{id}/delete(id=${c.id})}" method="post"
+                      onsubmit="return confirm('Delete this challenge?')">
+                    <button class="btn-red" type="submit">Delete</button>
+                </form>
+            </td>
+        </tr>
+    </table>
+</div>
 </body>
 </html>
