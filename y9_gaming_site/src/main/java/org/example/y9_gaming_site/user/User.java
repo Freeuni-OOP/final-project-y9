@@ -21,6 +21,7 @@ public class User {
 
     @Column(nullable = false)
     private String password;
+    private String avatarUrl;
 
     private String salt;
 
@@ -50,6 +51,10 @@ public class User {
     public String getPassword() { return password; }
     public void setPassword(String password) { this.password = password; }
 
+    public void setAvatarUrl(String avatarUrl) { this.avatarUrl = avatarUrl;}
+
+    public String getAvatarUrl(){return this.avatarUrl;}
+}
     public String getSalt() { return salt; }
     public void setSalt(String salt) { this.salt = salt; }
 
