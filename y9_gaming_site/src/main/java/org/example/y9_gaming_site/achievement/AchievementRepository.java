@@ -7,6 +7,6 @@ import java.util.List;
 // Repository for the Achievement catalog (list of all possible achievements).
 // Extending JpaRepository automatically provides save(), findById(), findAll(), delete(), etc.
 // No custom queries needed here — we only need to fetch the full catalog or a single achievement by ID.
-public interface  AchievementRepository extends JpaRepository<Achievements,Long> {
+public interface  AchievementRepository extends JpaRepository<Achievement,Long> {
 }
 
