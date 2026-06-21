@@ -5,6 +5,7 @@ import org.example.y9_gaming_site.auth.UserLoginController;
 import org.example.y9_gaming_site.auth.UserLoginDto;
 import org.example.y9_gaming_site.security.PasswordUtil;
 import org.example.y9_gaming_site.security.TokenUtil;
+import org.example.y9_gaming_site.streak.StreakService;
 import org.example.y9_gaming_site.user.User;
 import org.example.y9_gaming_site.user.UserRepository;
 import org.example.y9_gaming_site.user.UserService;
@@ -23,13 +24,15 @@ public class UserAuthTests extends TestCase {
     private User testUser;
     private String key;
     private String correctHashedPassword;
+    private StreakService mockStreakService;
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
+        mockStreakService = Mockito.mock(StreakService.class);
         mockRepository = Mockito.mock(UserRepository.class);
         mockUserService = Mockito.mock(UserService.class);
-        loginController = new UserLoginController(mockRepository, mockUserService);
+        loginController = new UserLoginController(mockRepository, mockUserService, mockStreakService);
         key = PasswordUtil.generateKey();
         correctHashedPassword = PasswordUtil.hashPassword("mesatiasUyvarsGhomi<3", key);
 
