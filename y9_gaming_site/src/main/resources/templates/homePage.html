@@ -5,10 +5,139 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Y9 — Home</title>
     <link rel="stylesheet" href="/css/homePage.css" />
+    <style>
+        .games-container {
+            padding: 40px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .hub-title {
+            font-family: inherit;
+            color: #b327c9;
+            text-align: center;
+            margin-bottom: 30px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        .game-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+        }
+        .game-card {
+            background: rgba(71, 44, 82, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            color: white;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            backdrop-filter: blur(8px);
+        }
+        .game-card:hover {
+            transform: translateY(-5px);
+            border-color: #e765e0;
+            box-shadow: 0 10px 25px rgba(145, 60, 143, 0.4);
+        }
+        .game-icon {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 12px;
+            margin: 0 auto 15px auto;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+        .game-title {
+            font-size: 20px;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        .game-desc {
+            font-size: 13px;
+            color: #ccc;
+            margin-bottom: 20px;
+            line-height: 1.4;
+        }
+        .game-badge {
+            display: inline-block;
+            font-size: 11px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        .badge-source { background-color: #00f0ff; color: #0f0f1a; }
+        .badge-home { background-color: #ff007f; color: white; }
+        .play-btn {
+            width: 100%;
+            padding: 12px;
+            background-color: #9a4eab;
+            border: none;
+            color: white;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.2s;
+        }
+        .play-btn:hover { background-color: #e194d5; color: #0f0f1a; }
+        .theater-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: #0a0a12;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+        }
+        .theater-header {
+            background-color: rgba(71, 44, 82, 0.9);
+            border-bottom: 2px solid #b327c9;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .theater-title {
+            color: #e194d5;
+            letter-spacing: 1px;
+            font-size: 24px;
+            margin: 0;
+        }
+        .close-theater-btn {
+            padding: 8px 18px;
+            background-color: #ff007f;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+        .close-theater-btn:hover { background-color: #ff5599; }
+        .theater-body {
+            flex-grow: 1;
+            width: 100%;
+            height: calc(100vh - 65px);
+            background-color: #000;
+        }
+        .theater-body iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        .hidden { display: none !important; }
+    </style>
 </head>
 <body>
 
-<!-- ── NAVBAR ───────────────────────────────────────────────── -->
 <nav class="navbar">
     <a class="navbar__brand" href="/homePage.html">Y9</a>
 
@@ -26,34 +155,35 @@
     </div>
 </nav>
 
-<!-- ── MAIN ─────────────────────────────────────────────────── -->
 <main class="page">
 
-    <!-- HERO stat -->
     <section class="hero">
         <p class="hero__label">Total Players</p>
         <h1 class="hero__number" id="total-users">—</h1>
         <p class="hero__sub">and counting</p>
     </section>
 
+    <div class="games-container">
+        <h1 class="hub-title">⚡ Available Games ⚡</h1>
+        <div id="gameGrid" class="game-grid">
+            <p>Scanning game database blocks...</p>
+        </div>
+    </div>
+
     <div class="grid">
 
-        <!-- TOP RANKED PLAYERS -->
         <section class="card" id="leaderboard-card">
             <h2 class="card__title">🏆 Top Players</h2>
             <ol class="leaderboard" id="top-players">
-                <!-- filled by home.js -->
                 <li class="leaderboard__skeleton"></li>
                 <li class="leaderboard__skeleton"></li>
                 <li class="leaderboard__skeleton"></li>
             </ol>
         </section>
 
-        <!-- RECENT ACHIEVEMENTS -->
         <section class="card" id="achievements-card">
             <h2 class="card__title">⭐ Recent Achievements</h2>
             <ul class="achievements" id="recent-achievements">
-                <!-- filled by home.js -->
                 <li class="achievements__skeleton"></li>
                 <li class="achievements__skeleton"></li>
                 <li class="achievements__skeleton"></li>
@@ -63,6 +193,85 @@
     </div>
 </main>
 
+<div id="gameTheaterModal" class="theater-overlay hidden">
+    <div class="theater-header">
+        <h2 id="theaterGameTitle" class="theater-title">Game Room</h2>
+        <button class="close-theater-btn" onclick="closeGameTheater()">✕ Exit Game</button>
+    </div>
+    <div class="theater-body">
+        <iframe id="gameIframe" src="" allowfullscreen></iframe>
+    </div>
+</div>
+
 <script src="/js/homePage.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        fetchAndRenderGames();
+    });
+
+    async function fetchAndRenderGames() {
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch('/api/games', {
+                method: 'GET',
+                headers: {
+                    'Authorization': token ? `Bearer ${token}` : '',
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!res.ok) throw new Error();
+
+            const games = await res.json();
+            const grid = document.getElementById('gameGrid');
+            grid.innerHTML = '';
+
+            games.forEach(game => {
+                const card = document.createElement('div');
+                card.className = 'game-card';
+
+                const isSource = game.gameType === 'OPENSOURCE';
+                const badgeClass = isSource ? 'badge-source' : 'badge-home';
+                const badgeText = isSource ? 'Web Arcade' : 'Custom Multiplayer';
+
+                card.innerHTML = `
+                    <div>
+                        <img class="game-icon" src="${game.iconUrl}" alt="${game.title}" onerror="this.src='/img/games/default.png'">
+                        <div class="game-title">${game.title}</div>
+                        <span class="game-badge ${badgeClass}">${badgeText}</span>
+                        <div class="game-desc">${game.description || ''}</div>
+                    </div>
+                    <button class="play-btn" onclick="handlePlayGame(${game.id}, '${game.gameType}', '${game.sourceUrl || ''}', '${game.title.replace(/'/g, "\\'")}')">
+                        Launch Game
+                    </button>
+                `;
+                grid.appendChild(card);
+            });
+        } catch (err) {
+            document.getElementById('gameGrid').innerHTML = `<p style="color:#ff5599;text-align:center;">Failed to sync with game database backend.</p>`;
+        }
+    }
+
+    function handlePlayGame(id, type, sourceUrl, title) {
+        if (type === 'OPENSOURCE') {
+            const modal = document.getElementById('gameTheaterModal');
+            const iframe = document.getElementById('gameIframe');
+            const titleHeader = document.getElementById('theaterGameTitle');
+
+            titleHeader.textContent = title.toUpperCase();
+            iframe.src = sourceUrl;
+            modal.classList.remove('hidden');
+        } else {
+            alert("Initializing Custom Game Session Lobby. Checking WebSocket pipelines...");
+        }
+    }
+
+    function closeGameTheater() {
+        const modal = document.getElementById('gameTheaterModal');
+        const iframe = document.getElementById('gameIframe');
+        modal.classList.add('hidden');
+        iframe.src = "";
+    }
+</script>
 </body>
 </html>

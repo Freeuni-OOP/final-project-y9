@@ -88,3 +88,34 @@ CREATE TABLE IF NOT EXISTS challenges (
     FOREIGN KEY (admin_id) REFERENCES users(id)
     );
 
+CREATE TABLE IF NOT EXISTS games (
+                                     id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                                     title VARCHAR(100) NOT NULL UNIQUE,
+    description TEXT,
+    max_players INT DEFAULT 2,
+    icon_url VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+
+CREATE TABLE IF NOT EXISTS game_sessions (
+                                             id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                                             game_id BIGINT NOT NULL,
+                                             host_id BIGINT NOT NULL,
+                                             room_code VARCHAR(20) NOT NULL UNIQUE,
+    status VARCHAR(30) DEFAULT 'WAITING',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (game_id) REFERENCES games(id),
+    FOREIGN KEY (host_id) REFERENCES users(id)
+    );
+
+CREATE TABLE IF NOT EXISTS game_invites (
+                                            id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                                            session_id BIGINT NOT NULL,
+                                            sender_id BIGINT NOT NULL,
+                                            receiver_id BIGINT NOT NULL,
+                                            status VARCHAR(20) DEFAULT 'PENDING',  -- PENDING, ACCEPTED, REJECTED, EXPIRED
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (session_id) REFERENCES game_sessions(id) ON DELETE CASCADE,
+    FOREIGN KEY (sender_id) REFERENCES users(id),
+    FOREIGN KEY (receiver_id) REFERENCES users(id)
+    );
