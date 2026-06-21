@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.Map;
+import org.example.y9_gaming_site.streak.StreakService;
 
 @RestController
 @RequestMapping("/api/users")
@@ -17,10 +18,13 @@ public class UserLoginController {
 
     private final UserRepository userRepository;
     private final UserService userService;
+    private final StreakService streakService;
 
-    public UserLoginController(UserRepository userRepository, UserService userService) {
+    public UserLoginController(UserRepository userRepository, UserService userService, StreakService streakService) {
         this.userRepository = userRepository;
         this.userService = userService;
+        this.streakService = streakService;
+
     }
 
     @PostMapping("/login")
@@ -34,6 +38,8 @@ public class UserLoginController {
             if (!user.getPassword().equals(incomingHashedPassword)) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password.");
             }
+
+            streakService.updateStreak(user.getId());
 
             String token = TokenUtil.generateToken(user.getUsername());
             return ResponseEntity.ok(Map.of("token", token, "username", user.getUsername(), "role", user.getRole().toString()));
