@@ -13,11 +13,11 @@ public class ViewController {
 
     @GetMapping("/login")
     public String showLogin() {
-        return "index"; // Also falls back gracefully to index.html
+        return "index"; // to index.html
     }
 
     @GetMapping("/home")
     public String showHome() {
-        return "homePage"; // Serves your homePage.html layout from templates
+        return "homePage"; //to homepage
     }
 }
