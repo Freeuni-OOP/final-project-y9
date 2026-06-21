@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Y9 — Home</title>
+    <link rel="stylesheet" href="/css/homePage.css" />
+</head>
+<body>
+
+<!-- ── NAVBAR ───────────────────────────────────────────────── -->
+<nav class="navbar">
+    <a class="navbar__brand" href="/homePage.html">Y9</a>
+
+    <ul class="navbar__links">
+        <li><a href="/homePage.html">Home</a></li>
+        <li><a href="/quizzes">Quizzes</a></li>
+        <li><a href="/leaderboard">Leaderboard</a></li>
+        <li><a href="/chat">Chat</a></li>
+    </ul>
+
+    <div class="navbar__user">
+        <img id="nav-avatar" class="navbar__avatar" src="/img/avatars/default.png" alt="avatar" />
+        <span id="nav-username" class="navbar__username">...</span>
+        <a href="/logout" class="navbar__logout">Log out</a>
+    </div>
+</nav>
+
+<!-- ── MAIN ─────────────────────────────────────────────────── -->
+<main class="page">
+
+    <!-- HERO stat -->
+    <section class="hero">
+        <p class="hero__label">Total Players</p>
+        <h1 class="hero__number" id="total-users">—</h1>
+        <p class="hero__sub">and counting</p>
+    </section>
+
+    <div class="grid">
+
+        <!-- TOP RANKED PLAYERS -->
+        <section class="card" id="leaderboard-card">
+            <h2 class="card__title">🏆 Top Players</h2>
+            <ol class="leaderboard" id="top-players">
+                <!-- filled by home.js -->
+                <li class="leaderboard__skeleton"></li>
+                <li class="leaderboard__skeleton"></li>
+                <li class="leaderboard__skeleton"></li>
+            </ol>
+        </section>
+
+        <!-- RECENT ACHIEVEMENTS -->
+        <section class="card" id="achievements-card">
+            <h2 class="card__title">⭐ Recent Achievements</h2>
+            <ul class="achievements" id="recent-achievements">
+                <!-- filled by home.js -->
+                <li class="achievements__skeleton"></li>
+                <li class="achievements__skeleton"></li>
+                <li class="achievements__skeleton"></li>
+            </ul>
+        </section>
+
+    </div>
+</main>
+
+<script src="/js/homePage.js"></script>
+</body>
+</html>

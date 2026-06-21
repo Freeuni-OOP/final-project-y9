@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Y9 Gaming Portal</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bitcount+Grid+Double+Ink&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+            background-color: #0f0f1a;
+        }
+
+        .video-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -2;
+        }
+
+        .video-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 10, 18, 0.65);
+            z-index: -1;
+        }
+
+        .card {
+            background: rgba(71, 44, 82, 0.82);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: 40px 30px;
+            border-radius: 16px;
+            width: 360px;
+            box-shadow:
+                    0 10px 40px rgba(145, 60, 143, 0.78),
+                    -4px -4px 20px rgba(0, 240, 255, 0.15),
+                    4px 4px 20px rgba(255, 0, 127, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            transition: all 0.4s ease;
+        }
+
+        .card-title {
+            text-align: center;
+            margin-bottom: 25px;
+            letter-spacing: 2px;
+            font-weight: 800;
+            font-family: "Bitcount Grid Double Ink", monospace;
+            font-size: 32px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 12px;
+            color: rgba(196, 115, 208, 0.84);
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            background-color: rgba(181, 181, 220, 0.85);
+            border: 1px solid #c59eef;
+            color: white;
+            border-radius: 6px;
+            outline: none;
+            font-size: 15px;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .form-group input:focus {
+            border-color: #e765e0;
+            box-shadow: 0 0 8px rgba(211, 113, 199, 0.3);
+        }
+
+        .field-error-msg {
+            color: #ff5599;
+            font-size: 12px;
+            margin-top: 5px;
+            font-weight: 600;
+            line-height: 1.4;
+            transition: all 0.3s ease;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background-color: rgba(154, 78, 171, 0.95);
+            border: none;
+            color: #0f0f1a;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            letter-spacing: 0.5px;
+            transition: background-color 0.3s, transform 0.1s;
+        }
+
+        button:hover {
+            background-color: #e194d5;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        .btn-guest {
+            background-color: transparent;
+            border: 2px solid #b060c2;
+            color: #e194d5;
+            margin-top: 12px;
+        }
+
+        .btn-guest:hover {
+            background-color: rgba(212, 185, 241, 0.75);
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 24px;
+            font-size: 14px;
+            color: #aaa;
+        }
+
+        .link {
+            color: rgba(208, 127, 248, 0.94);
+            cursor: pointer;
+            text-decoration: underline;
+            font-weight: bold;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<video class="video-background" autoplay loop muted playsinline>
+    <source th:src="@{/visualExternals/login_background.mp4}" src="/visualExternals/login_background.mp4" type="video/mp4">
+    Your browser does not support the video tag.
+</video>
+<div class="video-overlay"></div>
+
+<div id="loginView" class="card">
+    <h2 class="card-title" style="color: #b327c9;">Y9 GAMING</h2>
+    <form id="loginForm">
+        <div class="form-group">
+            <label>Username</label>
+            <input type="text" id="loginUser" required>
+        </div>
+        <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="loginPass" required>
+        </div>
+        <button type="submit">Log In</button>
+    </form>
+
+    <button id="guestBtn" class="btn-guest">Join as Guest</button>
+
+    <div class="footer">
+        Don't have an account? <span class="link" id="toRegisterLink">Sign Up</span>
+    </div>
+</div>
+
+<div id="registerView" class="card hidden">
+    <h2 class="card-title" style="color: #b327c9;">SIGN UP</h2>
+    <form id="registerForm">
+        <div class="form-group">
+            <label>Username</label>
+            <input type="text" id="regUser" required>
+            <div id="usernameError" class="field-error-msg"></div>
+        </div>
+        <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="regEmail" required>
+            <div id="emailError" class="field-error-msg"></div>
+        </div>
+        <div class="form-group">
+            <label>Birth Date</label>
+            <input type="date" id="regBirth" required style="color-scheme: dark;">
+            <div id="birthError" class="field-error-msg"></div>
+        </div>
+        <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="regPass" required>
+            <div id="passwordError" class="field-error-msg"></div>
+        </div>
+        <button type="submit">Register</button>
+    </form>
+
+    <div class="footer">
+        Already have an account? <span class="link" id="toLoginLink">Log In</span>
+    </div>
+</div>
+
+<script>
+    const API = 'http://localhost:8081/api/users';
+
+    const loginView = document.getElementById('loginView');
+    const registerView = document.getElementById('registerView');
+
+    document.getElementById('toRegisterLink').addEventListener('click', () => {
+        loginView.classList.add('hidden');
+        registerView.classList.remove('hidden');
+        clearRegisterErrors();
+    });
+
+    document.getElementById('toLoginLink').addEventListener('click', () => {
+        registerView.classList.add('hidden');
+        loginView.classList.remove('hidden');
+    });
+
+    function clearRegisterErrors() {
+        document.getElementById('usernameError').textContent = "";
+        document.getElementById('emailError').textContent = "";
+        document.getElementById('birthError').textContent = "";
+        document.getElementById('passwordError').textContent = "";
+    }
+
+    function saveSession(data) {
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('username', data.username);
+        localStorage.setItem('role', data.role);
+        window.location.href = '/home';
+    }
+
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const body = {
+            username: document.getElementById('loginUser').value,
+            password: document.getElementById('loginPass').value
+        };
+        try {
+            const res = await fetch(`${API}/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            });
+            if (res.ok) {
+                saveSession(await res.json());
+            } else {
+                alert("Invalid username or password.");
+            }
+        } catch (err) {
+            alert("Server connection failed.");
+        }
+    });
+
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        clearRegisterErrors();
+
+        const body = {
+            username: document.getElementById('regUser').value,
+            email: document.getElementById('regEmail').value,
+            birthDate: document.getElementById('regBirth').value,
+            password: document.getElementById('regPass').value
+        };
+
+        try {
+            const res = await fetch(API, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            });
+
+            if (res.ok) {
+                alert("Registered successfully!");
+                registerView.classList.add('hidden');
+                loginView.classList.remove('hidden');
+                document.getElementById('registerForm').reset();
+            } else {
+                const errMsg = await res.text();
+
+                if (errMsg.includes("Username") || errMsg.includes("username")) {
+                    document.getElementById('usernameError').textContent = errMsg;
+                } else if (errMsg.includes("Email") || errMsg.includes("email")) {
+                    document.getElementById('emailError').textContent = errMsg;
+                } else if (errMsg.includes("Password") || errMsg.includes("password")) {
+                    document.getElementById('passwordError').textContent = errMsg;
+                } else if (errMsg.includes("Birth") || errMsg.includes("date")) {
+                    document.getElementById('birthError').textContent = errMsg;
+                } else {
+                    alert(errMsg || "Registration failed.");
+                }
+            }
+        } catch (err) {
+            alert("Server connection failed.");
+        }
+    });
+
+    document.getElementById('guestBtn').addEventListener('click', async () => {
+        try {
+            const res = await fetch(`${API}/guest`, { method: 'POST' });
+            if (res.ok) {
+                saveSession(await res.json());
+            } else {
+                alert("Could not initialize guest session.");
+            }
+        } catch (err) {
+            alert("Server connection failed.");
+        }
+    });
+</script>
+</body>
+</html>
