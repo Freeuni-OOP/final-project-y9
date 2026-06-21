@@ -1,5 +1,8 @@
 package org.example.y9_gaming_site.homePage;
 
+import org.example.y9_gaming_site.admin.Announcement;
+import org.example.y9_gaming_site.admin.Challenge;
+
 import java.util.List;
 
 public class HomeStatsDTO {
@@ -48,6 +51,16 @@ public class HomeStatsDTO {
         public String getIconUrl()         { return iconUrl; }
         public String getEarnedAt()        { return earnedAt; }
     }
+
+    private List<Announcement> announcements;
+    private List<Challenge> challenges;
+
+    // getters and setters
+    public List<Announcement> getAnnouncements() { return announcements; }
+    public void setAnnouncements(List<Announcement> announcements) { this.announcements = announcements; }
+
+    public List<Challenge> getChallenges() { return challenges; }
+    public void setChallenges(List<Challenge> challenges) { this.challenges = challenges; }
 
     // ---- main getters / setters ----
 
