@@ -1,7 +1,5 @@
 package org.example.y9_gaming_site.friendship;
 
-import org.example.y9_gaming_site.friendship.Friendship;
-import org.example.y9_gaming_site.friendship.FriendshipRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -23,7 +21,7 @@ public class FriendshipService {
         return friendshipRepository.save(friendship);
     }
     public List<Friendship> getPendingRequests(Long userId) {
-        return friendshipRepository.findByReceiverIdandStatus(userId,"Pending");
+        return friendshipRepository.findByReceiverIdAndStatus(userId,"Pending");
     }
 
 }
