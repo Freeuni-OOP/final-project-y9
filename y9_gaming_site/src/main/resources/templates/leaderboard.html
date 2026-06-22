@@ -2,36 +2,68 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Leaderboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Y9 — Hall of Fame</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bitcount+Grid+Double+Ink&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="/css/homePage.css">
     <link rel="stylesheet" href="/css/leaderboard.css">
 </head>
 <body>
 
+<nav class="navbar">
+    <a class="navbar__brand" href="/home">Y9</a>
+    <ul class="navbar__links">
+        <li><a href="/home">Home</a></li>
+        <li><a href="/quizzes">Quizzes</a></li>
+        <li><a href="/leaderboard" class="active">Leaderboard</a></li>
+        <li><a href="/chat">Chat</a></li>
+    </ul>
+    <div class="navbar__user">
+        <img id="nav-avatar" class="navbar__avatar" src="/img/avatars/default.png" alt="avatar" />
+        <span id="nav-username" class="navbar__username">...</span>
+        <a href="/logout" class="navbar__logout">Log out</a>
+    </div>
+</nav>
+
 <div class="leaderboard-container">
-    <h1>🏆 Leaderboard</h1>
+    <h1 class="leaderboard-main-title">🏆 LEADERBOARD 🏆</h1>
 
-    <div class="game-selector">
-        <button class="game-btn active" data-game="wordle" onclick="selectGame('wordle', this)">Wordle</button>
-        <button class="game-btn" data-game="sudoku" onclick="selectGame('sudoku', this)">Sudoku</button>
-        <button class="game-btn" data-game="joker" onclick="selectGame('joker', this)">Joker</button>
+    <div class="controls-row">
+        <div class="select-wrapper">
+            <select id="gameSelect" class="custom-game-select" onchange="changeGame()">
+                <option value="Joker"> Joker</option>
+                <option value="Sudoku"> Sudoku</option>
+                <option value="Wordle"> Wordle</option>
+            </select>
+        </div>
+
+        <div class="filter-selector">
+            <button class="filter-btn active" onclick="selectFilter('alltime', this)">All Time</button>
+            <button class="filter-btn" onclick="selectFilter('today', this)">Last 24h</button>
+        </div>
     </div>
 
-    <div id="loading" class="loading" style="display:none">Loading...</div>
-    <div id="empty-state" class="empty-state" style="display:none">
-        No scores yet for this game. Be the first to play!
-    </div>
+    <div id="loading" class="loading" style="display: none;">Syncing secure database score blocks...</div>
+    <div id="empty-state" class="empty-state" style="display: none;">No records found for this criteria.</div>
 
-    <table class="leaderboard-table" id="leaderboard-table">
-        <thead>
-        <tr>
-            <th>Rank</th>
-            <th>Player</th>
-            <th>Score</th>
-            <th>Date</th>
-        </tr>
-        </thead>
-        <tbody id="leaderboard-body"></tbody>
-    </table>
+    <div class="table-neon-glow-wrapper">
+        <table id="leaderboard-table" class="leaderboard-table">
+            <thead>
+            <tr>
+                <th style="width: 15%;"># RANK</th>
+                <th style="width: 45%;">👤 USERNAME</th>
+                <th style="width: 20%;">🎯 SCORE</th>
+                <th style="width: 20%;">📅 DATE PLAYED</th>
+            </tr>
+            </thead>
+            <tbody id="leaderboard-body">
+            </tbody>
+        </table>
+    </div>
 </div>
 
 <script src="/js/leaderboard.js"></script>
