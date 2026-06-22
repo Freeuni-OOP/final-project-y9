@@ -15,7 +15,7 @@ public class LeaderboardService {
     //save new score for each new game played
     public void saveScore(Long userId, String gameName, Integer score){
         LeaderboardScore current = new LeaderboardScore();
-        current.setId(userId);
+        current.setUserId(userId);
         current.setGameName(gameName);
         current.setScore(score);
         current.setPlayedAt(LocalDateTime.now());
