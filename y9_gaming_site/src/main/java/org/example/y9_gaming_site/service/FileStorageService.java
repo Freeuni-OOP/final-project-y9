@@ -4,7 +4,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class FileStorageService {
@@ -20,13 +26,39 @@ public class FileStorageService {
     }
 
     public String store(MultipartFile file){
-        return null;
+        validate(file);
+        try {
+            Path uploadPath = Path.of(uploadDir).toAbsolutePath().normalize();
+            Files.createDirectories(uploadPath);
+
+            String fileNaem = UUID.randomUUID()+ extractExtension(file.getOriginalFilename());
+            Path targetPath = uploadPath.resolve(fileNaem);
+
+            try (InputStream inputStream = file.getInputStream()){
+                Files.copy(inputStream, targetPath, StandardCopyOption.REPLACE_EXISTING);
+            }
+            return urlPrefix +"/" +fileNaem;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    private void validate(MultipartFile file){}
+    private void validate(MultipartFile file){
+        if(file == null||file.isEmpty()){
+            throw new IllegalArgumentException();
+        }
+        String contentType = file.getContentType();
+        if(!ALLOWED_TYPES.contains(contentType)){
+            throw new IllegalArgumentException();
+        }
+    }
 
-    private String extractExtension(String originFilename){
-        return null;
+    private String extractExtension(String originFilename) {
+        if(originFilename == null || !originFilename.contains(".")){
+            return "";
+        }
+        return originFilename.substring(originFilename.lastIndexOf("."));
+
     }
 
 }

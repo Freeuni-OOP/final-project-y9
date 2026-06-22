@@ -1,8 +1,12 @@
 package org.example.y9_gaming_site.user;
 
+import org.example.y9_gaming_site.dto.UserProfileResponse;
 import org.example.y9_gaming_site.security.ContentModerator;
 import org.example.y9_gaming_site.security.PasswordUtil;
+import org.example.y9_gaming_site.service.FileStorageService;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,9 +18,11 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final Random random = new Random();
+    private final FileStorageService fileStorageService;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, FileStorageService fileStorageService) {
         this.userRepository = userRepository;
+        this.fileStorageService = fileStorageService;
     }
 
     public void addNewUser(UserRegisterDto dto) throws Exception {
@@ -101,5 +107,20 @@ public class UserService {
         };
         int randomIndex = random.nextInt(adjectives.length);
         return adjectives[randomIndex];
+    }
+
+    public UserProfileResponse getProfile(Long id){
+        User user = userRepository.findById(id).orElse(null);
+        assert user != null;
+        return new UserProfileResponse(user.getId(), user.getUsername(), user.getAvatarUrl());
+    }
+
+    public String updateOrCreateAvatar(Long userId, MultipartFile avatar){
+        User user = userRepository.findById(userId).orElse(null);
+        String avatarUrl = fileStorageService.store(avatar);
+        assert user != null;
+        user.setAvatarUrl(avatarUrl);
+        userRepository.save(user);
+        return avatarUrl;
     }
 }

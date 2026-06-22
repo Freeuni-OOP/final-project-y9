@@ -3,6 +3,7 @@ package org.example.y9_gaming_site;
 import junit.framework.TestCase;
 import org.example.y9_gaming_site.security.ContentModerator;
 import org.example.y9_gaming_site.security.TokenUtil;
+import org.example.y9_gaming_site.service.FileStorageService;
 import org.example.y9_gaming_site.user.User;
 import org.example.y9_gaming_site.user.UserService;
 import org.example.y9_gaming_site.user.UserRepository;
@@ -15,12 +16,14 @@ public class UserRegisterTests extends TestCase {
     private UserRepository mockRepository;
     private UserService userService;
     private UserRegisterDto validUserDto;
+    private FileStorageService mockFileStorageService;
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
         mockRepository = Mockito.mock(UserRepository.class);
-        userService = new UserService(mockRepository);
+        mockFileStorageService = Mockito.mock(FileStorageService.class);
+        userService = new UserService(mockRepository, mockFileStorageService);
 
         validUserDto = new UserRegisterDto();
         validUserDto.setUsername("mesatia");
