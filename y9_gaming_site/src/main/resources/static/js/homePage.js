@@ -56,6 +56,11 @@ async function loadHomeStats() {
         if (token) {
             headers["Authorization"] = `Bearer ${token}`;
         }
+        const role = localStorage.getItem('role');
+        if (role === 'ADMIN') {
+            document.getElementById('adminLink').style.display = 'block';
+        }
+
 
         const res = await fetch("/stats/home", {
             method: "GET",

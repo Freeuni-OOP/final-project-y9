@@ -26,6 +26,7 @@ public class SecurityConfig {
                         .requestMatchers("/leaderboard/**", "/leaderboard.html").permitAll()
                         .requestMatchers("/achievements/**").permitAll()
                         .requestMatchers("/streak/**").permitAll()
+                        .requestMatchers("/admin/**").permitAll()
                         .anyRequest().authenticated()
                 );
 
