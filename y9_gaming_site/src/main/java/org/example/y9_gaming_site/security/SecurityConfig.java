@@ -19,10 +19,13 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/login", "/home", "/index.html", "/homePage.html", "/stats/home").permitAll()
+                        .requestMatchers("/", "/login", "/home", "/me","/index.html", "/homePage.html", "/stats/home").permitAll()
                         .requestMatchers("/css/**", "/js/**", "/img/**", "/visualExternals/**").permitAll()
                         .requestMatchers("/api/users/**").permitAll()
                         .requestMatchers("/api/games/**").permitAll()
+                        .requestMatchers("/leaderboard/**", "/leaderboard.html").permitAll()
+                        .requestMatchers("/achievements/**").permitAll()
+                        .requestMatchers("/streak/**").permitAll()
                         .anyRequest().authenticated()
                 );
 

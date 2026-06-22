@@ -4,22 +4,43 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 async function loadUserProfile() {
+    const token = localStorage.getItem('token');
+
+    // თუ ტოკენი საერთოდ არ გვაქვს, პროფილის წამოღებას აზრი არ აქვს
+    if (!token) {
+        console.log("No token found, skipping profile load.");
+        return;
+    }
+
     try {
-        const token = localStorage.getItem('token');
         const res = await fetch("/api/users/me", {
             method: "GET",
             headers: {
-                "Authorization": token ? `Bearer ${token}` : "",
+                "Authorization": `Bearer ${token}`,
                 "Content-Type": "application/json"
             }
         });
 
         if (res.ok) {
             const user = await res.json();
-            document.getElementById("nav-username").textContent = user.username;
-            if (user.avatar) {
-                document.getElementById("nav-avatar").src = user.avatar;
+            const navUser = document.getElementById("nav-username");
+            const navAvatar = document.getElementById("nav-avatar");
+
+            if (navUser) navUser.textContent = user.username;
+            if (navAvatar && user.avatar) {
+                const finalAvatar = (user.avatarUrl && user.avatarUrl !== 'null') ? user.avatarUrl :
+                    (user.avatar && user.avatar !== 'null') ? user.avatar :
+                        '/img/avatars/default.png';
+
+                navAvatar.onerror = function() {
+                    this.onerror = null; // ციკლის გაწყვეტა
+                    this.src = '/img/avatars/default.png';
+                };
+                navAvatar.src = finalAvatar;
             }
+        } else if (res.status === 401 || res.status === 403) {
+            // თუ ტოკენი ვადაგასულია ან არასწორია, ვშლით მას
+            localStorage.removeItem('token');
         }
     } catch (err) {
         console.error("Profile sync failed:", err);
@@ -29,17 +50,27 @@ async function loadUserProfile() {
 async function loadHomeStats() {
     try {
         const token = localStorage.getItem('token');
+
+        // ვამზადებთ ჰედერებს. თუ ტოკენი არსებობს, ვაყოლებთ, თუ არა - ცარიელია
+        const headers = { "Content-Type": "application/json" };
+        if (token) {
+            headers["Authorization"] = `Bearer ${token}`;
+        }
+
         const res = await fetch("/stats/home", {
             method: "GET",
-            headers: {
-                "Authorization": token ? `Bearer ${token}` : "",
-                "Content-Type": "application/json"
-            }
+            headers: headers
         });
 
-        if (!res.ok || res.redirected) {
+        // შესწორდა აქ: ლოგინზე გადავა მხოლოდ მაშინ, თუ ბექენდმა სპეციალურად 401 (Unauthorized) დააბრუნა
+        if (res.status === 401) {
+            localStorage.removeItem('token');
             window.location.href = "/login";
             return;
+        }
+
+        if (!res.ok) {
+            throw new Error(`Server returned status ${res.status}`);
         }
 
         const data = await res.json();
@@ -80,18 +111,27 @@ function renderTopPlayers(players) {
 
     const medals = ["🥇", "🥈", "🥉"];
 
+    if (!players || players.length === 0) {
+        list.innerHTML = `<li style="color:var(--muted);font-size:.85rem">No top players available.</li>`;
+        return;
+    }
+
     players.forEach((player, i) => {
         const li = document.createElement("li");
         li.className = "leaderboard__item";
+
+        // შეცდომის თავიდან ასაცილებლად, თუ default.png-მდე მისასვლელი გზა შეიცვალა
+        const avatarSrc = player.avatarUrl ? escHtml(player.avatarUrl) : '/img/avatars/default.png';
+
         li.innerHTML = `
-      <span class="leaderboard__rank">${medals[i] ?? player.rank}</span>
+      <span class="leaderboard__rank">${medals[i] ?? (i + 1)}</span>
       <img  class="leaderboard__avatar"
-            src="${escHtml(player.avatarUrl)}"
+            src="${avatarSrc}"
             alt="${escHtml(player.username)}'s avatar"
-            onerror="this.src='/img/avatars/default.png'" />
+            onerror="this.onerror=null; this.src='/img/avatars/default.png';" />
       <div class="leaderboard__info">
         <div class="leaderboard__name">${escHtml(player.username)}</div>
-        <div class="leaderboard__score">${player.score.toLocaleString()} pts</div>
+        <div class="leaderboard__score">${player.score ? player.score.toLocaleString() : 0} pts</div>
       </div>
     `;
         list.appendChild(li);
@@ -103,14 +143,22 @@ function renderRecentAchievements(achievements) {
     if (!list) return;
     list.innerHTML = "";
 
+    if (!achievements || achievements.length === 0) {
+        list.innerHTML = `<li style="color:var(--muted);font-size:.85rem">No recent achievements.</li>`;
+        return;
+    }
+
     achievements.forEach(ach => {
         const li = document.createElement("li");
         li.className = "achievements__item";
+
+        const iconSrc = ach.iconUrl ? escHtml(ach.iconUrl) : '/img/ach/default.png';
+
         li.innerHTML = `
       <img  class="achievements__icon"
-            src="${escHtml(ach.iconUrl)}"
+            src="${iconSrc}"
             alt="${escHtml(ach.achievementName)}"
-            onerror="this.src='/img/ach/default.png'" />
+            onerror="this.onerror=null; this.src='/img/ach/default.png';" />
       <div class="achievements__info">
         <div class="achievements__name">${escHtml(ach.achievementName)}</div>
         <div class="achievements__meta">${escHtml(ach.username)} · ${escHtml(ach.earnedAt)}</div>
