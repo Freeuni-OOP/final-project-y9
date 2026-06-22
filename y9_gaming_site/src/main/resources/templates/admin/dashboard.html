@@ -49,7 +49,10 @@
     <a th:href="@{/admin/users}">👥 Users</a>
     <a th:href="@{/admin/announcements}">📢 Announcements</a>
     <a th:href="@{/admin/challenges}">🏆 Challenges</a>
-    <a th:href="@{/admin/banned-users}">🚫 Banned Users</a>
+    <a th:href="@{/admin/users/banned}">🚫 Banned Users</a>
+    <span style="display:block; color: rgba(225,148,213,0.5); font-size: 10px; letter-spacing: 1px; text-transform: uppercase; margin: 14px 0 4px; padding-bottom: 4px; border-bottom: 1px solid rgba(255,255,255,0.07);">Games</span>
+    <a th:href="@{/admin/games}">🎮 All Games</a>
+    <a th:href="@{/admin/games/new}">➕ Add Game</a>
     <a th:href="@{/}" class="danger">← Back to Site</a>
 </div>
 
@@ -70,16 +73,42 @@
             <div class="number" th:text="${challenges.size()}">0</div>
             <div class="label">Challenges</div>
         </div>
+        <div class="stat-card">
+            <div class="number" th:text="${games.size()}">0</div>
+            <div class="label">Games</div>
+        </div>
+        <div class="stat-card">
+            <div class="number" th:text="${totalGamePlays}">0</div>
+            <div class="label">Game Plays</div>
+        </div>
     </div>
 
     <div class="section">
-        <h2>RECENT USERS</h2>
+        <h2>👥 RECENT USERS</h2>
         <table>
             <tr><th>Username</th><th>Email</th><th>Role</th></tr>
             <tr th:each="user : ${users}">
                 <td th:text="${user.username}"></td>
                 <td th:text="${user.email}"></td>
                 <td th:text="${user.role}"></td>
+            </tr>
+        </table>
+
+    </div>
+    <div class="section">
+        <h2>🎮 RECENT GAMES</h2>
+        <table>
+            <tr>
+                <th>Title</th>
+                <th>Category</th>
+                <th>Plays</th>
+                <th>Status</th>
+            </tr>
+            <tr th:each="game : ${games}">
+                <td th:text="${game.title}"></td>
+                <td th:text="${game.category}"></td>
+                <td th:text="${game.playCount}">0</td>
+                <td th:text="${game.status}"></td>
             </tr>
         </table>
     </div>
