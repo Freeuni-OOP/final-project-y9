@@ -115,4 +115,7 @@ public class AdminController {
         ra.addFlashAttribute("message", "Challenge deleted.");
         return "redirect:/admin/challenges";
     }
+
+
+
 }
