@@ -329,7 +329,7 @@
     <a class="navbar__brand" href="/home">Y9</a>
 
     <ul class="navbar__links">
-        <li><a href="/home">Home</a></li>
+        <li><a href="/home" class="active">Home</a></li>
         <li><a href="/quizzes">Quizzes</a></li>
         <li><a href="/leaderboard">Leaderboard</a></li>
         <li><a href="/chat">Chat</a></li>
@@ -364,12 +364,18 @@
     <div class="grid">
 
         <section class="card" id="leaderboard-card">
-            <h2 class="card__title">🏆 Top Players</h2>
+            <h2 class="card__title">🏆 Top Players (Last 24h)</h2>
             <ol class="leaderboard" id="top-players">
                 <li class="leaderboard__skeleton"></li>
                 <li class="leaderboard__skeleton"></li>
                 <li class="leaderboard__skeleton"></li>
             </ol>
+
+            <div style="text-align: center; margin-top: 20px;">
+                <a href="/leaderboard" class="play-btn" style="text-decoration: none; display: inline-block; width: auto; padding: 8px 25px;">
+                    View Full Leaderboard →
+                </a>
+            </div>
         </section>
 
         <section class="card" id="achievements-card">
