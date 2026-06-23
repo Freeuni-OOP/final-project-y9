@@ -2,8 +2,10 @@ package org.example.y9_gaming_site.admin;
 
 
 import jakarta.persistence.*;
+import org.example.y9_gaming_site.user.User;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 
 @Entity
@@ -16,17 +18,25 @@ public class Challenge {
     private Long id;
 
 
-    private Long admin_id;
+    //private Long admin_id;
     private String title;
     private String description;
     private String reward;
     private LocalDateTime createdAt;
+    private Long admin_id;
 
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
     }
 
+
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "admin_id", nullable = false) // Maps to 'admin_id' column, but points to User entity
+//    private User admin; // Changed from Admin to User
+
+//    public User getAdmin() { return admin; }
+//    public void setAdmin(User admin) { this.admin = admin; }
 
     // getters and setters
     public Long getId() { return id; }
