@@ -251,7 +251,11 @@
         localStorage.setItem('token', data.token);
         localStorage.setItem('username', data.username);
         localStorage.setItem('role', data.role);
-        window.location.href = '/home';
+        if (data.role === 'ADMIN') {
+            window.location.href = '/admin/dashboard';
+        } else {
+            window.location.href = '/home';
+        }
     }
 
     document.getElementById('loginForm').addEventListener('submit', async (e) => {

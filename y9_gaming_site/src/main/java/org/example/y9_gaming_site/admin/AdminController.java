@@ -58,6 +58,12 @@ public class AdminController {
         return "redirect:/admin/users";
     }
 
+    @GetMapping("/users/banned")
+    public String viewBannedUsers(Model model) {
+        model.addAttribute("bannedUsers", adminService.getAllBannedUsers());
+        return "admin/banned-users";
+    }
+
     @PostMapping("/users/{id}/unban")
     public String unbanUser(@PathVariable Long id, RedirectAttributes ra) {
         adminService.unbanUser(id);
@@ -109,4 +115,7 @@ public class AdminController {
         ra.addFlashAttribute("message", "Challenge deleted.");
         return "redirect:/admin/challenges";
     }
+
+
+
 }

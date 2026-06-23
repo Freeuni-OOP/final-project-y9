@@ -1,8 +1,14 @@
 package org.example.y9_gaming_site.homePage;
 
+import org.example.y9_gaming_site.admin.Announcement;
+import org.example.y9_gaming_site.admin.AnnouncementRepository;
+import org.example.y9_gaming_site.admin.Challenge;
+import org.example.y9_gaming_site.admin.ChallengeRepository;
 import org.example.y9_gaming_site.homePage.HomeStatsDTO;
 import org.example.y9_gaming_site.homePage.HomeStatsDTO.RankedPlayerDTO;
 import org.example.y9_gaming_site.homePage.HomeStatsDTO.RecentAchievementDTO;
+import org.example.y9_gaming_site.user.User;
+import org.example.y9_gaming_site.user.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -23,16 +29,29 @@ import java.util.List;
 @Service
 public class HomeStatsService {
 
+    private final UserRepository userRepository;
+    private final AnnouncementRepository announcementRepository;
+    private final ChallengeRepository challengeRepository;
+
     private static final DateTimeFormatter FORMATTER =
             DateTimeFormatter.ofPattern("MMM d, yyyy")
                     .withZone(ZoneId.systemDefault());
 
+    public HomeStatsService(UserRepository userRepository,
+                            AnnouncementRepository announcementRepository,
+                            ChallengeRepository challengeRepository) {
+        this.userRepository = userRepository;
+        this.announcementRepository = announcementRepository;
+        this.challengeRepository = challengeRepository;
+    }
     public HomeStatsDTO getHomeStats() {
         HomeStatsDTO dto = new HomeStatsDTO();
 
         dto.setTotalUsers(fetchTotalUsers());
         dto.setTopPlayers(fetchTopPlayers());
         dto.setRecentAchievements(fetchRecentAchievements());
+        dto.setAnnouncements(fetchAnnouncements());
+        dto.setChallenges(fetchChallenges());
 
         return dto;
     }
@@ -42,8 +61,21 @@ public class HomeStatsService {
     // ---------------------------------------------------------------
 
     private long fetchTotalUsers() {
-        // TODO: return userRepository.count();
-        return 1_284;
+        List<User> users = userRepository.findAll();
+        long ans = 0;
+        for(User a : users){
+            if(!a.getBanned()){
+                ans++;
+            }
+        }
+        return ans;
+    }
+    private List<Announcement> fetchAnnouncements() {
+        return announcementRepository.findAll(); // real DB call
+    }
+
+    private List<Challenge> fetchChallenges() {
+        return challengeRepository.findAll(); // real DB call
     }
 
     private List<RankedPlayerDTO> fetchTopPlayers() {

@@ -25,7 +25,14 @@ public class AdminService {
 
 
     public List<User> getAllUsers() {
-        return userRepository.findAll();
+        List<User> users =  userRepository.findAll();
+        for(User a : users){
+            if(a.getBanned()){
+                users.remove(a);
+            }
+        }
+        return users;
+
     }
 
     public void deleteUser(Long id) {
@@ -44,6 +51,12 @@ public class AdminService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
         user.setBanned(true);
         userRepository.save(user);
+    }
+
+    public List<User> getAllBannedUsers() {
+        return userRepository.findAll().stream()
+                .filter(User::getBanned)
+                .toList();
     }
 
 

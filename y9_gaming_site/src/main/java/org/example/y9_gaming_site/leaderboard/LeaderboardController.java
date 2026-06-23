@@ -2,6 +2,7 @@ package org.example.y9_gaming_site.leaderboard;
 
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import org.springframework.web.servlet.ModelAndView;
 
 @RestController
 public class LeaderboardController {
@@ -12,7 +13,7 @@ public class LeaderboardController {
     }
 
     @GetMapping("/leaderboard/{gameName}")
-    public List<LeaderboardScore> getTopScored(String gameName){
+    public List<LeaderboardScore> getTopScored(@PathVariable String gameName){
         return service.getTopScored(gameName);
     }
 
@@ -25,6 +26,11 @@ public class LeaderboardController {
     public List<LeaderboardScore> getUserHistory(@PathVariable String gameName,
                                                  @PathVariable Long userId) {
         return service.getUserHistory(userId, gameName);
+    }
+
+    @GetMapping("/leaderboard")
+    public ModelAndView leaderboardPage() {
+        return new ModelAndView("leaderboard");
     }
 
 }
