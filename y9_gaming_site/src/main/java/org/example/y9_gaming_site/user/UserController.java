@@ -45,11 +45,13 @@ public class UserController {
     @PostMapping("/avatar")
     public ResponseEntity<?> uploadAvatar(@RequestParam("avatar") MultipartFile avatar) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        /*
         if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getName())) {
-            return  ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            return  ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("You are not logged in");
         }
+         */
         try {
-            String avatarUrl = userService.updateOrCreateAvatar(Long.valueOf(authentication.getName()), avatar);
+            String avatarUrl = userService.updateOrCreateAvatar(authentication.getName(), avatar);
             return ResponseEntity.ok(new AvatarUploadResponse(avatarUrl, "Updated successfully!"));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());

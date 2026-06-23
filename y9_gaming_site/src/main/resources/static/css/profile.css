@@ -1,0 +1,223 @@
+body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #edaaed;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: #2C1A1F;
+}
+
+
+.dashboard-container {
+    display: grid;
+    grid-template-columns: 300px 1fr 300px;
+    gap: 24px;
+    width: 95%;
+    max-width: 1200px;
+    margin: 40px auto;
+    align-items: start;
+}
+
+
+.dashboard-card {
+    background: #FFFFFF;
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(255, 132, 193, 0.4);
+    padding: 24px;
+    border: 1px solid #FFE4E8;
+}
+
+
+.profile-card {
+    text-align: center;
+}
+
+.avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid #FF6B8B;
+}
+
+#username-display {
+    margin: 14px 0 4px;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #FF4066;
+}
+
+.user-status {
+    margin: 0 0 16px 0;
+    font-size: 0.85rem;
+    color: #4CAF50;
+    font-weight: 600;
+}
+
+.upload-section {
+    margin-top: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.file-label {
+    cursor: pointer;
+    color: #FF6B8B;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.file-label:hover {
+    text-decoration: underline;
+    color: #FF4066;
+}
+
+button {
+    background: #FF6B8B;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s ease, transform 0.1s ease;
+    width: 100%;
+}
+
+button:hover {
+    background: #FF4066;
+}
+
+button:active {
+    transform: scale(0.98);
+}
+
+.column-middle {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.column-middle h3, .column-right h3 {
+    margin-top: 0;
+    margin-bottom: 18px;
+    font-size: 1.15rem;
+    color: #2C1A1D;
+    border-bottom: 2px solid #FFE4E8;
+    padding-bottom: 8px;
+}
+
+.leaderboard-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: #FFF8F9;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    border-left: 4px solid #FF6B8B;
+}
+
+.game-name {
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.badge {
+    font-size: 0.8rem;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-weight: 700;
+}
+.rank-gold { background: #FEF3C7; color: #D97706; }
+.rank-platinum { background: #E0F2FE; color: #0369A1; }
+.rank-silver { background: #F3F4F6; color: #4B5563; }
+
+.achievements-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 16px;
+}
+
+.achievement-badge {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 12px 8px;
+    border-radius: 12px;
+    background: #FFF8F9;
+}
+
+.achievement-badge.locked {
+    opacity: 0.5;
+    filter: grayscale(1);
+    background: #F9FAFB;
+}
+
+.badge-icon {
+    font-size: 2rem;
+    margin-bottom: 6px;
+}
+
+.badge-title {
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+/*friendds*/
+.friends-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.friend-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px;
+    border-radius: 8px;
+    transition: background 0.15s ease;
+}
+
+.friend-item:hover {
+    background: #FFF8F9;
+}
+
+.friend-avatar-placeholder {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #FFD0DB;
+}
+
+.friend-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.friend-name {
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.friend-status {
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.friend-status.online { color: #4CAF50; }
+.friend-status.offline { color: #9CA3AF; }
+
+
+@media (max-width: 900px) {
+    .dashboard-container {
+        grid-template-columns: 1fr;
+    }
+}

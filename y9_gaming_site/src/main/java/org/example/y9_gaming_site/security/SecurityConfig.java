@@ -18,6 +18,8 @@ public class SecurityConfig {
                         .requestMatchers("/", "/login", "/home", "/index.html", "/homePage.html").permitAll()
                         .requestMatchers("/css/**", "/js/**", "/visualExternals/**").permitAll()
                         .requestMatchers("/api/users/**").permitAll()
+                        .requestMatchers("/profile/**").permitAll()
+                        .requestMatchers("/avatars/**").permitAll()
                         .anyRequest().authenticated()
                 );
 
