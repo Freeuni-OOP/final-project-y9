@@ -20,4 +20,7 @@ public class ViewController {
     public String showHome() {
         return "homePage"; //to homepage
     }
+
+    @GetMapping("/quizzes")
+    public String showQuizzes(){return "quizzes";}
 }

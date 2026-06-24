@@ -26,7 +26,6 @@ public class AdminController {
         model.addAttribute("users", adminService.getAllUsers());
         model.addAttribute("announcements", adminService.getAllAnnouncements());
         model.addAttribute("challenges", adminService.getAllChallenges());
-        model.addAttribute("games", adminService.getAllGames());
         return "admin/dashboard";
     }
 
@@ -56,7 +55,7 @@ public class AdminController {
     public String banUser(@PathVariable Long id,
                           @RequestParam(required = false) String reason,
                           RedirectAttributes ra) {
-        adminService.banUser(id, reason);
+        adminService.banUser(id, reason); // passing both id and reason
         ra.addFlashAttribute("message", "User banned.");
         return "redirect:/admin/users";
     }
@@ -120,4 +119,25 @@ public class AdminController {
         ra.addFlashAttribute("message", "Challenge deleted.");
         return "redirect:/admin/challenges";
     }
+
+
+    //for custom created quizzes
+    @PostMapping("/quizzes/new")
+    public String saveManualQuiz(@RequestParam String title,
+                                 @RequestParam String category,
+                                 @RequestParam int timeLimit,
+                                 @RequestParam String description,
+                                 @RequestParam String rawQuestions,
+                                 RedirectAttributes redirectAttributes) {
+        try {
+            adminService.saveCustomQuiz(title, category, timeLimit, description, rawQuestions);
+            redirectAttributes.addFlashAttribute("message", "Successfully published custom quiz: " + title);
+        } catch(Exception e) {
+            redirectAttributes.addFlashAttribute("message", "Database Error: " + e.getMessage());
+        }
+        return "redirect:/admin/dashboard";
+    }
+
+
+
 }

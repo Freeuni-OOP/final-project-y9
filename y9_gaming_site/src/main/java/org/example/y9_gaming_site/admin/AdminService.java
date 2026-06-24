@@ -7,6 +7,7 @@ import org.example.y9_gaming_site.user.Role;
 import org.example.y9_gaming_site.user.User;
 import org.example.y9_gaming_site.user.UserRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.nio.file.AccessDeniedException;
 import java.util.List;
@@ -20,16 +21,19 @@ public class AdminService {
     private final AnnouncementRepository announcementRepository;
     private final ChallengeRepository challengeRepository;
     private final GameRepository gameRepository;
+    private final JdbcTemplate jdbcTemplate;
 
     public AdminService(UserRepository userRepository,
                         AnnouncementRepository announcementRepository,
                         ChallengeRepository challengeRepository,
-                        GameRepository gameRepository) {
+                        GameRepository gameRepository, JdbcTemplate jdbcTemplate) {
+
         this.userRepository = userRepository;
         this.announcementRepository = announcementRepository;
         this.challengeRepository = challengeRepository;
         this.gameRepository = gameRepository;
 
+        this.jdbcTemplate = jdbcTemplate;
     }
 
 
@@ -118,4 +122,12 @@ public class AdminService {
     public List<Game> getAllGames(){return gameRepository.findAll();}
 
     public void deleteGame(Long id){gameRepository.deleteById(id);}
+
+    //custom quiz making.
+    public void saveCustomQuiz(String title, String category, int timeLimit, String description, String rawQuestions) {
+        String formattedQuestions = rawQuestions.replace("\r\n", ";").replace("\n", ";");
+        String sql = "INSERT INTO quizzes (title, category, time_limit_seconds, description, questions_blob, created_at) " +
+                "VALUES (?, ?, ?, ?, ?, NOW())";
+        jdbcTemplate.update(sql, title, category.toUpperCase(), timeLimit, description, formattedQuestions);
+    }
 }

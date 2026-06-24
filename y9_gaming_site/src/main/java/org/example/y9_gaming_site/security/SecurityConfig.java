@@ -36,17 +36,19 @@ public class SecurityConfig {
                         .requestMatchers("/streak/**").authenticated()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/home", "/stats/home").authenticated()
+                        .requestMatchers("/quizzes", "/quizzes/**", "/quizzes.html").authenticated()
+                        .requestMatchers("/api/quizzes/**").authenticated()
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint((request, response, authException) ->
-                                response.sendRedirect("/") // 👈 unauthenticated users go here
+                                response.sendRedirect("/")
                         )
                         .accessDeniedHandler((request, response, accessDeniedException) ->
-                                response.sendRedirect("/") // 👈 wrong role (e.g. non-admin hitting /admin) also goes here
+                                response.sendRedirect("/")
                         )
                 )
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class); // 👈 only new line
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
