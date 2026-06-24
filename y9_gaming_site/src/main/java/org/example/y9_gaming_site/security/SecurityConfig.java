@@ -8,10 +8,17 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+
+    private final JwtAuthFilter jwtAuthFilter;
+
+    public SecurityConfig(JwtAuthFilter jwtAuthFilter) {
+        this.jwtAuthFilter = jwtAuthFilter;
+    }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -19,8 +26,16 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/login", "/home", "/me","/index.html", "/homePage.html", "/stats/home").permitAll()
+                        .requestMatchers("/", "/login", "/index.html").permitAll()
+                        .requestMatchers("/api/users/login", "/api/users/register", "/api/users/guest").permitAll()
                         .requestMatchers("/css/**", "/js/**", "/img/**", "/visualExternals/**").permitAll()
+                        .requestMatchers("/api/users/**").authenticated()
+                        .requestMatchers("/api/games/**").authenticated()
+                        .requestMatchers("/leaderboard/**", "/leaderboard.html").authenticated()
+                        .requestMatchers("/achievements/**").authenticated()
+                        .requestMatchers("/streak/**").authenticated()
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/home", "/stats/home").authenticated()
                         .requestMatchers("/api/users/**").permitAll()
                         .requestMatchers("/api/games/**").permitAll()
                         .requestMatchers("/leaderboard/**", "/leaderboard.html").permitAll()

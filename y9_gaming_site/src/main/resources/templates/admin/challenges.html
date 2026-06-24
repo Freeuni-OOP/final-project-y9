@@ -57,6 +57,11 @@
     <div class="form-card">
         <h2>NEW CHALLENGE</h2>
         <form th:action="@{/admin/challenges/create}" method="post">
+            <input type="hidden" id="form-token" name="token" value="">
+            <script>
+                // Automatically grab it from localstorage and put it in the form right before submission
+                document.getElementById('form-token').value = localStorage.getItem('your_token_key');
+            </script>
             <input type="text" name="title" placeholder="Title" required>
             <textarea name="description" placeholder="Description" required></textarea>
             <input type="text" name="reward" placeholder="Reward (e.g. 100 points)" required>

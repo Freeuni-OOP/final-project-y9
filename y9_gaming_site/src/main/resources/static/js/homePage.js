@@ -1,4 +1,9 @@
 document.addEventListener("DOMContentLoaded", () => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        window.location.href = "/login";
+        return;
+    }
     loadHomeStats();
     loadUserProfile();
 });
@@ -129,16 +134,17 @@ function renderTopPlayers(players) {
         const avatarSrc = player.avatarUrl ? escHtml(player.avatarUrl) : '/img/avatars/default.png';
 
         li.innerHTML = `
-      <span class="leaderboard__rank">${medals[i] ?? (i + 1)}</span>
-      <img  class="leaderboard__avatar"
-            src="${avatarSrc}"
-            alt="${escHtml(player.username)}'s avatar"
-            onerror="this.onerror=null; this.src='/img/avatars/default.png';" />
-      <div class="leaderboard__info">
-        <div class="leaderboard__name">${escHtml(player.username)}</div>
-        <div class="leaderboard__score">${player.score ? player.score.toLocaleString() : 0} pts</div>
-      </div>
-    `;
+  <span class="leaderboard__rank">${medals[i] ?? (i + 1)}</span>
+  <img  class="leaderboard__avatar"
+        src="${avatarSrc}"
+        style="width: 50px; height: 50px; object-fit: cover; border-radius: 50%;" 
+        alt="${escHtml(player.username)}'s avatar"
+        onerror="this.onerror=null; this.src='/img/avatars/default.png';" />
+  <div class="leaderboard__info">
+    <div class="leaderboard__name">${escHtml(player.username)}</div>
+    <div class="leaderboard__score">${player.score ? player.score.toLocaleString() : 0} pts</div>
+  </div>
+`;
         list.appendChild(li);
     });
 }
