@@ -27,6 +27,9 @@ public class SecurityConfig {
                         .requestMatchers("/achievements/**").permitAll()
                         .requestMatchers("/streak/**").permitAll()
                         .requestMatchers("/admin/**").permitAll()
+                        .requestMatchers("/quizzes", "/quizzes/**", "/quizzes.html").permitAll()
+                        .requestMatchers("/api/quizzes/**").permitAll()
+
                         .anyRequest().authenticated()
                 );
 
