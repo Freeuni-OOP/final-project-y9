@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile Dashboard</title>
+    <link rel="stylesheet" th:href="@{/css/profile.css}">
+</head>
+<body>
+
+<div class="dashboard-container">
+
+    <div class="column-left">
+        <div class="dashboard-card profile-card">
+            <img id="avatar-img"
+                 src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Crect width='100%25' height='100%25' fill='%23FFE4EC'/%3E%3C/svg%3E"
+                 alt="Avatar" class="avatar">
+
+            <h2 id="username-display">Loading...</h2>
+            <p class="user-status">Online</p>
+
+            <div id="avatar-upload-section" class="upload-section" hidden>
+                <form id="avatar-form">
+                    <label for="avatar-input" class="file-label">Choose photo</label>
+                    <input type="file" id="avatar-input" accept="image/png, image/jpeg, image/webp" hidden>
+                    <button type="submit">Save avatar</button>
+                </form>
+                <p id="upload-status"></p>
+            </div>
+            <p id="error-message" class="error" hidden></p>
+        </div>
+    </div>
+
+    <div class="column-middle">
+        <div class="dashboard-card leaderboard-card">
+            <h3>Rank in games : </h3>
+            <div class="placeholder-content">
+                <div class="leaderboard-item">
+                    <span class="game-name">Joker</span>
+                    <span class="badge rank-gold">Rank: Gold IV</span>
+                </div>
+                <div class="leaderboard-item">
+                    <span class="game-name">Georgian Wordle</span>
+                    <span class="badge rank-platinum">Rank: Platinum I</span>
+                </div>
+                <div class="leaderboard-item">
+                    <span class="game-name">Sudoku</span>
+                    <span class="badge rank-silver">Rank: Silver II</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboard-card achievements-card">
+            <h3>Achievements achieved</h3>
+            <div class="achievements-grid">
+                <div class="achievement-badge unlocked">
+                    <div class="badge-icon">🧠</div>
+                    <span class="badge-title">Quiz Master</span>
+                </div>
+                <div class="achievement-badge unlocked">
+                    <div class="badge-icon">🔥</div>
+                    <span class="badge-title">5 Day Streak</span>
+                </div>
+                <div class="achievement-badge unlocked">
+                    <div class="badge-icon">🃏</div>
+                    <span class="badge-title">Joker King</span>
+                </div>
+                <div class="achievement-badge locked">
+                    <div class="badge-icon">🎨</div>
+                    <span class="badge-title">Artist (Gartic)</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="column-right">
+        <div class="dashboard-card friends-card">
+            <h3>Friends List : </h3>
+            <div class="friends-list">
+                <div class="friend-item">
+                    <div class="friend-avatar-placeholder"></div>
+                    <div class="friend-info">
+                        <span class="friend-name">Lazy_Kitten</span>
+                        <span class="friend-status online">Sleeping</span>
+                    </div>
+                </div>
+                <div class="friend-item">
+                    <div class="friend-avatar-placeholder"></div>
+                    <div class="friend-info">
+                        <span class="friend-name">Lazy_Bear</span>
+                        <span class="friend-status online">Also Sleeping</span>
+                    </div>
+                </div>
+                <div class="friend-item">
+                    <div class="friend-avatar-placeholder"></div>
+                    <div class="friend-info">
+                        <span class="friend-name">Lazy pupy</span>
+                        <span class="friend-status offline">cant wait to sleep</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script th:inline="javascript">
+    const userId = /*[[${userId}]]*/ null;
+</script>
+<script th:src="@{/js/profile.js}"></script>
+</body>
+</html>

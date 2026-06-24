@@ -49,13 +49,13 @@ public class UserServiceTest{
 
         MultipartFile multipartFile = new MockMultipartFile("avatar", "test.jpg", "image/jpeg", "bytes".getBytes());
         when(fileStorageService.store(multipartFile)).thenReturn("/avatars/new-file.jpg");
-        String res = userService.updateOrCreateAvatar(Long.valueOf(1L), multipartFile);
+        String res = userService.updateOrCreateAvatar(user.getUsername(), multipartFile);
         assertThat(res).isEqualTo("/avatars/new-file.jpg");
     }
 
     @Test
     public void testSample3() {//none existent user
         when(userRepository.findById(Long.valueOf(10L))).thenReturn(Optional.empty());
-        assertThatThrownBy(() -> userService.updateOrCreateAvatar(Long.valueOf(10L), null));
+        assertThatThrownBy(() -> userService.updateOrCreateAvatar("none", null));
     }
 }

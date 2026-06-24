@@ -115,8 +115,8 @@ public class UserService {
         return new UserProfileResponse(user.getId(), user.getUsername(), user.getAvatarUrl());
     }
 
-    public String updateOrCreateAvatar(Long userId, MultipartFile avatar){
-        User user = userRepository.findById(userId).orElse(null);
+    public String updateOrCreateAvatar(String userName, MultipartFile avatar){
+        User user = userRepository.findByUsername(userName).orElse(null);
         String avatarUrl = fileStorageService.store(avatar);
         assert user != null;
         user.setAvatarUrl(avatarUrl);

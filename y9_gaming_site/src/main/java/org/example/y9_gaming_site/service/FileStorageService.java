@@ -15,7 +15,7 @@ import java.util.UUID;
 @Service
 public class FileStorageService {
 
-    private static final List<String> ALLOWED_TYPES = List.of("image/png", "image.jepg", "image/webp");
+    private static final List<String> ALLOWED_TYPES = List.of("image/png", "image/jpeg", "image/webp");
     private final String uploadDir;
     private final String urlPrefix;
 
@@ -45,11 +45,11 @@ public class FileStorageService {
 
     private void validate(MultipartFile file){
         if(file == null||file.isEmpty()){
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("File is empty");
         }
         String contentType = file.getContentType();
         if(!ALLOWED_TYPES.contains(contentType)){
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("Only PNG, JPEG or WEBP supported");
         }
     }
 
