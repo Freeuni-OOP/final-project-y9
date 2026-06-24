@@ -132,8 +132,11 @@ public class AdminServiceTests extends TestCase {
 
     public void testCreateAnnouncement() {
         AnnouncementDTO dto = new AnnouncementDTO("Title", "Content");
+       Mockito.when(userRepository.findByUsername("testuser"))
+                .thenReturn(Optional.of(testUser));
+        adminService.createAnnouncement(dto, "testUser");
 
-        adminService.createAnnouncement(dto);
+
 
         verify(announcementRepository, times(1)).save(any(Announcement.class));
     }
@@ -163,15 +166,12 @@ public class AdminServiceTests extends TestCase {
                 .thenReturn(Optional.of(testUser));
 
         ChallengeDTO dto = new ChallengeDTO();
-        // (Note: You can even remove dto.setAdmin_id(1L) since the service doesn't read it anymore!)
         dto.setTitle("New Challenge");
         dto.setDescription("Beat the high score");
         dto.setReward("100");
 
-        // 2. Call the service with the username that matches your mock setup above
         adminService.createChallenge(dto, "testuser");
 
-        // 3. Verify it saved successfully
         verify(challengeRepository, times(1)).save(any(Challenge.class));
     }
 

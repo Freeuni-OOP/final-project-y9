@@ -1,5 +1,7 @@
 package org.example.y9_gaming_site.auth;
 
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import org.example.y9_gaming_site.user.User;
 import org.example.y9_gaming_site.user.UserRepository;
 import org.example.y9_gaming_site.user.UserService;
@@ -24,11 +26,10 @@ public class UserLoginController {
         this.userRepository = userRepository;
         this.userService = userService;
         this.streakService = streakService;
-
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody UserLoginDto loginDto) {
+    public ResponseEntity<?> login(@RequestBody UserLoginDto loginDto, HttpServletResponse response) {
         try {
             User user = userRepository.findByUsername(loginDto.getUsername())
                     .orElseThrow(() -> new IllegalArgumentException("Invalid username or password."));
@@ -42,6 +43,8 @@ public class UserLoginController {
             streakService.updateStreak(user.getId());
 
             String token = TokenUtil.generateToken(user.getUsername());
+            addJwtCookie(response, token);
+
             return ResponseEntity.ok(Map.of("token", token, "username", user.getUsername(), "role", user.getRole().toString()));
 
         } catch (IllegalArgumentException e) {
@@ -52,13 +55,32 @@ public class UserLoginController {
     }
 
     @PostMapping("/guest")
-    public ResponseEntity<?> joinAsGuest() {
+    public ResponseEntity<?> joinAsGuest(HttpServletResponse response) {
         try {
             User guest = userService.createGuestUser();
             String token = TokenUtil.generateToken(guest.getUsername());
+            addJwtCookie(response, token);
+
             return ResponseEntity.ok(Map.of("token", token, "username", guest.getUsername(), "role", guest.getRole().toString()));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Could not create guest session.");
         }
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(HttpServletResponse response) {
+        Cookie cookie = new Cookie("jwt", null);
+        cookie.setMaxAge(0);
+        cookie.setPath("/");
+        response.addCookie(cookie);
+        return ResponseEntity.ok("Logged out successfully.");
+    }
+
+    private void addJwtCookie(HttpServletResponse response, String token) {
+        Cookie cookie = new Cookie("jwt", token);
+        cookie.setHttpOnly(true);
+        cookie.setPath("/");
+        cookie.setMaxAge(60 * 60 * 24); // 1 day
+        response.addCookie(cookie);
     }
 }

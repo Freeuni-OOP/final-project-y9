@@ -78,13 +78,16 @@ public class AdminService {
         return announcementRepository.findAll();
     }
 
-    public void createAnnouncement(AnnouncementDTO dto) {
+    public void createAnnouncement(AnnouncementDTO dto, String username) {
         Announcement announcement = new Announcement();
         announcement.setTitle(dto.getTitle());
         announcement.setContent(dto.getContent());
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with username: " + username));
+
+        announcement.setAdmin_id(user.getId());
         announcementRepository.save(announcement);
     }
-
     public void deleteAnnouncement(Long id) {
         announcementRepository.deleteById(id);
     }
@@ -103,10 +106,8 @@ public class AdminService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new EntityNotFoundException("User not found with username: " + username));
 
-        // Optional: If you want to strictly ensure they have an ADMIN role before creating i
 
-        challenge.setAdmin_id(user.getId()); // Ensure this is set!
-        //challenge.setAdmin_id(dto.getAdmin_id());
+        challenge.setAdmin_id(user.getId());
         challengeRepository.save(challenge);
     }
 
