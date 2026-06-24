@@ -13,7 +13,7 @@ public class HomeStatsDTO {
 
     // ---- nested DTOs ----
 
-    public static class RankedPlayerDTO {
+    public static class RankedPlayerDTO{
         private String username;
         private String avatarUrl;
         private int rank;

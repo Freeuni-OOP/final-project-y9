@@ -1,5 +1,6 @@
 package org.example.y9_gaming_site;
 
+import jakarta.servlet.http.HttpServletResponse;
 import junit.framework.TestCase;
 import org.example.y9_gaming_site.auth.UserLoginController;
 import org.example.y9_gaming_site.auth.UserLoginDto;
@@ -52,8 +53,10 @@ public class UserAuthTests extends TestCase {
         loginDto.setUsername("mst");
         loginDto.setPassword("mesatiasUyvarsGhomi<3");
 
-        ResponseEntity<?> response = loginController.login(loginDto);
 
+        HttpServletResponse mockResponse = Mockito.mock(HttpServletResponse.class);
+
+        ResponseEntity<?> response = loginController.login(loginDto, mockResponse);
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
 
@@ -74,8 +77,10 @@ public class UserAuthTests extends TestCase {
         loginDto.setUsername("mst");
         loginDto.setPassword("mesatiasARuyvarsGhomi:(");
 
-        ResponseEntity<?> response = loginController.login(loginDto);
 
+        HttpServletResponse mockResponse = Mockito.mock(HttpServletResponse.class);
+
+        ResponseEntity<?> response = loginController.login(loginDto, mockResponse);
         assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
         assertEquals("Invalid username or password.", response.getBody());
     }
@@ -87,8 +92,10 @@ public class UserAuthTests extends TestCase {
         loginDto.setUsername("stumariko");
         loginDto.setPassword("rameRume123!");
 
-        ResponseEntity<?> response = loginController.login(loginDto);
 
+        HttpServletResponse mockResponse = Mockito.mock(HttpServletResponse.class);
+
+        ResponseEntity<?> response = loginController.login(loginDto, mockResponse);
         assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
         assertEquals("Invalid username or password.", response.getBody());
     }
@@ -111,7 +118,10 @@ public class UserAuthTests extends TestCase {
 
         Mockito.when(mockUserService.createGuestUser()).thenReturn(guestUser);
 
-        ResponseEntity<?> response = loginController.joinAsGuest();
+        HttpServletResponse mockResponse = Mockito.mock(HttpServletResponse.class);
+
+
+        ResponseEntity<?> response = loginController.joinAsGuest(mockResponse);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());

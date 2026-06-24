@@ -3,10 +3,12 @@ package org.example.y9_gaming_site.admin;
 import org.example.y9_gaming_site.user.User;
 import org.example.y9_gaming_site.user.Role;
 import org.springframework.stereotype.Controller;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.nio.file.AccessDeniedException;
 import java.util.List;
 
 @Controller
@@ -18,14 +20,15 @@ public class AdminController {
     public AdminController(AdminService adminService) {
         this.adminService = adminService;
     }
+
     @GetMapping("/dashboard")
     public String dashboard(Model model) {
         model.addAttribute("users", adminService.getAllUsers());
         model.addAttribute("announcements", adminService.getAllAnnouncements());
         model.addAttribute("challenges", adminService.getAllChallenges());
+        model.addAttribute("games", adminService.getAllGames());
         return "admin/dashboard";
     }
-
 
     @GetMapping("/users")
     public String viewAllUsers(Model model) {
@@ -53,7 +56,7 @@ public class AdminController {
     public String banUser(@PathVariable Long id,
                           @RequestParam(required = false) String reason,
                           RedirectAttributes ra) {
-        adminService.banUser(id, reason); // passing both id and reason
+        adminService.banUser(id, reason);
         ra.addFlashAttribute("message", "User banned.");
         return "redirect:/admin/users";
     }
@@ -80,8 +83,9 @@ public class AdminController {
 
     @PostMapping("/announcements/create")
     public String createAnnouncement(@ModelAttribute AnnouncementDTO dto,
+                                     @AuthenticationPrincipal User loggedInUser,
                                      RedirectAttributes ra) {
-        adminService.createAnnouncement(dto);
+        adminService.createAnnouncement(dto, loggedInUser.getUsername());
         ra.addFlashAttribute("message", "Announcement posted.");
         return "redirect:/admin/announcements";
     }
@@ -93,19 +97,20 @@ public class AdminController {
         return "redirect:/admin/announcements";
     }
 
-
     @GetMapping("/challenges")
-    public String viewChallenges(Model model) {
+    public String viewChallenges(Model model, @AuthenticationPrincipal User loggedInUser) {
         model.addAttribute("challenges", adminService.getAllChallenges());
         model.addAttribute("newChallenge", new ChallengeDTO());
+        model.addAttribute("currentAdmin", loggedInUser);
         return "admin/challenges";
     }
 
     @PostMapping("/challenges/create")
     public String createChallenge(@ModelAttribute ChallengeDTO dto,
-                                  RedirectAttributes ra) {
-        adminService.createChallenge(dto);
-        ra.addFlashAttribute("message", "Challenge created.");
+                                  @AuthenticationPrincipal User loggedInUser, // 👈 Spring gives you this for free now
+                                  RedirectAttributes ra) throws AccessDeniedException {
+        adminService.createChallenge(dto, loggedInUser.getUsername());
+        ra.addFlashAttribute("message", "Challenge created successfully.");
         return "redirect:/admin/challenges";
     }
 
@@ -115,7 +120,4 @@ public class AdminController {
         ra.addFlashAttribute("message", "Challenge deleted.");
         return "redirect:/admin/challenges";
     }
-
-
-
 }

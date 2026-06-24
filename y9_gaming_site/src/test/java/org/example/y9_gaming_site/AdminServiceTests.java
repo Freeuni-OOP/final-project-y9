@@ -2,6 +2,7 @@ package org.example.y9_gaming_site;
 
 import junit.framework.TestCase;
 import org.example.y9_gaming_site.admin.*;
+import org.example.y9_gaming_site.game.GameRepository;
 import org.example.y9_gaming_site.streak.StreakService;
 import org.example.y9_gaming_site.user.Role;
 import org.example.y9_gaming_site.user.User;
@@ -15,6 +16,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.nio.file.AccessDeniedException;
 import java.util.List;
 import java.util.Optional;
 
@@ -32,6 +34,8 @@ public class AdminServiceTests extends TestCase {
 
     private ChallengeRepository challengeRepository;
 
+    private GameRepository gameRepository;
+
 
     private AdminService adminService;
 
@@ -44,7 +48,8 @@ public class AdminServiceTests extends TestCase {
         userRepository = Mockito.mock(UserRepository.class);
         announcementRepository = Mockito.mock(AnnouncementRepository.class);
         challengeRepository = Mockito.mock(ChallengeRepository.class);
-        adminService = new AdminService(userRepository, announcementRepository, challengeRepository);
+        gameRepository = Mockito.mock(GameRepository.class);
+        adminService = new AdminService(userRepository, announcementRepository, challengeRepository,gameRepository);
         testUser = new User();
         testUser.setId(1L);
         testUser.setUsername("testuser");
@@ -127,8 +132,11 @@ public class AdminServiceTests extends TestCase {
 
     public void testCreateAnnouncement() {
         AnnouncementDTO dto = new AnnouncementDTO("Title", "Content");
+       Mockito.when(userRepository.findByUsername("testuser"))
+                .thenReturn(Optional.of(testUser));
+        adminService.createAnnouncement(dto, "testUser");
 
-        adminService.createAnnouncement(dto);
+
 
         verify(announcementRepository, times(1)).save(any(Announcement.class));
     }
@@ -153,10 +161,16 @@ public class AdminServiceTests extends TestCase {
     }
 
 
-    public void testCreateChallenge() {
-        ChallengeDTO dto = new ChallengeDTO("Title", "Description", "100 points");
+    public void testCreateChallenge() throws AccessDeniedException {
+        Mockito.when(userRepository.findByUsername("testuser"))
+                .thenReturn(Optional.of(testUser));
 
-        adminService.createChallenge(dto);
+        ChallengeDTO dto = new ChallengeDTO();
+        dto.setTitle("New Challenge");
+        dto.setDescription("Beat the high score");
+        dto.setReward("100");
+
+        adminService.createChallenge(dto, "testuser");
 
         verify(challengeRepository, times(1)).save(any(Challenge.class));
     }
