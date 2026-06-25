@@ -26,8 +26,17 @@ public class ChatController {
         return chatService.getMessages(roomId);
     }
 
-    @PostMapping("/open/{user1Id}/{user2Id}/{type}")
-    public ChatRoom openRoom(@PathVariable Long user1Id, @PathVariable Long user2Id, @PathVariable String type) {
-        return chatService.openRoom(user1Id, user2Id, type);
+    // Endpoint for 1-on-1 friend chat
+    @PostMapping("/open-private/{user1Id}/{user2Id}")
+    public ChatRoom openPrivateRoom(@PathVariable Long user1Id, @PathVariable Long user2Id) {
+        return chatService.openPrivateRoom(user1Id, user2Id);
+    }
+
+    // Endpoint for making group rooms (e.g., game lobbies with multiple user IDs)
+    @PostMapping("/create-group")
+    public ChatRoom createGroupRoom(@RequestParam String name,
+                                    @RequestParam String type,
+                                    @RequestBody List<Long> memberIds) {
+        return chatService.createGroupRoom(name, type, memberIds);
     }
 }

@@ -38,6 +38,8 @@ public class SecurityConfig {
                         .requestMatchers("/home", "/stats/home").authenticated()
                         .requestMatchers("/quizzes", "/quizzes/**", "/quizzes.html").authenticated()
                         .requestMatchers("/api/quizzes/**").authenticated()
+                        .requestMatchers("/profile", "/profile/**", "/profile.html").authenticated()
+                        .requestMatchers("/css/profile.css", "/js/profile.js").permitAll()
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(ex -> ex

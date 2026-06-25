@@ -106,21 +106,87 @@ function formatDate(dateString) {
 
 async function loadUserProfile() {
     const token = localStorage.getItem('token');
-    if (!token) return;
+
+    // Safety redirect: If someone tries to browse the leaderboard without being logged in
+    if (!token) {
+        window.location.href = "/login";
+        return;
+    }
+
     try {
         const res = await fetch("/api/users/me", {
             method: "GET",
-            headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" }
+            headers: {
+                "Authorization": `Bearer ${token}`,
+                "Content-Type": "application/json"
+            }
         });
+
         if (res.ok) {
             const user = await res.json();
-            if(document.getElementById("nav-username")) document.getElementById("nav-username").textContent = user.username;
-            if(document.getElementById("nav-avatar") && user.avatarUrl) document.getElementById("nav-avatar").src = user.avatarUrl;
+            const navUser = document.getElementById("nav-username");
+            const navAvatar = document.getElementById("nav-avatar");
+
+            if (navUser) navUser.textContent = user.username;
+
+            // Fixed property lookup to match your UserController keys precisely
+            if (navAvatar && user.avatarUrl && user.avatarUrl !== 'null' && user.avatarUrl !== '') {
+                navAvatar.src = user.avatarUrl;
+                navAvatar.onerror = function() {
+                    this.onerror = null;
+                    this.src = '/img/avatars/default.png';
+                };
+            }
+        } else if (res.status === 401 || res.status === 403) {
+            localStorage.removeItem('token');
+            window.location.href = "/login";
         }
-    } catch (err) { console.error(err); }
+    } catch (err) {
+        console.error("Profile navbar sync failed:", err);
+    }
+}
+async function redirectToMyProfile() {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        window.location.href = "/login";
+        return;
+    }
+
+    try {
+        const res = await fetch("/api/users/me", {
+            method: "GET",
+            headers: {
+                "Authorization": `Bearer ${token}`,
+                "Content-Type": "application/json"
+            }
+        });
+
+        if (res.ok) {
+            const user = await res.json();
+            // Redirects to your secure dynamic Thymeleaf route (e.g., /profile/4)
+            window.location.href = `/profile/${user.id}`;
+        } else {
+            window.location.href = "/login";
+        }
+    } catch (err) {
+        console.error("Failed to route to profile view:", err);
+        window.location.href = "/login";
+    }
 }
 
-window.onload = () => {
+async function logout() {
+    try {
+        await fetch("/api/users/logout", { method: "POST" });
+    } catch (e) {
+        console.error("Backend logout call skipped.");
+    }
+    localStorage.removeItem("token");
+    localStorage.removeItem("role");
+    localStorage.removeItem("username");
+    window.location.href = "/login";
+}
+
+document.addEventListener("DOMContentLoaded", () => {
     loadUserProfile();
     loadLeaderboard();
-};
+});
