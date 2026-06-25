@@ -26,6 +26,7 @@ public class AdminController {
         model.addAttribute("users", adminService.getAllUsers());
         model.addAttribute("announcements", adminService.getAllAnnouncements());
         model.addAttribute("challenges", adminService.getAllChallenges());
+        model.addAttribute("games", adminService.getAllGames());
         return "admin/dashboard";
     }
 
