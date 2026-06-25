@@ -32,13 +32,13 @@ async function loadUserProfile() {
             const navAvatar = document.getElementById("nav-avatar");
 
             if (navUser) navUser.textContent = user.username;
-            if (navAvatar && user.avatar) {
-                const finalAvatar = (user.avatarUrl && user.avatarUrl !== 'null') ? user.avatarUrl :
-                    (user.avatar && user.avatar !== 'null') ? user.avatar :
-                        '/img/avatars/default.png';
+            if (navAvatar) {
+                const finalAvatar = (user.avatarUrl && user.avatarUrl !== 'null' && user.avatarUrl !== '')
+                    ? user.avatarUrl
+                    : '/img/avatars/default.png';
 
                 navAvatar.onerror = function() {
-                    this.onerror = null; // ციკლის გაწყვეტა
+                    this.onerror = null; // Break potential error loops
                     this.src = '/img/avatars/default.png';
                 };
                 navAvatar.src = finalAvatar;
@@ -49,6 +49,7 @@ async function loadUserProfile() {
         }
     } catch (err) {
         console.error("Profile sync failed:", err);
+        window.location.href = "/login";
     }
 }
 

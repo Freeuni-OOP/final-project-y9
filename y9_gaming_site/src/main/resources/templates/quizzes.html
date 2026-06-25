@@ -189,9 +189,19 @@
         </li>
     </ul>
     <div class="navbar__user">
-        <img id="nav-avatar" class="navbar__avatar" src="/img/avatars/default.png" alt="avatar" />
-        <span id="nav-username" class="navbar__username">Gamer</span>
-        <a href="/logout" class="navbar__logout">Log out</a>
+        <img id="nav-avatar"
+             class="navbar__avatar"
+             src="/img/avatars/default.png"
+             alt="avatar"
+             style="cursor: pointer;"
+             onclick="redirectToMyProfile()" />
+
+        <span id="nav-username"
+              class="navbar__username"
+              style="cursor: pointer;"
+              onclick="redirectToMyProfile()">...</span>
+
+        <button onclick="logout()" class="navbar__logout">Log out</button>
     </div>
 </nav>
 
@@ -250,5 +260,46 @@
     </div>
 </main>
 <script src="/js/quizzes.js"></script>
+<script>
+    async function redirectToMyProfile() {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            window.location.href = "/login";
+            return;
+        }
+
+        try {
+            const res = await fetch("/api/users/me", {
+                method: "GET",
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                }
+            });
+
+            if (res.ok) {
+                const user = await res.json();
+                window.location.href = `/profile/${user.id}`;
+            } else {
+                window.location.href = "/login";
+            }
+        } catch (err) {
+            console.error("Failed to route to profile view:", err);
+            window.location.href = "/login";
+        }
+    }
+
+    async function logout() {
+        try {
+            await fetch("/api/users/logout", { method: "POST" });
+        } catch (e) {
+            console.error("Logout request skipped.");
+        }
+        localStorage.removeItem("token");
+        localStorage.removeItem("role");
+        localStorage.removeItem("username");
+        window.location.href = "/login";
+    }
+</script>
 </body>
 </html>

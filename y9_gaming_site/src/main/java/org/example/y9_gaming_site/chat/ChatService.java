@@ -14,47 +14,55 @@ public class ChatService {
     private final MessageRepository messageRepository;
     private final ChatroomRepository chatroomRepository;
     private final FriendshipRepository friendshipRepository;
+    private ChatroomMemberRepository chatroomMemberRepository;
 
-    public ChatService(MessageRepository messageRepository, ChatroomRepository chatroomRepository, FriendshipRepository friendshipRepository) {
+    public ChatService(MessageRepository messageRepository, ChatroomRepository chatroomRepository, FriendshipRepository friendshipRepository,ChatroomMemberRepository chatroomMemberRepository) {
         this.messageRepository = messageRepository;
         this.chatroomRepository = chatroomRepository;
         this.friendshipRepository = friendshipRepository;
+        this.chatroomMemberRepository=chatroomMemberRepository;
     }
 
-    public ChatRoom openRoom(Long user1Id, Long user2Id, String type) {
-        if(type.equals("friend") && !isFriend(user1Id,user2Id)) {
-            throw new RuntimeException("users are not friends");
+    // Opens a new group or lobby chatroom and adds the creator
+    public ChatRoom createGroupRoom(String roomName, String type, List<Long> memberIds) {
+        ChatRoom chatRoom = new ChatRoom(roomName, type);
+        ChatRoom savedRoom = chatroomRepository.save(chatRoom);
+
+        // Add all specified members to the room
+        for (Long userId : memberIds) {
+            chatroomMemberRepository.save(new ChatroomMember(savedRoom.getId(), userId));
         }
-        ChatRoom chatRoom = findRoom(user1Id, user2Id);
-        if(chatRoom != null) {
-            return chatRoom;
-        }
-        chatRoom = new ChatRoom(user1Id, user2Id, type);
-        return chatroomRepository.save(chatRoom);
+        return savedRoom;
     }
+
+    // Specifically for 1-on-1 private messaging between friends
+    public ChatRoom openPrivateRoom(Long user1Id, Long user2Id) {
+        if (!isFriend(user1Id, user2Id)) {
+            throw new RuntimeException("Users are not friends");
+        }
+
+        // Create a basic private chatroom container
+        ChatRoom chatRoom = new ChatRoom(null, "PRIVATE");
+        ChatRoom savedRoom = chatroomRepository.save(chatRoom);
+
+        // Bind both friends to it
+        chatroomMemberRepository.save(new ChatroomMember(savedRoom.getId(), user1Id));
+        chatroomMemberRepository.save(new ChatroomMember(savedRoom.getId(), user2Id));
+
+        return savedRoom;
+    }
+
 
     private boolean isFriend(Long user1Id, Long user2Id) {
-        return friendshipRepository.findByUserIdAndFriendId(user1Id, user2Id) != null || friendshipRepository.findByUserIdAndFriendId(user2Id, user1Id) != null;
+        return friendshipRepository.findBySenderIdAndReceiverId(user1Id, user2Id) != null
+                || friendshipRepository.findBySenderIdAndReceiverId(user2Id, user1Id)!=null;
+
     }
 
-    private ChatRoom findRoom(Long user1Id, Long user2Id) {
-        ChatRoom chatRoom = chatroomRepository.findByUser1IdAndUser2Id(user1Id,user2Id);
-        if(chatRoom == null) {
-            chatRoom = chatroomRepository.findByUser1IdAndUser2Id(user1Id,user2Id);
-        }
-        return chatRoom;
-    }
-
-
-    public Message messageSender(Long senderId,Long roomId,String message){
-        ChatRoom chatRoom = chatroomRepository.findById(roomId).orElse(null);
-        if(chatRoom == null) {
-            throw new RuntimeException("room not found");
-        }
-        boolean isMember = senderId.equals(chatRoom.getUser1Id()) || senderId.equals(chatRoom.getUser2Id());
-        if(!isMember) {
-            throw new RuntimeException("you are not member of this room");
-        }
+    public Message messageSender(Long senderId, Long roomId, String message) {
+        // Validation: Verify the sender actually belongs to this room
+        chatroomMemberRepository.findByRoomIdAndUserId(roomId, senderId)
+                .orElseThrow(() -> new RuntimeException("You are not a member of this chatroom"));
 
         Message messageEntity = new Message();
         messageEntity.setSenderId(senderId);

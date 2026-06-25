@@ -23,9 +23,19 @@
         <li><a href="/chat">Chat</a></li>
     </ul>
     <div class="navbar__user">
-        <img id="nav-avatar" class="navbar__avatar" src="/img/avatars/default.png" alt="avatar" />
-        <span id="nav-username" class="navbar__username">...</span>
-        <a href="/logout" class="navbar__logout">Log out</a>
+        <img id="nav-avatar"
+             class="navbar__avatar"
+             src="/img/avatars/default.png"
+             alt="avatar"
+             style="cursor: pointer;"
+             onclick="redirectToMyProfile()" />
+
+        <span id="nav-username"
+              class="navbar__username"
+              style="cursor: pointer;"
+              onclick="redirectToMyProfile()">...</span>
+
+        <button onclick="logout()" class="navbar__logout">Log out</button>
     </div>
 </nav>
 
