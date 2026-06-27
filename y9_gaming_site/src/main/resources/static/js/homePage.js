@@ -1,3 +1,9 @@
+// მოთამაშისთვის ვინახავ რომელ თამაშში რა დროს ატარებს
+window.gameStartTime = null;
+window.activeGameTitle = null;
+window.activeGameId = null;
+window.activeGameCategory = null;
+
 document.addEventListener("DOMContentLoaded", () => {
     const token = localStorage.getItem('token');
     if (!token) {
@@ -152,4 +158,73 @@ function escHtml(str) {
         .replace(/>/g, "&gt;")
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#39;");
+}
+
+window.handlePlayGame = function(id, type, sourceUrl, title) {
+    const modal = document.getElementById('gameTheaterModal');
+    const iframe = document.getElementById('gameIframe');
+    const titleHeader = document.getElementById('theaterGameTitle');
+
+    titleHeader.textContent = title.toUpperCase();
+    iframe.src = sourceUrl;
+    modal.classList.remove('hidden');
+
+    window.gameStartTime = Date.now();
+    window.activeGameTitle = title;
+    window.activeGameId = id;
+
+    const globalGames = window.cachedGamesList || (typeof cachedGamesList !== 'undefined' ? cachedGamesList : null);
+    if (globalGames && Array.isArray(globalGames)) {
+        const foundGame = globalGames.find(g => Number(g.id) === Number(id));
+        window.activeGameCategory = foundGame ? foundGame.category : "ARCADE";
+    } else {
+        window.activeGameCategory = "ARCADE";
+    }
+    console.log(`[TRACKER] Started: ${window.activeGameTitle}`);
+};
+
+window.closeGameTheater = function() {
+    const modal = document.getElementById('gameTheaterModal');
+    const iframe = document.getElementById('gameIframe');
+
+    modal.classList.add('hidden');
+    iframe.src = "";
+
+    if (window.gameStartTime && window.activeGameTitle) {
+        const timeSpentSeconds = Math.max(1, Math.floor((Date.now() - window.gameStartTime) / 1000));
+        sendTimeAnalytics(window.activeGameId, window.activeGameTitle, window.activeGameCategory, timeSpentSeconds);
+    }
+
+    window.gameStartTime = null;
+    window.activeGameTitle = null;
+    window.activeGameId = null;
+    window.activeGameCategory = null;
+};
+
+async function sendTimeAnalytics(id, title, category, seconds) {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        console.error("[TRACKER] Failed to send metrics: Token missing in localStorage");
+        return;
+    }
+
+    try {
+        console.log(`[TRACKER] Dispatching payload to server...`);
+        const res = await fetch("/api/games/track-time", {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${token}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                gameId: id,
+                gameTitle: title,
+                category: category || "ARCADE",
+                durationSeconds: seconds
+            })
+        });
+        console.log(`[TRACKER] Server response code: ${res.status}`);
+    } catch (err) {
+        console.error("Time tracking sync aborted:", err);
+    }
 }

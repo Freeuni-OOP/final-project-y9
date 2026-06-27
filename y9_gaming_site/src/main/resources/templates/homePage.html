@@ -349,8 +349,7 @@
 <div id="gameTheaterModal" class="theater-overlay hidden">
     <div class="theater-header">
         <h2 id="theaterGameTitle" class="theater-title">Game Room</h2>
-        <button class="close-theater-btn" onclick="closeGameTheater()">✕ Exit Game</button>
-    </div>
+        <button class="close-theater-btn" onclick="window.closeGameTheater()">✕ Exit Game</button>    </div>
     <div class="theater-body">
         <iframe id="gameIframe" src="" allowfullscreen></iframe>
     </div>
@@ -358,59 +357,53 @@
 
 <script src="/js/navbar.js"></script>
 <script src="/js/homePage.js"></script>
+
+<script src="/js/homePage.js?v=9999"></script>
 <script>
-    // 1. We create an empty array to store the live cloud games when they stream in
-    let cachedGamesList = [];
+    window.cachedGamesList = [];
 
-
-    // 2. As soon as the page finishes loading, we trigger the remote connection
     document.addEventListener("DOMContentLoaded", () => {
         fetchAndRenderRemoteGames();
     });
-
 
     async function fetchAndRenderRemoteGames() {
         try {
             const res = await fetch('https://raw.githubusercontent.com/InterstellarNetwork/Interstellar/main/static/assets/json/g.min.json');
             if (!res.ok) throw new Error("Network response was not ok");
 
-
             const remoteGames = await res.json();
 
-
-            cachedGamesList = remoteGames
+            window.cachedGamesList = remoteGames
                 .filter(game => game && game.name && !game.name.startsWith('!') && !['Steam', 'Amazon Luna', 'Newgrounds'].includes(game.name))
                 .map((game, index) => {
-
+                    const name = String(game.name).toLowerCase();
+                    const tagString = game.categories && Array.isArray(game.categories)
+                        ? game.categories.map(c => String(c).toLowerCase()).join(" ")
+                        : "";
 
                     let matchedCategory = "ARCADE";
-                    if (game.categories && Array.isArray(game.categories) && game.categories.length > 0) {
-                        const tags = game.categories.map(c => String(c).toUpperCase());
 
-
-                        if (tags.includes("2P") || tags.includes("MULTIPLAYER") || tags.includes("ONLINE") || tags.includes("IO")) {
-                            matchedCategory = "MULTIPLAYER";
-                        }
-                        else if (tags.includes("A") || tags.includes("ACTION") || tags.includes("FIGHT")) {
-                            matchedCategory = "ACTION";
-                        }
-                        else if (tags.includes("ADV") || tags.includes("ADVENTURE") || tags.includes("RPG")) {
-                            matchedCategory = "ADVENTURE";
-                        }
-                        else if (tags.includes("FPS") || tags.includes("SHOOTER") || tags.includes("SHOOT") || tags.includes("GUN")) {
-                            matchedCategory = "SHOOTER";
-                        }
-                        else if (tags.includes("P") || tags.includes("PUZZLE") || tags.includes("LOGIC") || tags.includes("BOARD")) {
-                            matchedCategory = "BOARD_PUZZLE";
-                        }
-                        else if (tags.includes("S") || tags.includes("SPORTS") || tags.includes("DRIVE") || tags.includes("RACE") || tags.includes("CAR")) {
-                            matchedCategory = "SPORTS";
-                        }
-                        else if (tags.includes("STRATEGY") || tags.includes("STRAT")) {
-                            matchedCategory = "STRATEGY";
-                        }
+                    if (name.includes("fireboy") || name.includes("watergirl") || name.includes("2 player") || name.includes("2-player") || tagString.includes("multiplayer") || tagString.includes("2p")) {
+                        matchedCategory = "MULTIPLAYER";
                     }
-
+                    else if (name.includes("moto") || name.includes("bowl") || name.includes("race") || name.includes("car") || name.includes("drive") || name.includes("drift") || tagString.includes("sport")) {
+                        matchedCategory = "SPORTS";
+                    }
+                    else if (name.includes("fps") || name.includes("lol") || name.includes("shoot") || name.includes("gun") || name.includes("sniper") || tagString.includes("shooter")) {
+                        matchedCategory = "SHOOTER";
+                    }
+                    else if (name.includes("puzzle") || name.includes("chess") || name.includes("logic") || name.includes("block") || name.includes("match") || tagString.includes("puzzle")) {
+                        matchedCategory = "BOARD_PUZZLE";
+                    }
+                    else if (name.includes("strategy") || name.includes("defense") || name.includes("clash") || name.includes("tower") || tagString.includes("strat")) {
+                        matchedCategory = "STRATEGY";
+                    }
+                    else if (name.includes("adventure") || name.includes("rpg") || name.includes("world") || name.includes("quest") || tagString.includes("adv")) {
+                        matchedCategory = "ADVENTURE";
+                    }
+                    else if (tagString.includes("action") || name.includes("fight") || name.includes("combat") || name.includes("smash")) {
+                        matchedCategory = "ACTION";
+                    }
 
                     let finalIcon = game.image || game.img || game.logo || '';
                     if (!finalIcon) {
@@ -418,7 +411,6 @@
                     } else if (finalIcon.startsWith('/')) {
                         finalIcon = `https://raw.githubusercontent.com/InterstellarNetwork/Interstellar/main/static${finalIcon}`;
                     }
-
 
                     return {
                         id: index,
@@ -430,9 +422,7 @@
                     };
                 });
 
-
-            renderGrid(cachedGamesList);
-
+            renderGrid(window.cachedGamesList);
 
         } catch (err) {
             console.error("Registry load error details:", err);
@@ -440,8 +430,6 @@
         }
     }
 
-
-    // 4. This packs the games into those beautiful small Y8 icon boxes
     function renderGrid(games) {
         const grid = document.getElementById('gameGrid');
         grid.innerHTML = '';
@@ -453,19 +441,29 @@
         }
 
 
-        // Limit the rendering to 100 units here so matching datasets can slice fluidly
-        games.slice(0, 100).forEach(game => {
+        //marto isini minda romlebsac aqvt icon tore shavebi afuchebs
+        const gamesWithIcons = games.filter(game => {
+            return game.iconUrl &&
+                game.iconUrl.trim() !== '' &&
+                game.iconUrl !== 'null' &&
+                game.iconUrl !== 'undefined';
+        });
+
+        gamesWithIcons.forEach(game => {
             const item = document.createElement('div');
             item.className = 'y8-game-box';
-            item.onclick = () => handlePlayGame(game.id, game.gameType, game.sourceUrl, game.title);
-
+            item.onclick = () => window.handlePlayGame(game.id, game.gameType, game.sourceUrl, game.title);
 
             item.innerHTML = `
-               <div class="y8-thumbnail-wrapper">
-                   <img class="y8-icon" src="${game.iconUrl}" alt="${game.title}" onerror="this.src='/img/games/default.png'">
-               </div>
-               <div class="y8-title-label">${game.title}</div>
-           `;
+       <div class="y8-thumbnail-wrapper">
+           <img class="y8-icon"
+                src="${game.iconUrl}"
+                alt="${game.title}"
+                loading="lazy"
+                onerror="this.onerror=null; this.src='/img/games/default.png';">
+       </div>
+       <div class="y8-title-label">${game.title}</div>
+   `;
             grid.appendChild(item);
         });
     }
@@ -481,35 +479,14 @@
         const titleElement = document.getElementById('current-category-title');
         if (categoryKey === 'ALL') {
             if (titleElement) titleElement.textContent = "⚡ Available Games ⚡";
-            renderGrid(cachedGamesList);
+            renderGrid(window.cachedGamesList);
         } else {
             let displayTitle = categoryKey;
             if (categoryKey === 'BOARD_PUZZLE') displayTitle = 'PUZZLE';
             if (titleElement) titleElement.textContent = `🕹️ ${displayTitle} Games`;
-            const filtered = cachedGamesList.filter(g => g.category === categoryKey);
+            const filtered = window.cachedGamesList.filter(g => g.category === categoryKey);
             renderGrid(filtered);
         }
-    }
-
-
-    // 5. When clicked, this drops the streaming link right into your popup theater room frame!
-    function handlePlayGame(id, type, sourceUrl, title) {
-        const modal = document.getElementById('gameTheaterModal');
-        const iframe = document.getElementById('gameIframe');
-        const titleHeader = document.getElementById('theaterGameTitle');
-
-
-        titleHeader.textContent = title.toUpperCase();
-        iframe.src = sourceUrl;
-        modal.classList.remove('hidden');
-    }
-
-
-    function closeGameTheater() {
-        const modal = document.getElementById('gameTheaterModal');
-        const iframe = document.getElementById('gameIframe');
-        modal.classList.add('hidden');
-        iframe.src = "";
     }
 
 
