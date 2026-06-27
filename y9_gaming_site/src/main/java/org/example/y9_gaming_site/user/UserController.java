@@ -50,9 +50,10 @@ public class UserController {
         if(authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getName())) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("not logged in");
         }
-
+        User user = (User) authentication.getPrincipal();
+        String userName= user.getUsername();
         try{
-            return ResponseEntity.ok(userService.getProfileByUsername(authentication.getName()));
+            return ResponseEntity.ok(userService.getProfileByUsername(userName));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
@@ -64,9 +65,11 @@ public class UserController {
         if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getName())) {
             return  ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("You are not logged in");
         }
+        User user = (User) authentication.getPrincipal();
+        String userName= user.getUsername();
 
         try {
-            String avatarUrl = userService.updateOrCreateAvatar(authentication.getName(), avatar);
+            String avatarUrl = userService.updateOrCreateAvatar(userName, avatar);
             return ResponseEntity.ok(new AvatarUploadResponse(avatarUrl, "Updated successfully!"));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
