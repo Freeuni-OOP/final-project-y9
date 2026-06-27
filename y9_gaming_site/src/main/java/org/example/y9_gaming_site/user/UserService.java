@@ -116,7 +116,7 @@ public class UserService {
     }
 
     public String updateOrCreateAvatar(String userName, MultipartFile avatar){
-        User user = userRepository.findByUsername(userName).orElse(null);
+        User user = userRepository.findByUsername(userName).orElseThrow(() -> new RuntimeException("Username not found."));
         String avatarUrl = fileStorageService.store(avatar);
         assert user != null;
         user.setAvatarUrl(avatarUrl);
