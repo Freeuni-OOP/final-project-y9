@@ -26,7 +26,7 @@ public class AdminController {
         model.addAttribute("users", adminService.getAllUsers());
         model.addAttribute("announcements", adminService.getAllAnnouncements());
         model.addAttribute("challenges", adminService.getAllChallenges());
-        model.addAttribute("games",adminService.getAllGames());
+        model.addAttribute("games", adminService.getAllGames());
         return "admin/dashboard";
     }
 
@@ -107,7 +107,7 @@ public class AdminController {
 
     @PostMapping("/challenges/create")
     public String createChallenge(@ModelAttribute ChallengeDTO dto,
-                                  @AuthenticationPrincipal User loggedInUser,
+                                  @AuthenticationPrincipal User loggedInUser, // 👈 Spring gives you this for free now
                                   RedirectAttributes ra) throws AccessDeniedException {
         adminService.createChallenge(dto, loggedInUser.getUsername());
         ra.addFlashAttribute("message", "Challenge created successfully.");
