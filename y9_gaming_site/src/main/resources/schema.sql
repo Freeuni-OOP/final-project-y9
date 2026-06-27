@@ -25,13 +25,29 @@ CREATE TABLE IF NOT EXISTS friendships (
 CREATE TABLE IF NOT EXISTS messages (
                                         id BIGINT AUTO_INCREMENT PRIMARY KEY,
                                         sender_id BIGINT NOT NULL,
-                                        receiver_id BIGINT NOT NULL,
-                                        content TEXT NOT NULL,
-                                        sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                                        room_id BIGINT NOT NULL,
+                                        message TEXT NOT NULL,
+                                        timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                                         FOREIGN KEY (sender_id) REFERENCES users(id),
-    FOREIGN KEY (receiver_id) REFERENCES users(id)
+    FOREIGN KEY (room_id) REFERENCES chatrooms(id) ON DELETE CASCADE
     );
 
+CREATE TABLE IF NOT EXISTS chatrooms (
+                                         id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                                         name VARCHAR(100) DEFAULT NULL,               -- e.g., "Joker Lobby #432" or NULL for private 1-on-1s
+    type VARCHAR(50) NOT NULL,                    -- 'PRIVATE', 'GROUP', or 'GAME_LOBBY'
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+
+CREATE TABLE IF NOT EXISTS chatroom_members (
+                                                id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                                                room_id BIGINT NOT NULL,
+                                                user_id BIGINT NOT NULL,
+                                                joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                                                FOREIGN KEY (room_id) REFERENCES chatrooms(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    UNIQUE KEY unique_room_user (room_id, user_id) -- Ensures a user can't join the same room twice
+    );
 
 CREATE TABLE IF NOT EXISTS achievements (
                                             id BIGINT AUTO_INCREMENT PRIMARY KEY,

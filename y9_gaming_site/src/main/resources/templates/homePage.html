@@ -1,3 +1,13 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Y9 — Home</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bitcount+Grid+Double+Ink&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/homePage.css" />
+</head>
+<body>
 
     <!DOCTYPE html>
     <html lang="en">
@@ -267,49 +277,74 @@
 
     <nav th:replace="~{fragments/navbar :: navbar(active='home')}"></nav>
 
-<main class="page">
 
-    <section class="hero">
-        <p class="hero__label">Total Players</p>
-        <h1 class="hero__number" id="total-users">—</h1>
-        <p class="hero__sub">and counting</p>
-    </section>
+<main class="page layout-split">
 
-    <div class="games-container">
-        <h1 class="hub-title">⚡ Available Games ⚡</h1>
-        <div id="gameGrid" class="game-grid">
-            <p>Scanning game database blocks...</p>
-        </div>
-    </div>
 
-    <div class="grid">
+    <aside class="sidebar-categories">
+        <h3 class="sidebar-title">Categories</h3>
+        <ul class="category-menu">
+            <li><button class="cat-btn active" onclick="filterCategory('ALL')">🎮 All Games</button></li>
+            <li><button class="cat-btn" onclick="filterCategory('ACTION')">💥 Action</button></li>
+            <li><button class="cat-btn" onclick="filterCategory('ADVENTURE')">🗺️ Adventure</button></li>
+            <li><button class="cat-btn" onclick="filterCategory('ARCADE')">🕹️ Arcade</button></li>
+            <li><button class="cat-btn" onclick="filterCategory('BOARD_PUZZLE')">🧩 Puzzle</button></li>
+            <li><button class="cat-btn" onclick="filterCategory('SHOOTER')">🔫 Shooter</button></li>
+            <li><button class="cat-btn" onclick="filterCategory('STRATEGY')">🧠 Strategy</button></li>
+            <li><button class="cat-btn" onclick="filterCategory('SPORTS')">⚽ Sports</button></li>
+            <li><button class="cat-btn" onclick="filterCategory('MULTIPLAYER')">👥 Multiplayer</button></li>
+        </ul>
+    </aside>
 
-        <section class="card" id="leaderboard-card">
-            <h2 class="card__title">🏆 Top Players (Last 24h)</h2>
-            <ol class="leaderboard" id="top-players">
-                <li class="leaderboard__skeleton"></li>
-                <li class="leaderboard__skeleton"></li>
-                <li class="leaderboard__skeleton"></li>
-            </ol>
 
-            <div style="text-align: center; margin-top: 20px;">
-                <a href="/leaderboard" class="play-btn" style="text-decoration: none; display: inline-block; width: auto; padding: 8px 25px;">
-                    View Full Leaderboard →
-                </a>
+    <div class="main-content-flow">
+
+
+        <section class="hero">
+            <p class="hero__label">Total Players</p>
+            <h1 class="hero__number" id="total-users">—</h1>
+            <p class="hero__sub">and counting</p>
+        </section>
+
+
+        <div class="games-container">
+            <h2 class="hub-title" id="current-category-title">⚡ Available Games ⚡</h2>
+            <div id="gameGrid" class="y8-game-grid">
+                <p>Scanning game database blocks...</p>
             </div>
-        </section>
+        </div>
 
-        <section class="card" id="achievements-card">
-            <h2 class="card__title">⭐ Recent Achievements</h2>
-            <ul class="achievements" id="recent-achievements">
-                <li class="achievements__skeleton"></li>
-                <li class="achievements__skeleton"></li>
-                <li class="achievements__skeleton"></li>
-            </ul>
-        </section>
+
+        <div class="grid">
+            <section class="card" id="leaderboard-card">
+                <h2 class="card__title">🏆 Top Players (Last 24h)</h2>
+                <ol class="leaderboard" id="top-players">
+                    <li class="leaderboard__skeleton"></li>
+                    <li class="leaderboard__skeleton"></li>
+                    <li class="leaderboard__skeleton"></li>
+                </ol>
+                <div style="text-align: center; margin-top: 20px;">
+                    <a href="/leaderboard" class="play-btn" style="text-decoration: none; display: inline-block; width: auto; padding: 8px 25px;">
+                        View Full Leaderboard →
+                    </a>
+                </div>
+            </section>
+
+
+            <section class="card" id="achievements-card">
+                <h2 class="card__title">⭐ Recent Achievements</h2>
+                <ul class="achievements" id="recent-achievements">
+                    <li class="achievements__skeleton"></li>
+                    <li class="achievements__skeleton"></li>
+                    <li class="achievements__skeleton"></li>
+                </ul>
+            </section>
+        </div>
+
 
     </div>
 </main>
+
 
 <div id="gameTheaterModal" class="theater-overlay hidden">
     <div class="theater-header">
@@ -324,66 +359,151 @@
 <script src="/js/navbar.js"></script>
 <script src="/js/homePage.js"></script>
 <script>
+    // 1. We create an empty array to store the live cloud games when they stream in
+    let cachedGamesList = [];
+
+
+    // 2. As soon as the page finishes loading, we trigger the remote connection
     document.addEventListener("DOMContentLoaded", () => {
-        fetchAndRenderGames();
+        fetchAndRenderRemoteGames();
     });
 
-    async function fetchAndRenderGames() {
+
+    async function fetchAndRenderRemoteGames() {
         try {
-            const token = localStorage.getItem('token');
-            const res = await fetch('/api/games', {
-                method: 'GET',
-                headers: {
-                    'Authorization': token ? `Bearer ${token}` : '',
-                    'Content-Type': 'application/json'
-                }
-            });
+            const res = await fetch('https://raw.githubusercontent.com/InterstellarNetwork/Interstellar/main/static/assets/json/g.min.json');
+            if (!res.ok) throw new Error("Network response was not ok");
 
-            if (!res.ok) throw new Error();
 
-            const games = await res.json();
-            const grid = document.getElementById('gameGrid');
-            grid.innerHTML = '';
+            const remoteGames = await res.json();
 
-            games.forEach(game => {
-                const card = document.createElement('div');
-                card.className = 'game-card';
 
-                const isSource = game.gameType === 'OPENSOURCE';
-                const badgeClass = isSource ? 'badge-source' : 'badge-home';
-                const badgeText = isSource ? 'Web Arcade' : 'Custom Multiplayer';
+            cachedGamesList = remoteGames
+                .filter(game => game && game.name && !game.name.startsWith('!') && !['Steam', 'Amazon Luna', 'Newgrounds'].includes(game.name))
+                .map((game, index) => {
 
-                card.innerHTML = `
-                    <div>
-                        <img class="game-icon" src="${game.iconUrl}" alt="${game.title}" onerror="this.src='/img/games/default.png'">
-                        <div class="game-title">${game.title}</div>
-                        <span class="game-badge ${badgeClass}">${badgeText}</span>
-                        <div class="game-desc">${game.description || ''}</div>
-                    </div>
-                    <button class="play-btn" onclick="handlePlayGame(${game.id}, '${game.gameType}', '${game.sourceUrl || ''}', '${game.title.replace(/'/g, "\\'")}')">
-                        Launch Game
-                    </button>
-                `;
-                grid.appendChild(card);
-            });
+
+                    let matchedCategory = "ARCADE";
+                    if (game.categories && Array.isArray(game.categories) && game.categories.length > 0) {
+                        const tags = game.categories.map(c => String(c).toUpperCase());
+
+
+                        if (tags.includes("2P") || tags.includes("MULTIPLAYER") || tags.includes("ONLINE") || tags.includes("IO")) {
+                            matchedCategory = "MULTIPLAYER";
+                        }
+                        else if (tags.includes("A") || tags.includes("ACTION") || tags.includes("FIGHT")) {
+                            matchedCategory = "ACTION";
+                        }
+                        else if (tags.includes("ADV") || tags.includes("ADVENTURE") || tags.includes("RPG")) {
+                            matchedCategory = "ADVENTURE";
+                        }
+                        else if (tags.includes("FPS") || tags.includes("SHOOTER") || tags.includes("SHOOT") || tags.includes("GUN")) {
+                            matchedCategory = "SHOOTER";
+                        }
+                        else if (tags.includes("P") || tags.includes("PUZZLE") || tags.includes("LOGIC") || tags.includes("BOARD")) {
+                            matchedCategory = "BOARD_PUZZLE";
+                        }
+                        else if (tags.includes("S") || tags.includes("SPORTS") || tags.includes("DRIVE") || tags.includes("RACE") || tags.includes("CAR")) {
+                            matchedCategory = "SPORTS";
+                        }
+                        else if (tags.includes("STRATEGY") || tags.includes("STRAT")) {
+                            matchedCategory = "STRATEGY";
+                        }
+                    }
+
+
+                    let finalIcon = game.image || game.img || game.logo || '';
+                    if (!finalIcon) {
+                        finalIcon = '/img/games/default.png';
+                    } else if (finalIcon.startsWith('/')) {
+                        finalIcon = `https://raw.githubusercontent.com/InterstellarNetwork/Interstellar/main/static${finalIcon}`;
+                    }
+
+
+                    return {
+                        id: index,
+                        title: game.name || 'Unknown Web Game',
+                        category: matchedCategory,
+                        sourceUrl: game.link || '',
+                        iconUrl: finalIcon,
+                        gameType: 'OPENSOURCE'
+                    };
+                });
+
+
+            renderGrid(cachedGamesList);
+
+
         } catch (err) {
-            document.getElementById('gameGrid').innerHTML = `<p style="color:#ff5599;text-align:center;">Failed to sync with game database backend.</p>`;
+            console.error("Registry load error details:", err);
+            document.getElementById('gameGrid').innerHTML = `<p style="color:#ff5599;text-align:center;">Failed to live-stream games from remote network registry.</p>`;
         }
     }
 
-    function handlePlayGame(id, type, sourceUrl, title) {
-        if (type === 'OPENSOURCE') {
-            const modal = document.getElementById('gameTheaterModal');
-            const iframe = document.getElementById('gameIframe');
-            const titleHeader = document.getElementById('theaterGameTitle');
 
-            titleHeader.textContent = title.toUpperCase();
-            iframe.src = sourceUrl;
-            modal.classList.remove('hidden');
+    // 4. This packs the games into those beautiful small Y8 icon boxes
+    function renderGrid(games) {
+        const grid = document.getElementById('gameGrid');
+        grid.innerHTML = '';
+
+
+        if (games.length === 0) {
+            grid.innerHTML = '<p style="grid-column: 1/-1; text-align:center; color:#888;">No games found in this category.</p>';
+            return;
+        }
+
+
+        // Limit the rendering to 100 units here so matching datasets can slice fluidly
+        games.slice(0, 100).forEach(game => {
+            const item = document.createElement('div');
+            item.className = 'y8-game-box';
+            item.onclick = () => handlePlayGame(game.id, game.gameType, game.sourceUrl, game.title);
+
+
+            item.innerHTML = `
+               <div class="y8-thumbnail-wrapper">
+                   <img class="y8-icon" src="${game.iconUrl}" alt="${game.title}" onerror="this.src='/img/games/default.png'">
+               </div>
+               <div class="y8-title-label">${game.title}</div>
+           `;
+            grid.appendChild(item);
+        });
+    }
+
+
+    function filterCategory(categoryKey) {
+        document.querySelectorAll('.cat-btn').forEach(btn => {
+            btn.classList.remove('active');
+            if (btn.getAttribute('onclick') && btn.getAttribute('onclick').includes(`'${categoryKey}'`)) {
+                btn.classList.add('active');
+            }
+        });
+        const titleElement = document.getElementById('current-category-title');
+        if (categoryKey === 'ALL') {
+            if (titleElement) titleElement.textContent = "⚡ Available Games ⚡";
+            renderGrid(cachedGamesList);
         } else {
-            alert("Initializing Custom Game Session Lobby. Checking WebSocket pipelines...");
+            let displayTitle = categoryKey;
+            if (categoryKey === 'BOARD_PUZZLE') displayTitle = 'PUZZLE';
+            if (titleElement) titleElement.textContent = `🕹️ ${displayTitle} Games`;
+            const filtered = cachedGamesList.filter(g => g.category === categoryKey);
+            renderGrid(filtered);
         }
     }
+
+
+    // 5. When clicked, this drops the streaming link right into your popup theater room frame!
+    function handlePlayGame(id, type, sourceUrl, title) {
+        const modal = document.getElementById('gameTheaterModal');
+        const iframe = document.getElementById('gameIframe');
+        const titleHeader = document.getElementById('theaterGameTitle');
+
+
+        titleHeader.textContent = title.toUpperCase();
+        iframe.src = sourceUrl;
+        modal.classList.remove('hidden');
+    }
+
 
     function closeGameTheater() {
         const modal = document.getElementById('gameTheaterModal');
@@ -391,6 +511,44 @@
         modal.classList.add('hidden');
         iframe.src = "";
     }
+
+
+    async function logout() {
+        await fetch("/api/users/logout", { method: "POST" });
+        localStorage.removeItem("token");
+        localStorage.removeItem("role");
+        window.location.href = "/login";
+    }
+
+
+    async function redirectToMyProfile() {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            window.location.href = "/login";
+            return;
+        }
+        try {
+            const res = await fetch("/api/users/me", {
+                method: "GET",
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                }
+            });
+            if (res.ok) {
+                const user = await res.json();
+                window.location.href = `/profile/${user.id}`;
+            } else {
+                window.location.href = "/login";
+            }
+        } catch (err) {
+            console.error("Failed identity check:", err);
+            window.location.href = "/login";
+        }
+    }
 </script>
 </body>
 </html>
+
+
+

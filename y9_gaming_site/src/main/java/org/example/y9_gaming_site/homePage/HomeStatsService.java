@@ -15,6 +15,7 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * HomeStatsService
@@ -61,14 +62,10 @@ public class HomeStatsService {
     // ---------------------------------------------------------------
 
     private long fetchTotalUsers() {
-        List<User> users = userRepository.findAll();
-        long ans = 0;
-        for(User a : users){
-            if(!a.getBanned()){
-                ans++;
-            }
-        }
-        return ans;
+        return userRepository.findAll()
+                .stream()
+                .filter(a -> !a.getBanned())
+                .collect(Collectors.toList()).size();
     }
     private List<Announcement> fetchAnnouncements() {
         return announcementRepository.findAll(); // real DB call
