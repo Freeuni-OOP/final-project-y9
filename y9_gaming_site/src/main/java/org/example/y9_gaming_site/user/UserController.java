@@ -42,14 +42,28 @@ public class UserController {
         }
     }
 
+    //used by navbar to show avatar of user
+    @GetMapping("/me")
+    public ResponseEntity<?> getCurrentUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if(authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getName())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("not logged in");
+        }
+
+        try{
+            return ResponseEntity.ok(userService.getProfileByUsername(authentication.getName()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
     @PostMapping("/avatar")
     public ResponseEntity<?> uploadAvatar(@RequestParam("avatar") MultipartFile avatar) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        /*
         if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getName())) {
             return  ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("You are not logged in");
         }
-         */
+
         try {
             String avatarUrl = userService.updateOrCreateAvatar(authentication.getName(), avatar);
             return ResponseEntity.ok(new AvatarUploadResponse(avatarUrl, "Updated successfully!"));

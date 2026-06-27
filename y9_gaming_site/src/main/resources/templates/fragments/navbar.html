@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<nav th:fragment="navbar(active)" class="navbar">
+    <a class="navbar__brand" href="/home">Y9</a>
+    <ul class="navbar__links">
+        <li><a href="/home" th:classappend="${active == 'home'} ? 'active'">Home</a> </li>
+        <li><a href="/quizzes" th:classappend="${active == 'quizzes'} ? 'active'">Quizzes</a> </li>
+        <li><a href="/leaderboard" th:classappend="${active == 'leaderboard'} ? 'active'">Leaderboard</a> </li>
+        <li><a href="/chat" th:classappend="${active == 'chat'} ? 'active'">Chat</a> </li>
+        <li id="adminLink" style="display:none;"><a th:href="@{/admin/dashboard}">Admin Panel</a> </li>
+    </ul>
+
+    <div class="navbar__user">
+        <a id="nav-profile-link" href="/profile" class="navbar__profile-link">
+            <img id="nav-avatar" class="navbar__avatar" src="/img/avatars/default.png" alt="avatar" />
+            <span id="nav-username" class="navbar__username">...</span>
+        </a>
+        <a href="/logout" class="navbar__logout">Log out</a>
+    </div>
+</nav>
+</body>
+</html>

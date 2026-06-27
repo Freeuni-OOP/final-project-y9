@@ -1,0 +1,98 @@
+.navbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 30px;
+    height: 65px;
+    background: rgba(185, 45, 125, 0.91);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgb(163, 42, 107);
+    box-shadow: 0 10px 40px rgba(145, 60, 143, 0.78),
+                -4px -4px 20px rgba(0, 240, 255, 0.15),
+                4px 4px 20px rgba(255, 0, 127, 0.15);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.navbar__brand{
+    font-family: "Bitcount Grid Double Ink", monospace;
+    color: rgba(140, 55, 156, 0.91);
+    font-size:26px;
+    letter-spacing: 3px;
+    text-decoration: none;
+}
+
+.navbar__links{
+    display: flex;
+    gap: 28px;
+    list-style: none;
+}
+
+.navbar__links a {
+    color: rgba(61, 19, 64, 0.89);
+    text-decoration: none;
+    font-size: 15px;
+    letter-spacing: 1px;
+    transition: color 0.2s;
+}
+
+.navbar__links a:hover,
+.navbar__links a.active{
+    color: #6e1b61;
+    font-weight: 700;
+}
+
+.navbar__user {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.navbar__profile-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    border-radius: 20px;
+    padding: 3px 10px 3px 3px;
+    transition: background 0.2s;
+}
+
+.navbar__profile-link:hover {
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.navbar__avatar{
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    border: 2px solid #b327c9;
+    object-fit: cover;
+}
+
+.navbar__username {
+    font-size: 13px;
+    color: rgba(73, 30, 85, 0.87);
+}
+
+.navbar__logout {
+    font-size: 13px;
+    color: #ff6b9d;
+    text-decoration: none;
+    padding: 5px 12px;
+    border: 1px solid rgba(255, 107, 157, 0.4);
+    border-radius: 6px;
+    transition: all 0.2s;
+}
+
+.navbar__logout:hover {
+    background: rgba(255, 107, 157, 0.15);
+}
+
+@media (max-width: 768px) {
+    .navbar__links{
+        display: none;
+    }
+
+}
