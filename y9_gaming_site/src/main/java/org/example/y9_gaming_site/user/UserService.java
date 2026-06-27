@@ -123,4 +123,11 @@ public class UserService {
         userRepository.save(user);
         return avatarUrl;
     }
+
+
+    //I added this function cause authentication returns only name
+    public UserProfileResponse getProfileByUsername(String userName){
+        User user = userRepository.findByUsername(userName).orElseThrow(() ->new IllegalArgumentException("Username not found."));
+        return  new UserProfileResponse(user.getId(), user.getUsername(), user.getAvatarUrl());
+    }
 }

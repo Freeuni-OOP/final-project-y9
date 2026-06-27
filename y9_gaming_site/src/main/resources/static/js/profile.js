@@ -1,5 +1,6 @@
 const API_BASE = "/api/users";
 
+const token = localStorage.getItem('token')
 const avatarImg = document.getElementById("avatar-img");
 const usernameDisplay = document.getElementById("username-display");
 const uploadSection = document.getElementById("avatar-upload-section");
