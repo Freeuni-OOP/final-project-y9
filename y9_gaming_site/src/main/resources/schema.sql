@@ -135,3 +135,11 @@ CREATE TABLE IF NOT EXISTS game_invites (
     FOREIGN KEY (sender_id) REFERENCES users(id),
     FOREIGN KEY (receiver_id) REFERENCES users(id)
     );
+
+CREATE TABLE IF NOT EXISTS user_game_time (
+                                id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                                user_id BIGINT NOT NULL,
+                                game_title VARCHAR(255) NOT NULL,
+                                total_time_seconds BIGINT NOT NULL DEFAULT 0,
+                                CONSTRAINT fk_user_game_time_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
