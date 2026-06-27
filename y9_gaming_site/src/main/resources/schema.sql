@@ -143,3 +143,11 @@ CREATE TABLE IF NOT EXISTS user_game_time (
                                 total_time_seconds BIGINT NOT NULL DEFAULT 0,
                                 CONSTRAINT fk_user_game_time_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS sudoku_puzzles (
+                                              id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                                              puzzle_date DATE UNIQUE, -- only one per day
+                                              definition VARCHAR(81) NOT NULL,
+                                              solution VARCHAR(81) NOT NULL,
+                                              difficulty VARCHAR(20) NOT NULL
+);
