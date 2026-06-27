@@ -5,53 +5,9 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
     }
     loadHomeStats();
-    loadUserProfile();
+    //navbar is doing loaduserProfiles function
 });
 
-async function loadUserProfile() {
-    const token = localStorage.getItem('token');
-
-    // თუ ტოკენი საერთოდ არ გვაქვს, პროფილის წამოღებას აზრი არ აქვს
-    if (!token) {
-        console.log("No token found, skipping profile load.");
-        return;
-    }
-
-    try {
-        const res = await fetch("/api/users/me", {
-            method: "GET",
-            headers: {
-                "Authorization": `Bearer ${token}`,
-                "Content-Type": "application/json"
-            }
-        });
-
-        if (res.ok) {
-            const user = await res.json();
-            const navUser = document.getElementById("nav-username");
-            const navAvatar = document.getElementById("nav-avatar");
-
-            if (navUser) navUser.textContent = user.username;
-            if (navAvatar) {
-                const finalAvatar = (user.avatarUrl && user.avatarUrl !== 'null' && user.avatarUrl !== '')
-                    ? user.avatarUrl
-                    : '/img/avatars/default.png';
-
-                navAvatar.onerror = function() {
-                    this.onerror = null; // Break potential error loops
-                    this.src = '/img/avatars/default.png';
-                };
-                navAvatar.src = finalAvatar;
-            }
-        } else if (res.status === 401 || res.status === 403) {
-            // თუ ტოკენი ვადაგასულია ან არასწორია, ვშლით მას
-            localStorage.removeItem('token');
-        }
-    } catch (err) {
-        console.error("Profile sync failed:", err);
-        window.location.href = "/login";
-    }
-}
 
 async function loadHomeStats() {
     try {
