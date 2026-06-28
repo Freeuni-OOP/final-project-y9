@@ -12,11 +12,16 @@ public class JokerGameConfig {
     private final PlayerCount playerCount;
     private final boolean allowRandoms; //if we want to play with random people
     private final RoundOption roundOption;
+    private final int jokerAmount;
 
-    public JokerGameConfig(PlayerCount playerCount, boolean allowRandoms, RoundOption roundOption){
+    public JokerGameConfig(PlayerCount playerCount, boolean allowRandoms, RoundOption roundOption, int jokerAmount){
         this.playerCount=playerCount;
         this.allowRandoms=allowRandoms;
         this.roundOption=roundOption;
+        if (jokerAmount < 1 || jokerAmount > 2) {
+            throw new IllegalArgumentException("Joker amount must be 1 or 2");
+        }
+        this.jokerAmount = jokerAmount;
     }
 
     public int getPlayers(){

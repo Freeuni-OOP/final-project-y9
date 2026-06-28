@@ -10,14 +10,16 @@ import java.util.List;
 @Getter
 public class JokerPlayer {
     private final Long userId;
+    private final String username;
     //what cards does user hold in hands
     private final List<Card> cardList=new ArrayList<>();
-    @Setter private int prophecy=0; //how many tricks user claims to take
+    @Setter private int prophecy=-1; //how many tricks user claims to take
     @Setter private int current=0; //how many tricks  user has for this time
     private  int totalScore=0;
 
-    public JokerPlayer(Long userId){
-        this.userId=userId;
+    public JokerPlayer(Long userId, String username) {
+        this.userId = userId;
+        this.username = username;
     }
 
     //calling this while dealing cards
@@ -31,9 +33,16 @@ public class JokerPlayer {
                 c.getIsJoker().equals(card.getIsJoker()));
     }
 
+    public boolean hasSuit(String suit) {
+        return cardList.stream().anyMatch(c -> c.getSuit().equals(suit) && !c.getIsJoker());
+    }
+
+    public boolean hasTrumps(String trumpSuit) {
+        return cardList.stream().anyMatch(c -> c.getSuit().equals(trumpSuit) && !c.getIsJoker());
+    }
     public void resetRoundInfo(){
         this.cardList.clear();
-        this.prophecy=0;
+        this.prophecy=-1;
         this.current=0;
     }
 
