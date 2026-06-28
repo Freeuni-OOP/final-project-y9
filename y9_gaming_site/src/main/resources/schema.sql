@@ -151,3 +151,32 @@ CREATE TABLE IF NOT EXISTS sudoku_puzzles (
                                               solution VARCHAR(81) NOT NULL,
                                               difficulty VARCHAR(20) NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS game_records (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    game_id BIGINT NOT NULL,
+    context_id BIGINT,
+    score_value DOUBLE NOT NULL,
+    recorded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (game_id) REFERENCES games(id)
+);
+
+CREATE TABLE IF NOT EXISTS game_challenges (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    sender_id BIGINT NOT NULL,
+    receiver_id BIGINT NOT NULL,
+    targ_record_id BIGINT NOT NULL,
+    res_record_id BIGINT,
+    winner_id BIGINT,
+    status VARCHAR(20) DEFAULT 'PENDING',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    expires_at TIMESTAMP NOT NULL,
+    resolved_at TIMESTAMP,
+    FOREIGN KEY (sender_id) REFERENCES users(id),
+    FOREIGN KEY (receiver_id) REFERENCES users(id),
+    FOREIGN KEY (targ_record_id) REFERENCES game_records(id),
+    FOREIGN KEY (res_record_id) REFERENCES  game_records,
+    FOREIGN KEY (winner_id) REFERENCES users(id)
+);
