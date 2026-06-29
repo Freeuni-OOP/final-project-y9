@@ -26,11 +26,11 @@ public class GameChallenge {
     private GameRecord targRecord;
 
     @ManyToOne
-    @JoinColumn(name = "res_record_id", nullable = false)
+    @JoinColumn(name = "res_record_id", nullable = true)
     private GameRecord resRecord;
 
     @ManyToOne
-    @JoinColumn(name = "winner_id", nullable = false)
+    @JoinColumn(name = "winner_id", nullable = true)
     private User winner;
 
     @Enumerated(EnumType.STRING)

@@ -34,7 +34,7 @@ public class GameRecord {
 
     public GameRecord() {}
 
-    public GameRecord(User user, Game game, Long contextId, double value, LocalDateTime recordedAt) {
+    public GameRecord(User user, Game game, Long contextId, double value) {
         this.user = user;
         this.game = game;
         this.contextId = contextId;
