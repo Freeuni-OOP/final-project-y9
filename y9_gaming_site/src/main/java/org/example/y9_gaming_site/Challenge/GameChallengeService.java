@@ -1,6 +1,7 @@
 package org.example.y9_gaming_site.Challenge;
 
 
+import org.example.y9_gaming_site.friendship.Friendship;
 import org.example.y9_gaming_site.friendship.FriendshipRepository;
 import org.example.y9_gaming_site.gameRecord.GameRecord;
 import org.example.y9_gaming_site.gameRecord.GameRecordService;
@@ -11,7 +12,6 @@ import org.example.y9_gaming_site.user.UserRepository;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -33,6 +33,10 @@ public class GameChallengeService {
     }
 
     public GameChallenge sendChallenge(Long senderId, Long receiverId, String gameKey, Long contextId) {
+        if(!theyAreFriends(senderId, receiverId)) {
+            throw new RuntimeException("Sender or receiver are not friends");
+        }
+
         GameRecord targetRecord = gameRecordService.findBest(senderId, gameKey, contextId).orElseThrow(()->new RuntimeException("No record found"));
         User receiver = userRepository.findById(receiverId).orElseThrow(()->new RuntimeException("No User found"));
         LocalDateTime expiresAt =  LocalDateTime.now().plusDays(7);
@@ -51,8 +55,7 @@ public class GameChallengeService {
             throw new RuntimeException("challenge is not waiting for response");
         }
         if(challenge.getExpiresAt().isBefore(LocalDateTime.now())) {
-            expire(challenge);
-            throw new RuntimeException("challenge has expired");
+            return expire(challenge);
         }
         if(accept) {
             challenge.setStatus(GameChallengeStatus.ACCEPTED);
@@ -117,6 +120,15 @@ public class GameChallengeService {
         challenge.setStatus(GameChallengeStatus.EXPIRED);
         challenge.setResolvedAt(LocalDateTime.now());
         return gameChallengeRepository.save(challenge);
+    }
+
+    private boolean theyAreFriends(Long userId, Long receiverId) {
+        Friendship forward = friendshipRepository.findBySenderIdAndReceiverId(userId, receiverId);
+        if(forward != null && "Accepted".equals(forward.getStatus())) {
+            return true;
+        }
+        Friendship backward = friendshipRepository.findBySenderIdAndReceiverId(receiverId, userId);
+        return backward != null && "Accepted".equals(backward.getStatus());
     }
 }
 
