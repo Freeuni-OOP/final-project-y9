@@ -48,7 +48,7 @@ public class WordleAttempt {
     }
     public List<String> getGuessList() {
         if(guesses == null || guesses.isEmpty()) {
-            return Collections.emptyList();
+            return new ArrayList<>();
         }
         return new ArrayList<>(Arrays.asList(guesses.split(",")));
     }

@@ -28,4 +28,9 @@ public class ViewController {
     public String showSudoku() {
         return "sudoku";
     }
+
+    @GetMapping("/wordle")
+    public String showWordle() {
+        return "wordle";
+    }
 }
