@@ -1,0 +1,32 @@
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Y9 — ვორდლი</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bitcount+Grid+Double+Ink&family=Noto+Sans+Georgian:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/homePage.css" />
+    <link rel="stylesheet" href="/css/wordle.css" />
+</head>
+<body>
+
+<nav th:replace="~{fragments/navbar :: navbar(active='home')}"></nav>
+
+<main class="wordle-wrap">
+    <div class="wordle-panel">
+        <h1 class="wordle-title">ვორდლი</h1>
+        <div class="wordle-sub" id="sub">დღის სიტყვა</div>
+
+        <div id="board" class="board"></div>
+        <div id="msg" class="msg" aria-live="polite"></div>
+        <div id="keyboard" class="keyboard"></div>
+
+        <div class="wordle-actions">
+            <button class="y9-btn" onclick="loadDaily()">დღის თამაში</button>
+            <button class="y9-btn y9-btn--alt" onclick="loadPractice()">ვარჯიში</button>
+        </div>
+    </div>
+</main>
+
+<script src="/js/navbar.js"></script>
+<script src="/js/wordle.js"></script>
+</body>
+</html>

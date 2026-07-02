@@ -180,3 +180,32 @@ CREATE TABLE IF NOT EXISTS game_challenges (
     FOREIGN KEY (res_record_id) REFERENCES  game_records,
     FOREIGN KEY (winner_id) REFERENCES users(id)
 );
+
+CREATE TABLE IF NOT EXISTS wordle_puzzles(
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    puzzle_date DATE UNIQUE,
+    answer_word VARCHAR(5) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS wordle_attempts (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    puzzle_id BIGINT NOT NULL,
+    guesses VARCHAR(64) NOT NULL DEFAULT '',
+    status VARCHAR(20) NOT NULL DEFAULT 'IN_PROGRESS',
+    started_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    completed_at TIMESTAMP NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (puzzle_id) REFERENCES wordle_puzzles(id) ON DELETE CASCADE,
+    UNIQUE KEY unique_user_puzzle (user_id, puzzle_id)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+INSERT INTO games(title, description, max_players, icon_url, created_at)
+VALUES (
+        'WORDLE',
+        'Guess 5 letter Georgian word in 6 tries',
+        1,
+        '/images/games/wordle.png',
+        CURRENT_TIMESTAMP
+       );
