@@ -11,10 +11,12 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
-public interface GameRecordRepository extends JpaRepository<GameChallenge, Long> {
-    List<GameChallenge> findByReceiverAndStatus(Long receiver, GameChallengeStatus status);
+public interface GameRecordRepository extends JpaRepository<GameRecord, Long> {
+    List<GameRecord> findByUserIdAndGameId(Long userId, Long gameId);
 
-    List<GameChallenge> findBySenderAndStatus(Long sender, Long receiver);
+    List<GameRecord> findByUserIdAndGameIdAndContextId(Long userId, Long gameId, Long contextId);
 
-    List<GameChallenge> findByStatusAndExpiresAtBefore(GameChallengeStatus status, LocalDateTime cutoff);
+    List<GameRecord> findByGameIdAndContextId(Long gameId, Long contextId);
+
+    List<GameRecord> findByGameId(Long gameId);
 }
