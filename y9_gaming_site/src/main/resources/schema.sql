@@ -177,7 +177,7 @@ CREATE TABLE IF NOT EXISTS game_challenges (
     FOREIGN KEY (sender_id) REFERENCES users(id),
     FOREIGN KEY (receiver_id) REFERENCES users(id),
     FOREIGN KEY (targ_record_id) REFERENCES game_records(id),
-    FOREIGN KEY (res_record_id) REFERENCES  game_records,
+    FOREIGN KEY (res_record_id) REFERENCES  game_records(id),
     FOREIGN KEY (winner_id) REFERENCES users(id)
 );
 
@@ -201,7 +201,7 @@ CREATE TABLE IF NOT EXISTS wordle_attempts (
     UNIQUE KEY unique_user_puzzle (user_id, puzzle_id)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
-INSERT INTO games(title, description, max_players, icon_url, created_at)
+INSERT IGNORE INTO games(title, description, max_players, icon_url, created_at)
 VALUES (
         'WORDLE',
         'Guess 5 letter Georgian word in 6 tries',
