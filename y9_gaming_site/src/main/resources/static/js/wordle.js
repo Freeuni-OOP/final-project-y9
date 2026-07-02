@@ -202,7 +202,7 @@ async function submitGuess() {
 
 document.addEventListener("keydown", (e) => {
     if (e.ctrlKey || e.metaKey || e.altKey) return;
-    if (e.key === "Enter") { submitGuess(); return; }
+    if (e.key === "Enter") { gu(); return; }
     if (e.key === "Backspace") { e.preventDefault(); removeLetter(); return; }
     if (e.key.length === 1 && ANBANI_SET.has(e.key)) addLetter(e.key);
 });
