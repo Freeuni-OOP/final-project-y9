@@ -57,6 +57,20 @@ body {
     align-items: center;
     gap: 10px;
 }
+
+.navbar__profile-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    border-radius: 20px;
+    padding: 3px 10px 3px 3px;
+    transition: background 0.2s;
+}
+.navbar__profile-link:hover {
+    background: rgba(255, 255, 255, 0.12);
+}
+
 .navbar__avatar {
     width: 34px;
     height: 34px;
