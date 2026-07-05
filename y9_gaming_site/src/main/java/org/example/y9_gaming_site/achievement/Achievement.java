@@ -13,8 +13,7 @@ public class Achievement {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
 
     private Long id; //unique identifier
+    private String code;// key for unique achievements
     private String name; //name of achievement, status
     private String description; //what to do to get the status
-    private String icon; //name of icon file. used for frontend
-
 }
