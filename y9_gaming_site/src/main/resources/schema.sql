@@ -209,3 +209,17 @@ VALUES (
         '/images/games/wordle.png',
         CURRENT_TIMESTAMP
        );
+
+CREATE TABLE IF NOT EXISTS joker_sessions (
+                                              id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                                              room_code VARCHAR(20) NOT NULL UNIQUE,  -- join key
+                                              host_id BIGINT NOT NULL,                  -- who created the game
+                                              status VARCHAR(30) DEFAULT 'WAITING',
+                                              player_count INT NOT NULL,
+                                              total_rounds INT NOT NULL,
+                                              is_open BOOLEAN DEFAULT FALSE,
+                                              joker_amount INT DEFAULT 1,
+                                              created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                                              ended_at TIMESTAMP NULL,
+                                              FOREIGN KEY (host_id) REFERENCES users(id)
+);
