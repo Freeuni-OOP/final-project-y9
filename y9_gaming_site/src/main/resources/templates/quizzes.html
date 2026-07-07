@@ -187,40 +187,8 @@
     </style>
 </head>
 <body>
-
-
-
-<!--<nav class="navbar">-->
-<!--    <a class="navbar__brand" href="/home">Y9</a>-->
-<!--    <ul class="navbar__links">-->
-<!--        <li><a href="/home">Home</a></li>-->
-<!--        <li><a href="/quizzes" class="active">Quizzes</a></li>-->
-<!--        <li><a href="/leaderboard">Leaderboard</a></li>-->
-<!--        <li><a href="/chat">Chat</a></li>-->
-<!--        <li id="adminLink" style="display: none;">-->
-<!--            <a th:href="@{/admin/dashboard}">Admin Panel</a>-->
-<!--        </li>-->
-<!--    </ul>-->
-<!--    <div class="navbar__user">-->
-<!--        <img id="nav-avatar"-->
-<!--             class="navbar__avatar"-->
-<!--             src="/img/avatars/default.png"-->
-<!--             alt="avatar"-->
-<!--             style="cursor: pointer;"-->
-<!--             onclick="redirectToMyProfile()" />-->
-
-<!--        <span id="nav-username"-->
-<!--              class="navbar__username"-->
-<!--              style="cursor: pointer;"-->
-<!--              onclick="redirectToMyProfile()">...</span>-->
-
-<!--        <button onclick="logout()" class="navbar__logout">Log out</button>-->
-<!--    </div>-->
-<!--</nav>-->
 <nav th:replace="~{fragments/navbar :: navbar(active='quizzes')}"></nav>
-<!--<ul class="navbar__links">-->
-<!--    <li><a href="#" onclick="toggleQuizForm(event)">➕ Add Quiz</a></li>-->
-<!--</ul>-->
+
 
 <main class="container">
     <h1 class="hub-title">🧠 Knowledge Vault 🧠</h1>

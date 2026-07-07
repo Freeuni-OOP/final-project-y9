@@ -233,7 +233,7 @@ function checkMCQAnswer(selectedText, btnElement) {
     } else {
         btnElement.classList.add('wrong-answer');
 
-        // Also highlight which one WAS correct, so the player learns the answer
+        // Also highlight which one was correct, so the player learns the answer
         allButtons.forEach(btn => {
             const btnText = btn.textContent.trim().toLowerCase().replace(/[\r\n\t]/g, "");
             if (btnText === cleanCorrectAnswer) {
@@ -294,7 +294,6 @@ function quitQuiz() {
     const okBtn = document.getElementById('confirmModalOk');
     const cancelBtn = document.getElementById('confirmModalCancel');
 
-    // Use {once: true} so we don't stack duplicate listeners on repeated opens
     okBtn.addEventListener('click', () => {
         modal.classList.add('hidden');
         endQuiz();
