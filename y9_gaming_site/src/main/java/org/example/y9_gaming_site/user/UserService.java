@@ -130,4 +130,16 @@ public class UserService {
         User user = userRepository.findByUsername(userName).orElseThrow(() ->new IllegalArgumentException("Username not found."));
         return  new UserProfileResponse(user.getId(), user.getUsername(), user.getAvatarUrl());
     }
+
+    public List<UserProfileResponse> searchUsers(String query){
+        List<User> users = userRepository.findByUsernameContainingIgnoreCase(query);
+
+        List<UserProfileResponse> responses = new ArrayList<>();
+
+        for (User user : users) {
+            responses.add(new UserProfileResponse(user.getId(), user.getUsername(), user.getAvatarUrl()));
+        }
+
+        return responses;
+    }
 }

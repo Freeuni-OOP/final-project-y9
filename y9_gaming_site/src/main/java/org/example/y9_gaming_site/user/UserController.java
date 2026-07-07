@@ -76,4 +76,11 @@ public class UserController {
         }
     }
 
+    @GetMapping("/search")
+    public ResponseEntity<?> searchUser(@RequestParam String query) {
+        if (query == null || query.trim().length()<2) {
+            return ResponseEntity.badRequest().body("write min 2 symbols");
+        }
+        return ResponseEntity.ok(userService.searchUsers(query.trim()));
+    }
 }
