@@ -76,35 +76,4 @@ public class QuizController {
         redirectAttributes.addFlashAttribute("message", "Quiz published!");
         return "redirect:/home";
     }
-//@PostMapping("/new")
-//public ResponseEntity<Void> createQuiz(@RequestParam String title,
-//                                       @RequestParam String category,
-//                                       @RequestParam String description,
-//                                       @RequestParam int timeLimit,
-//                                       @RequestParam("questionText") List<String> questionTexts,
-//                                       @RequestParam("correctAnswer") List<String> correctAnswers,
-//                                       @RequestParam("wrongAnswers") List<String> wrongAnswers,
-//                                       @RequestParam("questionImage") List<MultipartFile> images) throws IOException {
-//
-//    Files.createDirectories(Paths.get(UPLOAD_DIR));
-//    List<String> imagePaths = new ArrayList<>();
-//
-//    for (MultipartFile file : images) {
-//        if (file == null || file.isEmpty()) {
-//            imagePaths.add("");
-//            continue;
-//        }
-//        String filename = UUID.randomUUID() + "-" + file.getOriginalFilename();
-//        Path target = Paths.get(UPLOAD_DIR, filename);
-//        Files.copy(file.getInputStream(), target, StandardCopyOption.REPLACE_EXISTING);
-//        imagePaths.add("/uploads/quiz-images/" + filename);
-//    }
-//
-//    quizService.createQuiz(title, category, description, timeLimit,
-//            questionTexts, correctAnswers, wrongAnswers, imagePaths);
-//
-//    HttpHeaders headers = new HttpHeaders();
-//    headers.add(HttpHeaders.LOCATION, "/home");
-//    return new ResponseEntity<>(headers, HttpStatus.FOUND); // 302 redirect
-//}
 }
