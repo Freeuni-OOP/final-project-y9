@@ -143,3 +143,83 @@ CREATE TABLE IF NOT EXISTS user_game_time (
                                 total_time_seconds BIGINT NOT NULL DEFAULT 0,
                                 CONSTRAINT fk_user_game_time_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS sudoku_puzzles (
+                                              id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                                              puzzle_date DATE UNIQUE, -- only one per day
+                                              definition VARCHAR(81) NOT NULL,
+                                              solution VARCHAR(81) NOT NULL,
+                                              difficulty VARCHAR(20) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS game_records (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    game_id BIGINT NOT NULL,
+    context_id BIGINT,
+    score_value DOUBLE NOT NULL,
+    recorded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (game_id) REFERENCES games(id)
+);
+
+CREATE TABLE IF NOT EXISTS game_challenges (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    sender_id BIGINT NOT NULL,
+    receiver_id BIGINT NOT NULL,
+    targ_record_id BIGINT NOT NULL,
+    res_record_id BIGINT,
+    winner_id BIGINT,
+    status VARCHAR(20) DEFAULT 'PENDING',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    expires_at TIMESTAMP NOT NULL,
+    resolved_at TIMESTAMP,
+    FOREIGN KEY (sender_id) REFERENCES users(id),
+    FOREIGN KEY (receiver_id) REFERENCES users(id),
+    FOREIGN KEY (targ_record_id) REFERENCES game_records(id),
+    FOREIGN KEY (res_record_id) REFERENCES  game_records(id),
+    FOREIGN KEY (winner_id) REFERENCES users(id)
+);
+
+CREATE TABLE IF NOT EXISTS wordle_puzzles(
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    puzzle_date DATE UNIQUE,
+    answer_word VARCHAR(5) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS wordle_attempts (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    puzzle_id BIGINT NOT NULL,
+    guesses VARCHAR(64) NOT NULL DEFAULT '',
+    status VARCHAR(20) NOT NULL DEFAULT 'IN_PROGRESS',
+    started_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    completed_at TIMESTAMP NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (puzzle_id) REFERENCES wordle_puzzles(id) ON DELETE CASCADE,
+    UNIQUE KEY unique_user_puzzle (user_id, puzzle_id)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+INSERT IGNORE INTO games(title, description, max_players, icon_url, created_at)
+VALUES (
+        'WORDLE',
+        'Guess 5 letter Georgian word in 6 tries',
+        1,
+        '/images/games/wordle.png',
+        CURRENT_TIMESTAMP
+       );
+
+CREATE TABLE IF NOT EXISTS joker_sessions (
+                                              id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                                              room_code VARCHAR(20) NOT NULL UNIQUE,  -- join key
+                                              host_id BIGINT NOT NULL,                  -- who created the game
+                                              status VARCHAR(30) DEFAULT 'WAITING',
+                                              player_count INT NOT NULL,
+                                              total_rounds INT NOT NULL,
+                                              is_open BOOLEAN DEFAULT FALSE,
+                                              joker_amount INT DEFAULT 1,
+                                              created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                                              ended_at TIMESTAMP NULL,
+                                              FOREIGN KEY (host_id) REFERENCES users(id)
+);

@@ -36,6 +36,8 @@ public class SecurityConfig {
                         .requestMatchers("/streak/**").authenticated()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/home", "/stats/home").authenticated()
+                        .requestMatchers("/sudoku", "/sudoku.html").authenticated()
+                        .requestMatchers("/api/sudoku/**").authenticated()
                         .requestMatchers("/quizzes", "/quizzes/**", "/quizzes.html").authenticated()
                         .requestMatchers("/api/quizzes/**").authenticated()
                         .requestMatchers("/profile", "/profile/**", "/profile.html").authenticated()
