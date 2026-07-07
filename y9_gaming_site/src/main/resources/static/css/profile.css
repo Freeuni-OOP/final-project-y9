@@ -149,6 +149,38 @@ button:active {
 .rank-platinum { background: #E0F2FE; color: #0369A1; }
 .rank-silver { background: #F3F4F6; color: #4B5563; }
 
+/* --- rarest achievements showcase (replaces the old ranks widget) --- */
+.rarest-list { display: flex; flex-direction: column; gap: 10px; }
+.rarest-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: 8px;
+    border-left: 3px solid #b327c9;
+}
+.rarest-info { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+.rarest-name { font-weight: 700; font-size: 0.9rem; color: #e8e8e8; }
+.rarest-desc { font-size: 0.75rem; color: #b79ec4; }
+.rarest-count {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #e194d5;
+    background: rgba(179, 39, 201, 0.18);
+    padding: 4px 8px;
+    border-radius: 10px;
+    border: 1px solid rgba(179, 39, 201, 0.35);
+    white-space: nowrap;
+}
+.ach-empty {
+    color: #b79ec4;
+    font-size: 0.85rem;
+    text-align: center;
+    opacity: 0.85;
+    margin: 4px 0;
+}
+
 .achievements-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
@@ -173,11 +205,6 @@ button:active {
 .achievement-badge.locked {
     opacity: 0.4;
     filter: grayscale(1);
-}
-
-.badge-icon {
-    font-size: 2rem;
-    margin-bottom: 6px;
 }
 
 .badge-title {

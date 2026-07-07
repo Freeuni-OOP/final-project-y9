@@ -6,6 +6,7 @@ import org.example.y9_gaming_site.chat.SendMessageDto;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/chat")
@@ -22,7 +23,7 @@ public class ChatController {
     }
 
     @GetMapping("/{roomId}")
-    public List<Message> getMessages(@PathVariable Long roomId) {
+    public List<Map<String, Object>> getMessages(@PathVariable Long roomId) {
         return chatService.getMessages(roomId);
     }
 
@@ -39,4 +40,11 @@ public class ChatController {
                                     @RequestBody List<Long> memberIds) {
         return chatService.createGroupRoom(name, type, memberIds);
     }
+
+    //finding id with username, very useful for frontend
+    @GetMapping("/find-user/{username}")
+    public Map<String, Object> findUser(@PathVariable String username) {
+        return chatService.findUserByUsername(username);
+    }
+
 }

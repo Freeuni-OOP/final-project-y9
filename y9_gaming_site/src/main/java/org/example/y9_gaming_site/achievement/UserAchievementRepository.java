@@ -11,4 +11,6 @@ public interface  UserAchievementRepository extends JpaRepository<UserAchievemen
     // Checks whether a user has already earned a specific achievement,
     // used to prevent granting the same achievement twice
     Optional<UserAchievement> findByUserIdAndAchievementId(Long userId, Long achievementId);
+
+    long countByAchievementId(Long achievementId);
 }

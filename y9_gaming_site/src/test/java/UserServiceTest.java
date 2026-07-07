@@ -44,8 +44,9 @@ public class UserServiceTest{
     @Test
     void testSample2() {// correctly updates users avatar
         User user = new User();
-        user.setId(Long.valueOf(1L));
-        when(userRepository.findById(Long.valueOf(1L))).thenReturn(Optional.of(user));
+        user.setId(1L);
+        user.setUsername("test");
+        when(userRepository.findByUsername("test")).thenReturn(Optional.of(user));
 
         MultipartFile multipartFile = new MockMultipartFile("avatar", "test.jpg", "image/jpeg", "bytes".getBytes());
         when(fileStorageService.store(multipartFile)).thenReturn("/avatars/new-file.jpg");
@@ -55,7 +56,7 @@ public class UserServiceTest{
 
     @Test
     public void testSample3() {//none existent user
-        when(userRepository.findById(Long.valueOf(10L))).thenReturn(Optional.empty());
+        when(userRepository.findByUsername("none")).thenReturn(Optional.empty());
         assertThatThrownBy(() -> userService.updateOrCreateAvatar("none", null));
     }
 }

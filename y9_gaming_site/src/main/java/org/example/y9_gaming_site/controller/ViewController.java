@@ -24,8 +24,19 @@ public class ViewController {
     @GetMapping("/quizzes")
     public String showQuizzes(){return "quizzes";}
 
+    @GetMapping("/sudoku")
+    public String showSudoku() {
+        return "sudoku";
+    }
+
+    @GetMapping("/wordle")
+    public String showWordle() {
+        return "wordle";
+    }
     @GetMapping("/addQuiz")
     public String showCreateForm() {
         return "addQuiz";
     }
-    }
+}
+
+

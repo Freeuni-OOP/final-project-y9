@@ -40,7 +40,7 @@ public class SecurityConfig {
                         .requestMatchers("/quizzes", "/quizzes/**", "/quizzes.html", "/addQuiz.html", "/api/quizzes/new").authenticated()
                         .requestMatchers("/api/quizzes/**").authenticated()
                         .requestMatchers("/profile", "/profile/**", "/profile.html").authenticated()
-                        .requestMatchers("/css/profile.css", "/js/profile.js").authenticated()
+                        .requestMatchers("/css/profile.css", "/js/profile.js").permitAll()
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(ex -> ex
