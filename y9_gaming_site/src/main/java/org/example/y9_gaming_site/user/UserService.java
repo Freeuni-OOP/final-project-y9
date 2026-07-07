@@ -112,7 +112,7 @@ public class UserService {
     public UserProfileResponse getProfile(Long id){
         User user = userRepository.findById(id).orElse(null);
         assert user != null;
-        return new UserProfileResponse(user.getId(), user.getUsername(), user.getAvatarUrl());
+        return new UserProfileResponse(user.getId(), user.getUsername(), user.getAvatarUrl(), user.getRole().name());
     }
 
     public String updateOrCreateAvatar(String userName, MultipartFile avatar){
@@ -128,6 +128,6 @@ public class UserService {
     //I added this function cause authentication returns only name
     public UserProfileResponse getProfileByUsername(String userName){
         User user = userRepository.findByUsername(userName).orElseThrow(() ->new IllegalArgumentException("Username not found."));
-        return  new UserProfileResponse(user.getId(), user.getUsername(), user.getAvatarUrl());
+        return  new UserProfileResponse(user.getId(), user.getUsername(), user.getAvatarUrl(), user.getRole().name());
     }
 }

@@ -2,6 +2,8 @@ package org.example.y9_gaming_site.quiz;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "quizzes")
@@ -15,6 +17,8 @@ public class Quiz {
 
     @Column(nullable = false)
     private String title;
+
+    private List<String> images = new ArrayList<>();
 
     private String description;
 
@@ -55,4 +59,7 @@ public class Quiz {
 
     public java.util.List<String> getQuestions() { return questions; }
     public void setQuestions(java.util.List<String> questions) { this.questions = questions; }
+
+    public List<String> getImages() {return images;}
+    public void setImages(List<String> images){this.images = images;}
 }

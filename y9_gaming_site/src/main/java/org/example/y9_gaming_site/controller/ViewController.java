@@ -23,4 +23,9 @@ public class ViewController {
 
     @GetMapping("/quizzes")
     public String showQuizzes(){return "quizzes";}
-}
+
+    @GetMapping("/addQuiz")
+    public String showCreateForm() {
+        return "addQuiz";
+    }
+    }

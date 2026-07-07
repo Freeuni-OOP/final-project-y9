@@ -28,6 +28,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/", "/login", "/index.html").permitAll()
                         .requestMatchers("/api/users/login", "/api/users/register", "/api/users/guest").permitAll()
+                        .requestMatchers("/uploads/**").permitAll()
                         .requestMatchers("/css/**", "/js/**", "/img/**", "/visualExternals/**").permitAll()
                         .requestMatchers("/api/users/**").authenticated()
                         .requestMatchers("/api/games/**").authenticated()
@@ -36,10 +37,10 @@ public class SecurityConfig {
                         .requestMatchers("/streak/**").authenticated()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/home", "/stats/home").authenticated()
-                        .requestMatchers("/quizzes", "/quizzes/**", "/quizzes.html").authenticated()
+                        .requestMatchers("/quizzes", "/quizzes/**", "/quizzes.html", "/addQuiz.html", "/api/quizzes/new").authenticated()
                         .requestMatchers("/api/quizzes/**").authenticated()
                         .requestMatchers("/profile", "/profile/**", "/profile.html").authenticated()
-                        .requestMatchers("/css/profile.css", "/js/profile.js").permitAll()
+                        .requestMatchers("/css/profile.css", "/js/profile.js").authenticated()
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(ex -> ex

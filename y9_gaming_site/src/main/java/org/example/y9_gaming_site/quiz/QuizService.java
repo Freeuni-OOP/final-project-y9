@@ -2,6 +2,9 @@ package org.example.y9_gaming_site.quiz;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,6 +12,8 @@ import java.util.List;
 public class QuizService {
 
     private final JdbcTemplate jdbcTemplate;
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
 
     public QuizService(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
@@ -25,11 +30,19 @@ public class QuizService {
             q.setTimeLimitSeconds(rs.getInt("time_limit_seconds"));
 
             String blob = rs.getString("questions_blob");
-            if (blob != null && !blob.isBlank()) {
-                q.setQuestions(List.of(blob.split(";")));
-            } else {
-                q.setQuestions(new ArrayList<>());
+            q.setQuestions(blob != null && !blob.isBlank()
+                    ? List.of(blob.split(";", -1)) : new ArrayList<>());
+
+            String imgJson = rs.getString("images");
+            List<String> images;
+            try {
+                images = (imgJson != null && !imgJson.isBlank())
+                        ? objectMapper.readValue(imgJson, new TypeReference<List<String>>() {})
+                        : new ArrayList<>();
+            } catch (Exception e) {
+                images = new ArrayList<>();
             }
+            q.setImages(images);
             return q;
         });
     }
@@ -45,5 +58,26 @@ public class QuizService {
                 .filter(quiz -> quiz.getId().equals(id))
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("Quiz ID " + id + " not found."));
+    }
+
+
+
+    public void createQuiz(String title, String category, String description, int timeLimit,
+                           List<String> questionTexts, List<String> correctAnswers,
+                           List<String> wrongAnswers, List<String> imagePaths) {
+
+        List<String> questions = new ArrayList<>();
+        for (int i = 0; i < questionTexts.size(); i++) {
+            questions.add(questionTexts.get(i) + " (" + correctAnswers.get(i) + "|" + wrongAnswers.get(i) + ")");
+        }
+
+        String questionsBlob = String.join(";", questions);
+
+        String imagesJson = imagePaths.stream()
+                .map(p -> "\"" + (p == null ? "" : p.replace("\\", "\\\\").replace("\"", "\\\"")) + "\"")
+                .collect(java.util.stream.Collectors.joining(",", "[", "]"));
+
+        String sql = "INSERT INTO quizzes (title, category, description, time_limit_seconds, questions_blob, images, created_at) VALUES (?, ?, ?, ?, ?, ?, NOW())";
+        jdbcTemplate.update(sql, title, category, description, timeLimit, questionsBlob, imagesJson);
     }
 }
