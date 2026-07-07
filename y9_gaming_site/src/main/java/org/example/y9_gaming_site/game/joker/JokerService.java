@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.example.y9_gaming_site.game.joker.JokerGameConfig.PlayerCount;
 import org.example.y9_gaming_site.game.joker.JokerGameConfig.RoundOption;
 import org.example.y9_gaming_site.game.joker.JokerGameState.GameStatus;
+import org.example.y9_gaming_site.user.User;
+import org.example.y9_gaming_site.user.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -12,27 +14,39 @@ import java.util.concurrent.ConcurrentHashMap;
 @Service
 @RequiredArgsConstructor
 public class JokerService {
+
     private final JokerScoringService scoringService;
+    private final JokerDbService jokerDbService;
+    private final UserRepository userRepository;
     private final Map<String, JokerGameState> activeGames = new ConcurrentHashMap<>();
-    private final Map<String, JokerTrick> activeTricks = new ConcurrentHashMap<>();
 
     public JokerGameState createGame(Long hostId, String hostUsername,
                                      PlayerCount playerCount, RoundOption roundOption,
                                      int jokerAmount, boolean allowRandoms) {
-        String roomId = generateRoomId();
+        String roomCode = generateRoomCode();
         JokerGameConfig config = new JokerGameConfig(playerCount, allowRandoms, roundOption, jokerAmount);
-        JokerRoom room = new JokerRoom(roomId);
+        JokerRoom room = new JokerRoom(roomCode);
 
         JokerGameState state = new JokerGameState(config, room);
         JokerPlayer host = new JokerPlayer(hostId, hostUsername);
         state.addPlayer(host);
+        activeGames.put(roomCode, state);
 
-        activeGames.put(roomId, state);
+        User hostUser = userRepository.findById(hostId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        jokerDbService.saveNewSession(
+                hostUser, roomCode,
+                config.getPlayers(),
+                config.getTotalRounds(),
+                allowRandoms,
+                jokerAmount
+        );
+
         return state;
     }
 
-    public JokerGameState joinGame(String roomId, Long userId, String username) {
-        JokerGameState state = getActiveGame(roomId);
+    public JokerGameState joinGame(String roomCode, Long userId, String username) {
+        JokerGameState state = getActiveGame(roomCode);
 
         if (state.getStatus() != GameStatus.WAITING) {
             throw new IllegalStateException("Game already started");
@@ -56,8 +70,8 @@ public class JokerService {
                 .toList();
     }
 
-    public void invitePlayer(String roomId, Long inviterId, Long receiverId) {
-        JokerGameState state = getActiveGame(roomId);
+    public void invitePlayer(String roomCode, Long inviterId, Long receiverId) {
+        JokerGameState state = getActiveGame(roomCode);
 
         if (state.getStatus() != GameStatus.WAITING) {
             throw new IllegalStateException("Game already started, cannot invite");
@@ -70,8 +84,8 @@ public class JokerService {
         }
     }
 
-    public void startGame(String roomId, Long hostId) {
-        JokerGameState state = getActiveGame(roomId);
+    public void startGame(String roomCode, Long hostId) {
+        JokerGameState state = getActiveGame(roomCode);
 
         if (!isHost(state, hostId)) {
             throw new IllegalStateException("Only the host can start the game");
@@ -84,11 +98,11 @@ public class JokerService {
         }
 
         state.startNextRound();
-        prepareNewTrick(roomId, state);
+        jokerDbService.updateSessionStatus(roomCode, "IN_PROGRESS");
     }
 
-    public void placeBid(String roomId, Long userId, int bid) {
-        JokerGameState state = getActiveGame(roomId);
+    public void placeBid(String roomCode, Long userId, int bid) {
+        JokerGameState state = getActiveGame(roomCode);
 
         if (state.getStatus() != GameStatus.BIDDING) {
             throw new IllegalStateException("Not in bidding phase");
@@ -100,22 +114,22 @@ public class JokerService {
             throw new IllegalArgumentException("Bid cannot be negative");
         }
 
-        int totalCardsDealt = state.cardsForRound(state.getCurrRound());
-        if (bid > totalCardsDealt) {
-            throw new IllegalArgumentException("Bid cannot exceed total cards dealt: " + totalCardsDealt);
+        int totalCards = state.cardsForRound(state.getCurrRound());
+        if (bid > totalCards) {
+            throw new IllegalArgumentException("Bid cannot exceed total cards dealt: " + totalCards);
         }
 
-        // FIXED: Check that sum of ALL player prophecies doesn't equal total available cards
-        boolean isLastPlayerToBid = (state.getCurrPlayer() == state.getPlayers().get(state.getDealer()));
-        if (isLastPlayerToBid) {
-            // Filter out everyone except the current dealer to sum the existing bids
-            int runningBidsSum = state.getPlayers().stream()
+        // dealer cannot make total bids equal total cards
+        boolean isDealer = state.getCurrPlayer().getUserId()
+                .equals(state.getPlayers().get(state.getDealer()).getUserId());
+        if (isDealer) {
+            int otherBidsSum = state.getPlayers().stream()
                     .filter(p -> !p.getUserId().equals(userId))
                     .mapToInt(JokerPlayer::getProphecy)
-                    .filter(p -> p >= 0).sum();
-
-            if (runningBidsSum + bid == totalCardsDealt) {
-                throw new IllegalArgumentException("Dealer's bid cannot make total bids equal total cards in play!");
+                    .filter(p -> p >= 0)
+                    .sum();
+            if (otherBidsSum + bid == totalCards) {
+                throw new IllegalArgumentException("Dealer's bid cannot make total bids equal total cards!");
             }
         }
 
@@ -123,22 +137,14 @@ public class JokerService {
         player.setProphecy(bid);
         state.turn();
 
-        // Check if all players completed their bidding sequence
-        boolean allBidded = state.getPlayers().stream().allMatch(p -> p.getProphecy() >= 0);
-        if (allBidded) {
-            // Shift the state cleanly to playing phase
-            try {
-                java.lang.reflect.Field statusField = JokerGameState.class.getDeclaredField("status");
-                statusField.setAccessible(true);
-                statusField.set(state, GameStatus.PLAYING);
-            } catch (Exception e) {
-                throw new IllegalStateException("Failed to update game status state context", e);
-            }
+        if (state.allPlayersBidded()) {
+            state.setStatus(GameStatus.PLAYING);
         }
     }
 
-    public JokerTrick playCard(String roomId, Long userId, String suit, Integer value, String jokerCall, String declaredSuit) {
-        JokerGameState state = getActiveGame(roomId);
+    public JokerTrick playCard(String roomCode, Long userId, String suit, Integer value,
+                               String jokerCall, String declaredSuit) {
+        JokerGameState state = getActiveGame(roomCode);
 
         if (state.getStatus() != GameStatus.PLAYING) {
             throw new IllegalStateException("Not in playing phase");
@@ -149,47 +155,25 @@ public class JokerService {
 
         JokerPlayer player = getPlayerFromGame(state, userId);
         Card card = findCardInHand(player, suit, value);
-        JokerTrick currentTrick = activeTricks.get(roomId);
-
-        if (currentTrick == null) {
-            throw new IllegalStateException("Trick tracking instance missing");
-        }
-
-        if (!currentTrick.isValCard(player, card, jokerCall, declaredSuit)) {
-            throw new IllegalStateException("Invalid card play based on rules hierarchy");
-        }
+        JokerTrick currentTrick = state.getCurrentTrick();
 
         currentTrick.playCard(player, card, jokerCall, declaredSuit);
 
-        // Evaluate complete trick
         if (currentTrick.isComplete(state.getPlayers().size())) {
             JokerPlayer winner = currentTrick.winner();
             winner.tricksTaken();
-
-            // FIXED: Cleanly match current turn indicator index directly to the trick winner
-            int winnerIdx = state.getPlayers().indexOf(winner);
-            try {
-                java.lang.reflect.Field currPlayerField = JokerGameState.class.getDeclaredField("currPlayer");
-                currPlayerField.setAccessible(true);
-                currPlayerField.set(state, winnerIdx);
-            } catch (Exception e) {
-                // Fallback turn loop matching logic if reflection access controls reject fields modification
-                while (!state.getCurrPlayer().getUserId().equals(winner.getUserId())) {
-                    state.turn();
-                }
-            }
+            state.finishTrick(winner);
 
             if (state.isRoundOver()) {
-                // FIXED: Matched method name to state.recordRoundRes
                 state.recordRoundRes(scoringService);
                 state.endRound();
 
-                if (!state.isGameOver()) {
+                if (state.isGameOver()) {
+                    jokerDbService.saveFinalScores(roomCode, state.getPlayers());
+                    jokerDbService.updateSessionStatus(roomCode, "FINISHED");
+                } else {
                     state.startNextRound();
-                    prepareNewTrick(roomId, state);
                 }
-            } else {
-                prepareNewTrick(roomId, state);
             }
         } else {
             state.turn();
@@ -198,12 +182,8 @@ public class JokerService {
         return currentTrick;
     }
 
-    public void setTrumpSuit(String roomId, Long userId, String suit) {
-        JokerGameState state = getActiveGame(roomId);
-
-        if (!"NONE".equals(state.getTrumpSuit()) && state.getTrumpSuit() != null) {
-            throw new IllegalStateException("Trump suit already set");
-        }
+    public void setTrumpSuit(String roomCode, Long userId, String suit) {
+        JokerGameState state = getActiveGame(roomCode);
 
         JokerPlayer dealer = state.getPlayers().get(state.getDealer());
         if (!dealer.getUserId().equals(userId)) {
@@ -211,20 +191,17 @@ public class JokerService {
         }
 
         state.setTrumpSuit(suit);
-        prepareNewTrick(roomId, state);
     }
 
-    public JokerGameState getGameState(String roomId) {
-        return getActiveGame(roomId);
+    public JokerGameState getGameState(String roomCode) {
+        return getActiveGame(roomCode);
     }
 
-    private void prepareNewTrick(String roomId, JokerGameState state) {
-        activeTricks.put(roomId, new JokerTrick(state.getTrumpSuit()));
-    }
+    // --- Helpers ---
 
-    private JokerGameState getActiveGame(String roomId) {
-        JokerGameState state = activeGames.get(roomId);
-        if (state == null) throw new IllegalArgumentException("Game not found: " + roomId);
+    private JokerGameState getActiveGame(String roomCode) {
+        JokerGameState state = activeGames.get(roomCode);
+        if (state == null) throw new IllegalArgumentException("Game not found: " + roomCode);
         return state;
     }
 
@@ -248,10 +225,10 @@ public class JokerService {
                 .filter(c -> (c.getIsJoker() && value.equals(c.getValue())) ||
                         (!c.getIsJoker() && c.getSuit().equals(suit) && c.getValue().equals(value)))
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Card not found in hand (" + suit + ", " + value + ")"));
+                .orElseThrow(() -> new IllegalArgumentException("Card not found: " + suit + ", " + value));
     }
 
-    private String generateRoomId() {
+    private String generateRoomCode() {
         return "JOKER-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
     }
 }

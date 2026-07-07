@@ -3,6 +3,7 @@ package org.example.y9_gaming_site.game.joker;
 import org.example.y9_gaming_site.game.joker.JokerGameConfig.PlayerCount;
 import org.example.y9_gaming_site.game.joker.JokerGameConfig.RoundOption;
 import org.example.y9_gaming_site.game.joker.JokerGameState.GameStatus;
+import org.example.y9_gaming_site.user.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -18,9 +19,16 @@ public class JokerServiceTest {
     private JokerScoringService scService;
 
     @BeforeEach
-    void setUp(){
-        scService=Mockito.mock(JokerScoringService.class);
-        service = new JokerService(scService);
+    void setUp() {
+        scService = Mockito.mock(JokerScoringService.class);
+        JokerDbService dbService = Mockito.mock(JokerDbService.class);
+        UserRepository userRepository = Mockito.mock(UserRepository.class);
+
+        // mock userRepository to return a fake user so createGame doesn't throw
+        org.example.y9_gaming_site.user.User fakeUser = Mockito.mock(org.example.y9_gaming_site.user.User.class);
+        Mockito.when(userRepository.findById(Mockito.any())).thenReturn(java.util.Optional.of(fakeUser));
+
+        service = new JokerService(scService, dbService, userRepository);
     }
 
     @Test
