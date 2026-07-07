@@ -9,6 +9,10 @@
 </head>
     <nav th:replace="~{fragments/navbar :: navbar(active='home')}"></nav>
 
+<div class="search-wrapper">
+    <input type="text" id="search-input" placeholder="🔍 search game or person..." autocomplete="off" oninput="onSearch(this.value)">
+    <div id="searchResults" class="search-results" style="display: none;"></div>
+</div>
 
 <main class="page layout-split">
 
