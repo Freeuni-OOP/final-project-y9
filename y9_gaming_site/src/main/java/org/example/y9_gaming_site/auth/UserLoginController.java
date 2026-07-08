@@ -7,7 +7,9 @@ import org.example.y9_gaming_site.user.UserRepository;
 import org.example.y9_gaming_site.user.UserService;
 import org.example.y9_gaming_site.security.PasswordUtil;
 import org.example.y9_gaming_site.security.TokenUtil;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.Map;
@@ -68,19 +70,26 @@ public class UserLoginController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<?> logout(HttpServletResponse response) {
-        Cookie cookie = new Cookie("jwt", null);
-        cookie.setMaxAge(0);
-        cookie.setPath("/");
-        response.addCookie(cookie);
-        return ResponseEntity.ok("Logged out successfully.");
+    public String logout(HttpServletResponse response) {
+        ResponseCookie cookie = ResponseCookie.from("jwt", "")
+                .httpOnly(true)
+                .secure(false)      // must match addJwtCookie exactly
+                .path("/")
+                .maxAge(0)
+                .sameSite("Lax")
+                .build();
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+        return "redirect:/login";
     }
 
     private void addJwtCookie(HttpServletResponse response, String token) {
-        Cookie cookie = new Cookie("jwt", token);
-        cookie.setHttpOnly(true);
-        cookie.setPath("/");
-        cookie.setMaxAge(60 * 60 * 24); // 1 day
-        response.addCookie(cookie);
+        ResponseCookie cookie = ResponseCookie.from("jwt", token)
+                .httpOnly(true)
+                .secure(false)      // set true only once you're actually on HTTPS in prod
+                .path("/")
+                .maxAge(60 * 60 * 24)
+                .sameSite("Lax")
+                .build();
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
     }
 }

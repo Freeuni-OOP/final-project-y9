@@ -45,6 +45,17 @@ public class QuizController {
         return ResponseEntity.ok(quizService.getQuizById(id));
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteQuiz(@PathVariable Long id, @RequestHeader("Authorization") String token) {
+        // Optional: Add role validation checking here if your JwtAuthFilter doesn't handle it globally
+        try {
+            quizService.deleteQuiz(id);
+            return ResponseEntity.ok().body("{\"message\": \"Quiz deleted successfully\"}");
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("{\"error\": \"Failed to delete quiz\"}");
+        }
+    }
+
     @PostMapping("/new")
     public String createQuiz(@RequestParam String title,
                              @RequestParam String category,

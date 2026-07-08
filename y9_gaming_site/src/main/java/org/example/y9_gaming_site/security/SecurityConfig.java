@@ -30,6 +30,7 @@ public class SecurityConfig {
                         .requestMatchers("/error").permitAll()
                         .requestMatchers("/api/users/login", "/api/users/register", "/api/users/guest").permitAll()
                         .requestMatchers("/uploads/**").permitAll()
+                        .requestMatchers("/addQuiz.html", "/api/quizzes/new").hasAnyRole("USER","ADMIN")
                         .requestMatchers("/css/**", "/js/**", "/img/**", "/visualExternals/**").permitAll()
                         .requestMatchers("/api/users/**").authenticated()
                         .requestMatchers("/api/games/**").authenticated()

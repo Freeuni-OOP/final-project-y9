@@ -1,0 +1,244 @@
+/* --- Global Styles & Background Inherited from Homepage --- */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Segoe UI', sans-serif;
+    color: #fff;
+    background-image: url('../img/backgrounds/final.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    min-height: 100vh;
+    padding: 40px 20px;
+}
+
+/* --- Container & Interactive Frosted Layouts --- */
+.quiz-container {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.back-link {
+    color: #d07fd8;
+    text-decoration: none;
+    display: inline-block;
+    margin-bottom: 20px;
+    font-size: 14px;
+    transition: color 0.2s;
+}
+
+.back-link:hover {
+    color: #e194d5;
+}
+
+/* Frosted Dashboard Card */
+.quiz-card-wrapper {
+    background: rgba(71, 44, 82, 0.6);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    box-shadow: 0 10px 40px rgba(145, 60, 143, 0.25);
+    overflow: hidden;
+}
+
+.quiz-meta-bar {
+    padding: 28px;
+}
+
+/* Font Headings Styling */
+.quiz-card-title {
+    font-family: 'Bitcount Grid Double Ink', monospace;
+    color: #d07fd8;
+    margin: 0 0 20px;
+    font-size: 22px;
+    letter-spacing: 1px;
+}
+
+.q-number {
+    font-family: 'Bitcount Grid Double Ink', monospace;
+    color: #d07fd8;
+    font-size: 16px;
+    letter-spacing: 1px;
+}
+
+/* --- Form Fields & Dropdowns --- */
+#quizFormContainer input[type="text"],
+#quizFormContainer input[type="number"],
+#quizFormContainer select,
+.q-text,
+.q-written-answer,
+select.q-type-select {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: white;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 14px;
+    transition: border-color 0.2s, background 0.2s;
+}
+
+#quizFormContainer input:focus,
+#quizFormContainer select:focus,
+.q-text:focus,
+.q-written-answer:focus {
+    outline: none;
+    border-color: #e194d5;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+select option {
+    background-color: #24142c;
+    color: #fff;
+}
+
+/* Label styling */
+.field-label {
+    font-size: 12px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: #cba8d8;
+    margin-bottom: 6px;
+    display: inline-block;
+}
+
+/* --- Split Slide Editing Interface --- */
+.split-workspace {
+    display: flex;
+    gap: 0;
+    margin-top: 22px;
+    min-height: 440px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+/* Left Nav Rail Panel */
+#slideRail {
+    width: 140px;
+    background: rgba(43, 22, 51, 0.7);
+    padding: 16px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    overflow-y: auto;
+    max-height: 480px;
+    border-right: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Right Content Area */
+.workspace-content {
+    flex: 1;
+    padding: 30px;
+    background: rgba(255, 255, 255, 0.01);
+}
+
+/* --- Slide Controls & States --- */
+.question-block { display: none; }
+.question-block.active { display: block; }
+
+.rail-thumb {
+    background: rgba(179, 39, 201, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 12px 10px;
+    cursor: pointer;
+    min-height: 65px;
+    transition: all 0.2s;
+}
+
+.rail-thumb:hover {
+    background: rgba(179, 39, 201, 0.25);
+    transform: scale(1.02);
+}
+
+.rail-thumb.active {
+    border-color: #e194d5;
+    background: rgba(179, 39, 201, 0.4);
+    box-shadow: 0 4px 12px rgba(179, 39, 201, 0.3);
+}
+
+.rail-number {
+    font-size: 11px;
+    color: #cba8d8;
+    font-weight: bold;
+    display: block;
+    margin-bottom: 6px;
+}
+
+.rail-dots { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
+.rail-dots span { display: block; width: 100%; height: 6px; border-radius: 2px; background: rgba(255, 255, 255, 0.15); }
+.rail-thumb.active .rail-dots span { background: #e194d5; }
+
+.add-slide-btn {
+    background: rgba(179, 39, 201, 0.1);
+    border: 1px dashed #e194d5;
+    color: #e194d5;
+    border-radius: 8px;
+    padding: 12px 0;
+    cursor: pointer;
+    font-size: 20px;
+    transition: all 0.2s;
+}
+
+.add-slide-btn:hover {
+    background: rgba(179, 39, 201, 0.2);
+    color: #fff;
+    border-color: #fff;
+}
+
+/* --- Answer Entry Templates & Grid --- */
+.answer-tile {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    border-radius: 10px;
+    cursor: pointer;
+    border: 2px solid transparent;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+    transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
+}
+.tile-check {
+    opacity: 0; /* Changed from 0.3 to 0 to make it completely hidden by default */
+    font-size: 16px;
+    color: white;
+    font-weight: bold;
+    transition: opacity 0.15s ease-in-out; /* Optional: adds a smooth fade when selected */
+}
+
+.answer-tile.selected .tile-check {
+    opacity: 1; /* Fully visible when the tile is selected */
+}
+
+.answer-tile:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(179, 39, 201, 0.2);
+}
+
+.answer-tile.selected {
+    border-color: #ffffff;
+    box-shadow: 0 0 15px rgba(255,255,255,0.4);
+}
+
+.answer-tile input.q-option {
+    flex: 1;
+    border: none;
+    background: rgba(0, 0, 0, 0.25);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.answer-tile input.q-option:focus {
+    outline: none;
+    background: rgba(0, 0, 0, 0.4);
+}
+
+.answer-
