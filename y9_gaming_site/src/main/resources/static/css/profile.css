@@ -267,3 +267,60 @@ button:active {
         grid-template-columns: 1fr;
     }
 }
+/* Add these style extensions at the bottom of profile.css */
+
+.stats-sidebar-card {
+    margin-top: 16px;
+    padding: 18px;
+}
+
+.clickable-stats-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.stat-clickable-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: 8px;
+    border-left: 3px solid #b327c9;
+    cursor: pointer;
+    transition: transform 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+/* Hover effects matching game-cards */
+.stat-clickable-item:hover {
+    background: rgba(179, 39, 201, 0.15);
+    transform: translateX(4px);
+    box-shadow: 0 0 12px rgba(179, 39, 201, 0.3);
+}
+
+.stat-clickable-item:active {
+    transform: translateX(2px) scale(0.99);
+}
+
+.stat-main-info {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    text-align: left;
+}
+
+.stat-item-title {
+    font-weight: 600;
+    font-size: 0.88rem;
+    color: #f1f1f1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.stat-item-subtitle {
+    font-size: 0.72rem;
+    color: #b79ec4;
+    margin-top: 2px;
+}
