@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -23,21 +24,22 @@ public class AchievementService {
         return userAchievementRepository.findByUserId(userId);
     }
 
-    public void grantAchievement(Long userId, long achievementId){
+    public Optional<Achievement> grantAchievement(Long userId, long achievementId){
         boolean alreadyEarned=userAchievementRepository.
                 findByUserIdAndAchievementId(userId,achievementId).isPresent();
-        if(alreadyEarned) return; //already has  this achievement
+        if(alreadyEarned) return Optional.empty();
         UserAchievement currAch=new UserAchievement();
         currAch.setUserId(userId);
         currAch.setAchievementId(achievementId);
         currAch.setEarnedTime(LocalDateTime.now());
 
         userAchievementRepository.save(currAch);
+        return achievementRepository.findById(achievementId);
     }
 
-    public void grantByCode(Long userId, String code){
-        if(userId==null || code==null) return;
-        achievementRepository.findByCode(code).ifPresent(a -> grantAchievement(userId, a.getId()));
+    public Optional<Achievement> grantByCode(Long userId, String code){
+        if(userId==null || code==null) return Optional.empty();
+        return achievementRepository.findByCode(code).flatMap(a -> grantAchievement(userId, a.getId()));
     }
 
     public List<AchievementView> getEarnedView(Long userId){
@@ -54,7 +56,7 @@ public class AchievementService {
 
             long earnedCount = userAchievementRepository.countByAchievementId(a.getId());
             out.add(new AchievementView(a.getCode(), a.getName(), a.getDescription()
-            , each.getEarnedTime(), earnedCount));
+                    , each.getEarnedTime(), earnedCount));
         }
         return out;
     }

@@ -1,6 +1,7 @@
 package org.example.y9_gaming_site.game.joker;
 
 import lombok.RequiredArgsConstructor;
+import org.example.y9_gaming_site.achievement.UnlockedAchievementDto;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
@@ -66,11 +67,13 @@ public class JokerWebSocketService {
     // --- Public state (safe to broadcast — no private hand info) ---
 
     public record PublicPlayerState(
+            Long userId,
             String username,
             int cardCount,
             int prophecy,
             int current,
-            int totalScore
+            int totalScore,
+            java.util.List<UnlockedAchievementDto> newAchievements
     ) {}
 
     public record PublicGameState(
@@ -84,13 +87,16 @@ public class JokerWebSocketService {
     ) {}
 
     private PublicGameState toPublicState(JokerGameState state) {
+        var achievementsByUser = state.drainPendingAchievements();
         var publicPlayers = state.getPlayers().stream()
                 .map(p -> new PublicPlayerState(
+                        p.getUserId(),
                         p.getUsername(),
                         p.getCardList().size(),
                         p.getProphecy(),
                         p.getCurrent(), // Ensure getCurrPlayer or custom properties map cleanly here
-                        p.getTotalScore()
+                        p.getTotalScore(),
+                        achievementsByUser.getOrDefault(p.getUserId(), java.util.List.of())
                 ))
                 .toList();
 

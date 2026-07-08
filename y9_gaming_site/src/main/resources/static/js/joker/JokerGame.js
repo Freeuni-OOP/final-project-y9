@@ -70,6 +70,10 @@ function handleWsEvent(event) {
     }
     if (event.type === "GAME_OVER") {
         setMsg("🏆 თამაში დასრულდა!", "success");
+        const me = event.data && event.data.players && event.data.players.find(p => p.userId === myUserId);
+        if (me && me.newAchievements && me.newAchievements.length && window.showAchievementToasts) {
+            window.showAchievementToasts(me.newAchievements);
+        }
     }
 }
 

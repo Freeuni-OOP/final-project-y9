@@ -174,7 +174,7 @@ public class JokerService {
                 state.endRound();
 
                 if (state.isGameOver()) {
-                    jokerDbService.saveFinalScores(roomCode, state.getPlayers());
+                    jokerDbService.saveFinalScores(roomCode, state); // for achievement
                     jokerDbService.updateSessionStatus(roomCode, "FINISHED");
                 } else {
                     state.startNextRound();

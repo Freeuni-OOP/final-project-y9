@@ -209,6 +209,14 @@ VALUES (
         '/images/games/wordle.png',
         CURRENT_TIMESTAMP
        );
+INSERT IGNORE INTO games(title, description, max_players, icon_url, created_at)
+VALUES (
+        'JOKER',
+        'Georgian trick-taking card game with bidding',
+        6,
+        '/images/games/joker.png',
+        CURRENT_TIMESTAMP
+       );
 
 CREATE TABLE IF NOT EXISTS joker_sessions (
                                               id BIGINT AUTO_INCREMENT PRIMARY KEY,

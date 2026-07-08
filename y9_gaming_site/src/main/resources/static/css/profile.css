@@ -194,12 +194,15 @@ button:active {
     text-align: center;
     padding: 14px 8px;
     border-radius: 12px;
-    background: #FFF8F9;
-    transition: transform 0.15s ease;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(179, 39, 201, 0.35);
+    box-shadow: 0 0 10px rgba(192, 38, 211, 0.18);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 .achievement-badge:hover{
     transform: translateY(-3px);
+    box-shadow: 0 0 16px rgba(192, 38, 211, 0.3);
 }
 
 .achievement-badge.locked {
@@ -210,6 +213,7 @@ button:active {
 .badge-title {
     font-size: 0.8rem;
     font-weight: 600;
+    color: #e8e8e8;
 }
 
 /*friendds*/
