@@ -6,7 +6,7 @@ import lombok.Setter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
+import com.fasterxml.jackson.annotation.JsonProperty;
 @Getter
 public class JokerPlayer {
     private final Long userId;
@@ -53,6 +53,8 @@ public class JokerPlayer {
     public void addScores(int point){
         this.totalScore+=point;
     }
+
+    @JsonProperty("cardList")
     public List<Card> getCardList() {
         return Collections.unmodifiableList(cardList);
     }

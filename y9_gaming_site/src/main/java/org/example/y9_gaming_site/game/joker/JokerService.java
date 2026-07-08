@@ -119,20 +119,25 @@ public class JokerService {
             throw new IllegalArgumentException("Bid cannot exceed total cards dealt: " + totalCards);
         }
 
-        // dealer cannot make total bids equal total cards
-        boolean isDealer = state.getCurrPlayer().getUserId()
-                .equals(state.getPlayers().get(state.getDealer()).getUserId());
-        if (isDealer) {
-            int otherBidsSum = state.getPlayers().stream()
-                    .filter(p -> !p.getUserId().equals(userId))
+        // 1. ვითვლით, რამდენი მოთამაშეს აქვს უკვე ნათქვამი ბიდი (ვისი პროფეციაც >= 0)
+        List<JokerPlayer> players = state.getPlayers();
+        long biddedCount = players.stream().filter(p -> p.getProphecy() >= 0).count();
+
+        // 2. თუ ეს მოთამაშე არის ბოლო (ანუ თამაშში მყოფთაგან ყველამ თქვა მის გარდა)
+        if (biddedCount == players.size() - 1) {
+            int existingBidsSum = players.stream()
+                    .filter(p -> p.getProphecy() >= 0) // მხოლოდ მათ, ვინც უკვე თქვა
                     .mapToInt(JokerPlayer::getProphecy)
-                    .filter(p -> p >= 0)
                     .sum();
-            if (otherBidsSum + bid == totalCards) {
-                throw new IllegalArgumentException("Dealer's bid cannot make total bids equal total cards!");
+
+            // 3. თუ მიმდინარე ბიდის დამატებით ჯამი ზუსტად გაუტოლდება კარტების რაოდენობას
+            if (existingBidsSum + bid == totalCards) {
+                int forbiddenBid = totalCards - existingBidsSum;
+                throw new IllegalArgumentException(forbiddenBid + "-ს გარდა ხარ!");
             }
         }
 
+        // თუ ვალიდაციამ წარმატებით გაიარა:
         JokerPlayer player = getPlayerFromGame(state, userId);
         player.setProphecy(bid);
         state.turn();

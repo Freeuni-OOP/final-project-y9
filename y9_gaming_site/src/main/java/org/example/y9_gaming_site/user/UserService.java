@@ -137,7 +137,7 @@ public class UserService {
         List<UserProfileResponse> responses = new ArrayList<>();
 
         for (User user : users) {
-            responses.add(new UserProfileResponse(user.getId(), user.getUsername(), user.getAvatarUrl()));
+            responses.add(new UserProfileResponse(user.getId(), user.getUsername(), user.getAvatarUrl(), user.getRole().name()));
         }
 
         return responses;
