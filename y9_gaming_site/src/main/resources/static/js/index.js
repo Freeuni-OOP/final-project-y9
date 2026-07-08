@@ -5,7 +5,6 @@ function saveSession(data) {
     localStorage.setItem('token', data.token);
     localStorage.setItem('username', data.username);
     localStorage.setItem('role', data.role);
-
     // Smooth transition over to our secure controller route
     window.location.href = '/home';
 }

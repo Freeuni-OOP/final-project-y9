@@ -5,6 +5,7 @@ import lombok.Getter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 public class JokerRoom {
     @Getter  private final String roomId;
@@ -68,6 +69,7 @@ public class JokerRoom {
         generateDeck();
         Collections.shuffle(deck);
     }
+    @JsonIgnore
     public List<Card> getDeck(){
         return Collections.unmodifiableList(deck);
     }

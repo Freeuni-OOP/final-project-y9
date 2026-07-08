@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ka" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Y9 — ჯოკერი</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bitcount+Grid+Double+Ink&family=Noto+Sans+Georgian:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/homePage.css" />
+    <link rel="stylesheet" th:href="@{/css/navbar.css}">
+    <link rel="stylesheet" href="/css/joker.css" />
+</head>
+<body>
+
+<nav th:replace="~{fragments/navbar :: navbar(active='home')}"></nav>
+
+<main class="joker-wrap">
+    <div class="joker-panel">
+
+        <div class="game-header" style="text-align: center; margin-bottom: 25px;">
+            <h1 class="joker-title">ჯოკერი</h1>
+            <p class="joker-sub" id="panel-subtitle">აირჩიეთ მოქმედება გასაგრძელებლად</p>
+        </div>
+
+        <div id="view-main" class="view-panel active">
+            <div style="display: flex; flex-direction: column; gap: 14px;">
+                <button class="joker-btn joker-btn--primary" onclick="switchView('view-create')">ოთახის შექმნა</button>
+                <button class="joker-btn joker-btn--alt" onclick="switchView('view-browse')">ღია ოთახები</button>
+                <button class="joker-btn joker-btn--alt" onclick="switchView('view-join')">კოდით შესვლა</button>
+            </div>
+        </div>
+
+        <div id="view-create" class="view-panel">
+            <div class="wizard-progress-bar">
+                <div id="wizardProgress" class="wizard-progress-fill" style="width: 25%;"></div>
+            </div>
+
+            <div class="wizard-step active" data-step="1">
+                <label class="joker-label wizard-q">რამდენი მოთამაშე ვიქნებით?</label>
+                <div class="joker-toggle-group">
+                    <button class="joker-toggle active" data-value="THREE">3 მოთამაშე</button>
+                    <button class="joker-toggle" data-value="FOUR">4 მოთამაშე</button>
+                </div>
+            </div>
+
+            <div class="wizard-step" data-step="2">
+                <label class="joker-label wizard-q">რამდენი რაუნდი ვითამაშოთ?</label>
+                <div class="joker-toggle-group">
+                    <button class="joker-toggle" data-value="QUICK_4">4 (სწრაფი)</button>
+                    <button class="joker-toggle active" data-value="SHORT_8">8 (საშუალო)</button>
+                    <button class="joker-toggle" data-value="FULL_24">24 (სრული)</button>
+                </div>
+            </div>
+
+            <div class="wizard-step" data-step="3">
+                <label class="joker-label wizard-q">რამდენი ჯოკერი იყოს დასტაში?</label>
+                <div class="joker-toggle-group">
+                    <button class="joker-toggle active" data-value="1">1 ჯოკერი</button>
+                    <button class="joker-toggle" data-value="2">2 ჯოკერი</button>
+                </div>
+            </div>
+
+            <div class="wizard-step" data-step="4">
+                <label class="joker-label wizard-q">ვის შეუძლია შემოსვლა?</label>
+                <div class="joker-toggle-group">
+                    <button class="joker-toggle active" data-value="false">მხოლოდ მეგობრები</button>
+                    <button class="joker-toggle" data-value="true">ყველა (ღია ლობი)</button>
+                </div>
+            </div>
+
+            <div class="wizard-nav">
+                <button class="joker-btn joker-btn--alt" id="wizardBackBtn" onclick="handleWizardBack()">← უკან</button>
+                <button class="joker-btn joker-btn--primary" id="wizardNextBtn" onclick="handleWizardNext()">შემდეგი →</button>
+            </div>
+        </div>
+
+        <div id="view-browse" class="view-panel">
+            <button class="y9-btn--back" onclick="switchView('view-main')">← უკან</button>
+
+            <div class="joker-input-row">
+                <input class="joker-input" id="searchLobbyInput" type="text" placeholder="ფილტრი კოდით..." oninput="filterLobbies()" />
+                <button class="joker-btn joker-btn--alt" style="width:auto; padding:11px 16px;" onclick="loadLobbies()">↻</button>
+            </div>
+
+            <div id="lobbiesList" class="joker-lobbies-list">
+                <p class="joker-empty">იტვირთება...</p>
+            </div>
+        </div>
+
+        <div id="view-join" class="view-panel">
+            <button class="y9-btn--back" onclick="switchView('view-main')">← უკან</button>
+
+            <div class="joker-field">
+                <label class="joker-label">შეიყვანეთ ოთახის კოდი</label>
+                <div class="joker-input-row">
+                    <input class="joker-input" id="roomCodeInput" type="text" placeholder="JOKER-XXXXXXXX" maxlength="14" style="text-transform:uppercase;" />
+                </div>
+            </div>
+            <button class="joker-btn joker-btn--primary" onclick="joinByCode()">შეერთება</button>
+        </div>
+
+        <div id="lobbyMsg" class="joker-msg"></div>
+    </div>
+</main>
+
+<script src="/js/navbar.js"></script>
+<script src="/js/joker/JokerLobby.js"></script>
+</body>
+</html>
