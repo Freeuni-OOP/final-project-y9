@@ -13,6 +13,16 @@ function showError(message) {
     errorMessage.hidden = false;
 }
 
+// Format seconds into readable hours/minutes format
+function formatPlaytime(totalSeconds) {
+    if (!totalSeconds || totalSeconds < 60) return `${totalSeconds || 0}s`;
+    const mins = Math.floor(totalSeconds / 60);
+    if (mins < 60) return `${mins}m`;
+    const hrs = Math.floor(mins / 60);
+    const remainingMins = mins % 60;
+    return remainingMins > 0 ? `${hrs}h ${remainingMins}m` : `${hrs}h`;
+}
+
 async function loadProfile() {
     const token = localStorage.getItem("token");
 
@@ -61,6 +71,86 @@ async function loadProfile() {
     }
 }
 
+// NEW: Load Analytics Data (Top 3 Games & Top 5 Categories)
+async function loadGameAnalytics() {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+
+    const headers = {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json"
+    };
+
+    // Pull Top 3 Favorite Games
+    try {
+        const gamesRes = await fetch("/api/games/my-top-3", { headers });
+        if (gamesRes.ok) {
+            const games = await gamesRes.json();
+            renderTopGames(games);
+        }
+    } catch (err) {
+        console.error("Error loading top games:", err);
+    }
+
+    // Pull Top 5 Favorite Categories
+    try {
+        const catsRes = await fetch("/api/games/my-top-categories", { headers });
+        if (catsRes.ok) {
+            const categories = await catsRes.json();
+            renderTopCategories(categories);
+        }
+    } catch (err) {
+        console.error("Error loading top categories:", err);
+    }
+}
+
+function renderTopGames(games) {
+    const container = document.getElementById("top-games-container");
+    if (!container) return;
+
+    if (!games || games.length === 0) {
+        container.innerHTML = `<p class="ach-empty">No games tracked yet.</p>`;
+        return;
+    }
+
+    container.innerHTML = games.map((g, index) => {
+        let rankClass = "rank-silver";
+        if (index === 0) rankClass = "rank-gold";
+        if (index === 1) rankClass = "rank-platinum";
+
+        // Clicking wraps action to launch the game dashboard immediately
+        return `
+            <div class="stat-clickable-item" onclick="window.location.href='/games?play=${encodeURIComponent(g.gameTitle)}'">
+                <div class="stat-main-info">
+                    <span class="stat-item-title">${escapeHtml(g.gameTitle)}</span>
+                    <span class="stat-item-subtitle">Playtime: ${formatPlaytime(g.totalTimeSeconds)}</span>
+                </div>
+                <span class="badge ${rankClass}">#${index + 1}</span>
+            </div>
+        `;
+    }).join("");
+}
+
+function renderTopCategories(categories) {
+    const container = document.getElementById("top-categories-container");
+    if (!container) return;
+
+    if (!categories || categories.length === 0) {
+        container.innerHTML = `<p class="ach-empty">No categories recorded.</p>`;
+        return;
+    }
+
+    container.innerHTML = categories.map(c => `
+        <div class="stat-clickable-item" onclick="window.location.href='/games?category=${encodeURIComponent(c.category)}'">
+            <div class="stat-main-info">
+                <span class="stat-item-title">${escapeHtml(c.category)}</span>
+                <span class="stat-item-subtitle">Total Accumulated Time</span>
+            </div>
+            <span class="rarest-count">${formatPlaytime(c.totalTimeSeconds)}</span>
+        </div>
+    `).join("");
+}
+
 // shows selected files name
 avatarInput.addEventListener("change", function () {
     if (avatarInput.files && avatarInput.files[0]) {
@@ -102,7 +192,6 @@ avatarForm.addEventListener("submit", function (event) {
         .then(function (result) {
             avatarImg.src = result.avatarUrl;
 
-            // Also update the navbar avatar simultaneously
             const navAvatar = document.getElementById("nav-avatar");
             if (navAvatar) {
                 navAvatar.src = result.avatarUrl;
@@ -149,7 +238,7 @@ async function loadAchievements() {
 function renderRarest(items) {
     const el = document.getElementById("rarest-achievements");
     if (!el) return;
-    if (!items || items.length === 0) { el.innerHTML = ""; return; } // blank when none
+    if (!items || items.length === 0) { el.innerHTML = ""; return; }
     el.innerHTML = items.map(a => `
         <div class="rarest-item">
             <div class="rarest-info">
@@ -173,5 +262,7 @@ function renderAllAchievements(items) {
         </div>`).join("");
 }
 
+//initializers
 loadProfile();
 loadAchievements();
+loadGameAnalytics();
