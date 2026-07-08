@@ -68,9 +68,18 @@ public class QuizService {
 
         List<String> questions = new ArrayList<>();
         for (int i = 0; i < questionTexts.size(); i++) {
-            questions.add(questionTexts.get(i) + " (" + correctAnswers.get(i) + "|" + wrongAnswers.get(i) + ")");
-        }
+            String wrong = wrongAnswers.get(i);
+            String correct = correctAnswers.get(i);
+            String qText = questionTexts.get(i);
 
+            // If there are no wrong answers (Written Answer), don't add the "|"
+            if (wrong == null || wrong.trim().isEmpty() || "NO_WRONG_ANSWERS".equals(wrong)) {
+                questions.add(qText + " (" + correct + ")");
+            } else {
+                // Standard MCQ formatting
+                questions.add(qText + " (" + correct + "|" + wrong + ")");
+            }
+        }
         String questionsBlob = String.join(";", questions);
 
         String imagesJson = imagePaths.stream()
@@ -79,5 +88,9 @@ public class QuizService {
 
         String sql = "INSERT INTO quizzes (title, category, description, time_limit_seconds, questions_blob, images, created_at) VALUES (?, ?, ?, ?, ?, ?, NOW())";
         jdbcTemplate.update(sql, title, category, description, timeLimit, questionsBlob, imagesJson);
+    }
+    public void deleteQuiz(Long quizId) {
+        String sql = "DELETE FROM quizzes WHERE id = ?";
+        jdbcTemplate.update(sql, quizId);
     }
 }
