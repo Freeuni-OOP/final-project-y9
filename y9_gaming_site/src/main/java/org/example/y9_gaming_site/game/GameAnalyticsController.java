@@ -9,7 +9,8 @@ import org.springframework.web.bind.annotation.*;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
-
+import java.util.Map;
+import org.springframework.data.domain.PageRequest;
 @RestController
 @RequestMapping("/api/games")
 public class GameAnalyticsController {
@@ -63,31 +64,46 @@ public class GameAnalyticsController {
     }
 
 
-    @GetMapping("/my-top-3")
-    public ResponseEntity<List<UserGameTime>> getMyTop3(Principal principal) {
-        if (principal == null) return ResponseEntity.status(401).build();
+    public static class GameTimeResponse {
+        public Long gameId;
+        public String gameTitle;
+        public String category;
+        public long totalTimeSeconds;
 
-        User user = userRepository.findByUsername(principal.getName())
-                .orElseThrow(() -> new RuntimeException("User missing"));
-
-        List<UserGameTime> top3 = userGameTimeRepository.findTop3FavoriteGames(user.getId());
-        return ResponseEntity.ok(top3);
+        public GameTimeResponse(UserGameTime t) {
+            this.gameId = t.getId();
+            this.gameTitle = t.getGameTitle();
+            this.category = t.getCategory();
+            this.totalTimeSeconds = t.getTotalTimeSeconds();
+        }
     }
 
 
-    @GetMapping("/my-top-categories")
-    public ResponseEntity<List<CategoryStatsResponse>> getMyTopCategories(Principal principal) {
-        if (principal == null) return ResponseEntity.status(401).build();
+    @GetMapping("/{userId}/top-3")
+    public ResponseEntity<?> getTop3(@PathVariable Long userId) {
+        try {
+            List<UserGameTime> games = userGameTimeRepository.findTop3FavoriteGames(
+                    userId, PageRequest.of(0, 3));
 
-        User user = userRepository.findByUsername(principal.getName())
-                .orElseThrow(() -> new RuntimeException("User missing"));
+            List<GameTimeResponse> response = games.stream()
+                    .map(GameTimeResponse::new)
+                    .toList();
 
-        List<Object[]> rawResults = userGameTimeRepository.findTop5CategoriesByUserId(user.getId());
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body(Map.of("error", e.getMessage(), "type", e.getClass().getName()));
+        }
+    }
+
+    @GetMapping("/{userId}/top-categories")
+    public ResponseEntity<List<CategoryStatsResponse>> getTopCategories(@PathVariable Long userId) {
+        List<Object[]> rawResults = userGameTimeRepository.findTop3CategoriesByUserId(
+                userId, PageRequest.of(0, 3));
+
         List<CategoryStatsResponse> formattedResponse = new ArrayList<>();
-
         for (Object[] row : rawResults) {
             String categoryName = (String) row[0];
-            // Safe conversion of database numeric fields to long
             long totalSeconds = ((Number) row[1]).longValue();
             formattedResponse.add(new CategoryStatsResponse(categoryName, totalSeconds));
         }
