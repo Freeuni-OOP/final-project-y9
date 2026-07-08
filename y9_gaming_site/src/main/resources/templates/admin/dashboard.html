@@ -60,7 +60,7 @@
 
     <span style="display:block; color: rgba(225,148,213,0.5); font-size: 10px; letter-spacing: 1px; text-transform: uppercase; margin: 14px 0 4px; padding-bottom: 4px; border-bottom: 1px solid rgba(255,255,255,0.07);">Quizzes</span>
     <a th:href="@{/quizzes}">🧩 All Quizzes</a>
-    <a href="#" onclick="toggleQuizForm(event)">➕ Add Quiz</a>
+    <a th:href="@{/addQuiz}" >➕ Add Quiz</a>
 
     <a th:href="@{/home}" class="danger">← Back to Site</a>
 </div>
@@ -92,44 +92,7 @@
         </div>
     </div>
 
-    <div id="quizFormContainer" style="display: none; background: rgba(71,44,82,0.6); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.08); margin-bottom: 40px; padding: 30px; border-radius: 12px; box-shadow: 0 10px 40px rgba(145,60,143,0.2);">
-        <h2 style="font-family: 'Bitcount Grid Double Ink', monospace; color: #d07fd8; margin-bottom: 20px; font-size: 20px; letter-spacing: 1px;">➕ ADD NEW QUIZ</h2>
-        <form th:action="@{/admin/quizzes/new}" method="POST" style="display: flex; flex-direction: column; gap: 15px;">
-            <div style="display: flex; gap: 20px; flex-wrap: wrap;">
-                <div style="flex: 2; min-width: 200px;">
-                    <label>Quiz Title</label>
-                    <input type="text" name="title" required placeholder="e.g., European History Masterclass">
-                </div>
-                <div style="flex: 1; min-width: 150px;">
-                    <label>Category</label>
-                    <select name="category">
-                        <option value="GEOGRAPHY">Geography</option>
-                        <option value="SCIENCE">Science</option>
-                        <option value="ENTERTAINMENT">Entertainment</option>
-                    </select>
-                </div>
-                <div style="flex: 1; min-width: 120px;">
-                    <label>Time Limit (Seconds)</label>
-                    <input type="number" name="timeLimit" value="300" required>
-                </div>
-            </div>
 
-            <div>
-                <label>Description Context Summary</label>
-                <input type="text" name="description" placeholder="Short tagline detailing quiz theme content...">
-            </div>
-
-            <div>
-                <label>Questions Stack (One complete question string layout per line block)</label>
-                <textarea name="rawQuestions" rows="6" required placeholder="Format rules:&#10;What is the capital of Italy? (Rome)&#10;Which element has symbol Fe? (Iron|Gold|Copper|Zinc)"></textarea>
-            </div>
-
-            <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 5px;">
-                <button type="button" onclick="toggleQuizForm(event)" style="padding: 10px 20px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 6px; cursor: pointer;">Cancel</button>
-                <button type="submit" style="padding: 10px 25px; background: rgba(145,60,143,0.6); border: 1px solid #e194d5; color: white; font-weight: bold; border-radius: 6px; cursor: pointer; transition: background 0.2s;">Publish Quiz Deck</button>
-            </div>
-        </form>
-    </div>
 
     <div class="section">
         <h2>👥 RECENT USERS</h2>
@@ -153,25 +116,11 @@
                 <th>Plays</th>
                 <th>Status</th>
             </tr>
-<!--            <tr th:each="game : ${games}">-->
-<!--                <td th:text="${game.title}"></td>-->
-<!--                <td th:text="${game.category}"></td>-->
-<!--                <td th:text="${game.playCount}">0</td>-->
-<!--                <td th:text="${game.status}"></td>-->
-<!--            </tr>-->
+
         </table>
     </div>
 </div>
 
-<script>
-    function toggleQuizForm(e) {
-        if(e) e.preventDefault();
-        const container = document.getElementById('quizFormContainer');
-        container.style.display = (container.style.display === 'none' || container.style.display === '') ? 'block' : 'none';
-        if(container.style.display === 'block') {
-            container.scrollIntoView({ behavior: 'smooth' });
-        }
-    }
-</script>
+
 </body>
 </html>

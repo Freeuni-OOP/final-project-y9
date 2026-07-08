@@ -5,39 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Y9 — Hall of Fame</title>
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!--    <link rel="preconnect" href="https://fonts.googleapis.com">-->
+<!--    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>-->
     <link href="https://fonts.googleapis.com/css2?family=Bitcount+Grid+Double+Ink&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="/css/homePage.css">
+<!--    <link rel="stylesheet" href="/css/homePage.css">-->
     <link rel="stylesheet" href="/css/leaderboard.css">
+    <link rel="stylesheet" th:href="@{/css/navbar.css}">
 </head>
 <body>
+<nav th:replace="~{fragments/navbar :: navbar(active='leaderboard')}"></nav>
+<script src="/js/navbar.js"></script>
 
-<nav class="navbar">
-    <a class="navbar__brand" href="/home">Y9</a>
-    <ul class="navbar__links">
-        <li><a href="/home">Home</a></li>
-        <li><a href="/quizzes">Quizzes</a></li>
-        <li><a href="/leaderboard" class="active">Leaderboard</a></li>
-        <li><a href="/chat">Chat</a></li>
-    </ul>
-    <div class="navbar__user">
-        <img id="nav-avatar"
-             class="navbar__avatar"
-             src="/img/avatars/default.png"
-             alt="avatar"
-             style="cursor: pointer;"
-             onclick="redirectToMyProfile()" />
 
-        <span id="nav-username"
-              class="navbar__username"
-              style="cursor: pointer;"
-              onclick="redirectToMyProfile()">...</span>
-
-        <button onclick="logout()" class="navbar__logout">Log out</button>
-    </div>
-</nav>
 
 <div class="leaderboard-container">
     <h1 class="leaderboard-main-title">🏆 LEADERBOARD 🏆</h1>

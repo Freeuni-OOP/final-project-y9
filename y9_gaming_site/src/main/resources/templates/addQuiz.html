@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Add New Quiz</title>
+<!--    <link rel="stylesheet" th:href="@{/css/homePage.css}"> &lt;!&ndash; adjust to your actual stylesheet &ndash;&gt;-->
+</head>
+<body style="background: #1e1224; min-height: 100vh; padding: 40px 20px;">
+
+<div style="max-width: 900px; margin: 0 auto;">
+
+    <a href="/home" style="color: #d07fd8; text-decoration: none; display: inline-block; margin-bottom: 20px;">← Back to Site</a>
+
+    <div style="background: rgba(30,18,36,0.85); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; box-shadow: 0 10px 40px rgba(145,60,143,0.25); overflow: hidden;">
+                    <!-- Quiz meta bar -->
+                    <div style="padding: 24px 28px 20px; border-bottom: 1px solid rgba(255,255,255,0.08);">
+                        <h2 style="font-family: 'Bitcount Grid Double Ink', monospace; color: #d07fd8; margin: 0 0 16px; font-size: 20px; letter-spacing: 1px;">➕ ADD NEW QUIZ</h2>
+                        <form id="quizForm" th:action="@{/api/quizzes/new}" method="POST" enctype="multipart/form-data">
+                            <div style="display: flex; gap: 16px; flex-wrap: wrap;">
+                                <div style="flex: 2; min-width: 220px;">
+                                    <label style="font-size: 12px; color: rgba(255,255,255,0.6);">Quiz Title</label>
+                                    <input type="text" name="title" required placeholder="e.g., European History Masterclass" style="width: 100%;">
+                                </div>
+                                <div style="flex: 1; min-width: 140px;">
+                                    <label style="font-size: 12px; color: rgba(255,255,255,0.6);">Category</label>
+                                    <select name="category" style="width: 100%;">
+                                        <option value="GEOGRAPHY">Geography</option>
+                                        <option value="SCIENCE">Science</option>
+                                        <option value="ENTERTAINMENT">Entertainment</option>
+                                    </select>
+                                </div>
+                                <div style="flex: 1; min-width: 120px;">
+                                    <label style="font-size: 12px; color: rgba(255,255,255,0.6);">Time Limit (s)</label>
+                                    <input type="number" name="timeLimit" value="300" required style="width: 100%;">
+                                </div>
+                                <div style="flex: 2; min-width: 220px;">
+                                    <label style="font-size: 12px; color: rgba(255,255,255,0.6);">Description</label>
+                                    <input type="text" name="description" placeholder="Short tagline..." style="width: 100%;">
+                                </div>
+                            </div>
+
+                            <div style="display: flex; gap: 0; margin-top: 22px; min-height: 420px; border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; overflow: hidden;">
+
+                                <div id="slideRail" style="width: 130px; background: rgba(0,0,0,0.25); padding: 12px 10px; display: flex; flex-direction: column; gap: 10px; overflow-y: auto; max-height: 460px;">
+                                    <button type="button" id="addSlideBtn" class="add-slide-btn" onclick="addQuestionBlock()">+</button>
+                                </div>
+
+                                <div style="flex: 1; padding: 26px 30px; background: rgba(255,255,255,0.02);">
+                                    <div id="questionsContainer"></div>
+                                </div>
+                            </div>
+
+                            <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 18px;">
+                                <a href="/home" style="text-decoration: none;">Cancel</a>
+                                <button type="submit" style="padding: 10px 25px; background: rgba(145,60,143,0.6); border: 1px solid #e194d5; color: white; font-weight: bold; border-radius: 6px; cursor: pointer;">Publish Quiz Deck</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+</div>
+
+<template id="questionTemplate">
+    <div class="question-block" data-slide="">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+            <span class="q-number" style="font-family: 'Bitcount Grid Double Ink', monospace; color: #d07fd8; font-size: 15px; letter-spacing: 1px;">QUESTION 1</span>
+            <button type="button" onclick="removeQuestion(this)" style="background: none; border: none; color: #e07979; cursor: pointer; font-size: 13px;">🗑 Remove slide</button>
+        </div>
+
+        <input type="text" class="q-text" name="questionText" required placeholder="Start typing your question"
+               style="width: 100%; font-size: 18px; padding: 14px 16px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.04); color: white; margin-bottom: 14px;">
+
+        <label style="display: flex; align-items: center; gap: 10px; padding: 10px 14px; border: 1px dashed rgba(255,255,255,0.2); border-radius: 8px; cursor: pointer; margin-bottom: 22px; color: rgba(255,255,255,0.6); font-size: 13px;">
+            🖼️ <span class="img-label">Add image (optional)</span>
+            <input type="file" class="q-image" name="questionImage" accept="image/*" style="display:none" onchange="previewImage(this)">
+        </label>
+        <img class="q-image-preview" style="display:none; max-height: 90px; border-radius: 6px; margin: -12px 0 20px;">
+
+        <div class="answer-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div class="answer-tile selected" data-color="#e21b3c" onclick="selectCorrect(this)" style="background:#000000;">
+                <input type="text" class="q-option" placeholder="Answer 1" required onclick="event.stopPropagation()">
+                <span class="tile-check">✓</span>
+            </div>
+            <div class="answer-tile" data-color="#1368ce" onclick="selectCorrect(this)" style="background:#000000;">
+                <input type="text" class="q-option" placeholder="Answer 2" required onclick="event.stopPropagation()">
+                <span class="tile-check">✓</span>
+            </div>
+            <div class="answer-tile" data-color="#d89e00" onclick="selectCorrect(this)" style="background:#000000;">
+                <input type="text" class="q-option" placeholder="Answer 3" required onclick="event.stopPropagation()">
+                <span class="tile-check">✓</span>
+            </div>
+            <div class="answer-tile" data-color="#26890c" onclick="selectCorrect(this)" style="background:#000000;">
+                <input type="text" class="q-option" placeholder="Answer 4" required onclick="event.stopPropagation()">
+                <span class="tile-check">✓</span>
+            </div>
+        </div>
+        <p style="font-size: 12px; color: rgba(255,255,255,0.4); margin-top: 10px;">Click a tile to mark it as the correct answer.</p>
+    </div>
+</template>
+
+<template id="railThumbTemplate">
+    <div class="rail-thumb" onclick="activateSlide(this)">
+        <span class="rail-number"></span>
+        <div class="rail-dots"></div>
+    </div>
+</template>
+
+<style>
+    #quizFormContainer input[type="text"],
+    #quizFormContainer input[type="number"],
+    #quizFormContainer select {
+        background: rgba(255,255,255,0.05);
+        border: 1px solid rgba(255,255,255,0.12);
+        color: white;
+        border-radius: 6px;
+        padding: 8px 10px;
+    }
+
+    .question-block { display: none; }
+    .question-block.active { display: block; }
+
+    .answer-tile {
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 16px 14px;
+        border-radius: 8px;
+        cursor: pointer;
+        border: 3px solid transparent;
+        transition: transform 0.15s, border-color 0.15s;
+    }
+    .answer-tile:hover { transform: translateY(-2px); }
+    .answer-tile.selected { border-color: #fff; box-shadow: 0 0 0 2px rgba(255,255,255,0.5); }
+    .tile-shape { font-size: 18px; color: rgba(255,255,255,0.85); width: 20px; text-align: center; }
+    .answer-tile input.q-option {
+        flex: 1; border: none; background: rgba(0,0,0,0.15); color: white;
+        padding: 8px 10px; border-radius: 5px; font-size: 14px;
+    }
+    .answer-tile input.q-option::placeholder { color: rgba(255,255,255,0.6); }
+    .tile-check { opacity: 0; font-size: 16px; color: white; width: 16px; }
+    .answer-tile.selected .tile-check { opacity: 1; }
+
+    .rail-thumb {
+        background: rgba(255,255,255,0.05);
+        border: 2px solid transparent;
+        border-radius: 8px;
+        padding: 10px 8px;
+        cursor: pointer;
+        min-height: 60px;
+    }
+    .rail-thumb.active { border-color: #e194d5; background: rgba(224,148,213,0.12); }
+    .rail-number { font-size: 11px; color: rgba(255,255,255,0.5); display: block; margin-bottom: 6px; }
+    .rail-dots { display: grid; grid-template-columns: 1fr 1fr; gap: 3px; }
+    .rail-dots span { display: block; width: 100%; height: 6px; border-radius: 2px; background: rgba(255,255,255,0.1); }
+
+    .add-slide-btn {
+        margin-top: auto;
+        background: rgba(224,148,213,0.1);
+        border: 1px dashed #e194d5;
+        color: #e194d5;
+        border-radius: 8px;
+        padding: 10px 0;
+        cursor: pointer;
+        font-size: 20px;
+    }
+</style>
+
+<script>
+    let slideCount = 0;
+
+    function addQuestionBlock() {
+        slideCount++;
+        const id = 'slide-' + slideCount;
+
+        const qClone = document.getElementById('questionTemplate').content.cloneNode(true);
+        const block = qClone.querySelector('.question-block');
+        block.dataset.slide = id;
+        document.getElementById('questionsContainer').appendChild(qClone);
+
+        const railClone = document.getElementById('railThumbTemplate').content.cloneNode(true);
+        const thumb = railClone.querySelector('.rail-thumb');
+        thumb.dataset.slide = id;
+        document.getElementById('slideRail').insertBefore(railClone, document.getElementById('addSlideBtn'));
+
+        renumber();
+        activateSlideById(id);
+    }
+
+    function removeQuestion(btn) {
+        const block = btn.closest('.question-block');
+        const id = block.dataset.slide;
+        block.remove();
+        document.querySelector(`.rail-thumb[data-slide="${id}"]`)?.remove();
+        renumber();
+        const remaining = document.querySelector('.question-block');
+        if (remaining) activateSlideById(remaining.dataset.slide);
+    }
+
+    function renumber() {
+        document.querySelectorAll('#questionsContainer .question-block').forEach((b, i) => {
+            b.querySelector('.q-number').textContent = 'QUESTION ' + (i + 1);
+        });
+        document.querySelectorAll('#slideRail .rail-thumb').forEach((t, i) => {
+            t.querySelector('.rail-number').textContent = i + 1;
+        });
+    }
+
+    function activateSlide(thumbEl) {
+        activateSlideById(thumbEl.dataset.slide);
+    }
+
+    function activateSlideById(id) {
+        document.querySelectorAll('.question-block').forEach(b => b.classList.toggle('active', b.dataset.slide === id));
+        document.querySelectorAll('.rail-thumb').forEach(t => t.classList.toggle('active', t.dataset.slide === id));
+    }
+
+    function selectCorrect(tile) {
+        const grid = tile.closest('.answer-grid');
+        grid.querySelectorAll('.answer-tile').forEach(t => t.classList.remove('selected'));
+        tile.classList.add('selected');
+        syncRailDots(tile.closest('.question-block'));
+    }
+
+    function syncRailDots(block) {
+        const id = block.dataset.slide;
+        const thumb = document.querySelector(`.rail-thumb[data-slide="${id}"] .rail-dots`);
+        if (!thumb) return;
+        thumb.innerHTML = '';
+        block.querySelectorAll('.answer-tile').forEach(tile => {
+            const dot = document.createElement('span');
+            const filled = tile.querySelector('.q-option').value.trim() !== '';
+            dot.style.background = filled ? tile.dataset.color : 'rgba(255,255,255,0.1)';
+            if (tile.classList.contains('selected')) dot.style.outline = '1px solid white';
+            thumb.appendChild(dot);
+        });
+    }
+
+    function previewImage(input) {
+        const block = input.closest('.question-block');
+        const preview = block.querySelector('.q-image-preview');
+        const label = block.querySelector('.img-label');
+        if (input.files && input.files[0]) {
+            preview.src = URL.createObjectURL(input.files[0]);
+            preview.style.display = 'block';
+            label.textContent = input.files[0].name;
+        }
+    }
+
+    document.getElementById('questionsContainer').addEventListener('input', e => {
+        if (e.target.classList.contains('q-option')) {
+            syncRailDots(e.target.closest('.question-block'));
+        }
+    });
+
+    document.getElementById('quizForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        document.querySelectorAll('#questionsContainer .question-block').forEach(block => {
+            const tiles = [...block.querySelectorAll('.answer-tile')];
+            const correctTile = tiles.find(t => t.classList.contains('selected'));
+            const correctVal = correctTile.querySelector('.q-option').value;
+            const wrongVals = tiles.filter(t => t !== correctTile)
+                .map(t => t.querySelector('.q-option').value)
+                .join('|');
+
+            const correctInput = document.createElement('input');
+            correctInput.type = 'hidden';
+            correctInput.name = 'correctAnswer';
+            correctInput.value = correctVal;
+            block.appendChild(correctInput);
+
+            const wrongInput = document.createElement('input');
+            wrongInput.type = 'hidden';
+            wrongInput.name = 'wrongAnswers';
+            wrongInput.value = wrongVals;
+            block.appendChild(wrongInput);
+
+            block.querySelectorAll('.q-option').forEach(o => o.removeAttribute('name'));
+        });
+
+        const formData = new FormData(this);
+        const token = localStorage.getItem('token'); // <-- match your actual storage key
+
+        try {
+            const response = await fetch(this.action, {
+                method: 'POST',
+                headers: {'Authorization': 'Bearer ' + token},
+                body: formData
+            });
+
+            if (response.ok) {
+                window.location.href = '/home'; // now a normal page load, JS attaches token as usual
+            } else {
+                alert('Failed to publish quiz (status ' + response.status + ')');
+            }
+        } catch (err) {
+            alert('Error publishing quiz: ' + err.message);
+        }
+    });
+
+    function toggleQuizForm(e) {
+        if (e) e.preventDefault();
+        const container = document.getElementById('quizFormContainer');
+        container.style.display = (container.style.display === 'none' || container.style.display === '') ? 'block' : 'none';
+        if (container.style.display === 'block') {
+            container.scrollIntoView({ behavior: 'smooth' });
+            if (!document.querySelector('.question-block')) addQuestionBlock();
+        }
+    }
+</script>
+</body>
+</html>

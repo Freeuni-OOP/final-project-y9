@@ -1,11 +1,13 @@
 package org.example.y9_gaming_site.game.wordle;
 
 
+import org.example.y9_gaming_site.achievement.AchievementService;
 import org.example.y9_gaming_site.game.wordle.dto.AttemptStateDto;
 import org.example.y9_gaming_site.game.wordle.dto.GuessFeedbackDto;
 import org.example.y9_gaming_site.gameRecord.GameRecordService;
 import org.example.y9_gaming_site.user.User;
 import org.example.y9_gaming_site.user.UserRepository;
+import org.example.y9_gaming_site.user.UserService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,14 +29,16 @@ public class WordleService {
     private final WordleDict dict;
     private final GameRecordService gameRecordService;
     private final UserRepository userRepository;
+    private final AchievementService achievementService;
 
     public WordleService(WordlePuzzleRepository wordlePuzzleRepository, WordleAttemptRepository attemptRepository,
-                         WordleDict dict, GameRecordService gameRecordService, UserRepository userRepository) {
+                         WordleDict dict, GameRecordService gameRecordService,AchievementService achievementService, UserRepository userRepository) {
         this.wordlePuzzleRepository = wordlePuzzleRepository;
         this.wordleAttemptRepository = attemptRepository;
         this.dict = dict;
         this.gameRecordService = gameRecordService;
         this.userRepository = userRepository;
+        this.achievementService = achievementService;
     }
 
     public WordlePuzzle getOrCreateDailyPuzzle() {
@@ -102,6 +106,15 @@ public class WordleService {
         wordleAttemptRepository.save(attempt);
         if(attempt.getStatus() == AttemptStatus.WON) {
             gameRecordService.recordResult(userId, GAME_KEY, puzzleId, (double) attempt.guessCount());
+            int tries = attempt.guessCount();
+            achievementService.grantByCode(userId, "WORDLE_FIRST_WIN");
+
+            if(tries <= 2){
+                achievementService.grantByCode(userId, "WORDLE_IN_TWO_TRIES");
+            }
+            if(tries == 1){
+                achievementService.grantByCode(userId, "WORDLE_IN_ONE_TRY");
+            }
         }
         return toDto(attempt);
     }

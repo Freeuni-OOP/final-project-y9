@@ -166,6 +166,29 @@ public class JokerGameState {
         status = isGameOver() ? GameStatus.FINISHED : GameStatus.ROUND_END;
     }
 
+    // add field
+    private JokerTrick currentTrick = null;
+
+    // add these methods
+    public void setStatus(GameStatus status) {
+        this.status = status;
+    }
+
+    public JokerTrick getCurrentTrick() {
+        if (currentTrick == null) {
+            currentTrick = new JokerTrick(trumpSuit);
+        }
+        return currentTrick;
+    }
+
+    public void finishTrick(JokerPlayer winner) {
+        currPlayer = players.indexOf(winner);
+        currentTrick = new JokerTrick(trumpSuit);
+    }
+
+    public boolean allPlayersBidded() {
+        return players.stream().allMatch(p -> p.getProphecy() >= 0);
+    }
 
 }
 

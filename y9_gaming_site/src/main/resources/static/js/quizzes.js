@@ -112,6 +112,26 @@ function showQuestion() {
     document.getElementById('questionPrompt').textContent = textPrompt;
     document.getElementById('questionProgress').textContent = `Question ${currentQuestionIndex + 1} of ${currentQuiz.questions.length}`;
 
+    let imgEl = document.getElementById('questionImage');
+    if (!imgEl) {
+        imgEl = document.createElement('img');
+        imgEl.id = 'questionImage';
+        imgEl.style.maxWidth = '100%';
+        imgEl.style.maxHeight = '260px';
+        imgEl.style.borderRadius = '10px';
+        imgEl.style.margin = '12px auto';
+        imgEl.style.display = 'block';
+        document.getElementById('questionPrompt').insertAdjacentElement('afterend', imgEl);
+    }
+
+    const imgPath = currentQuiz.images && currentQuiz.images[currentQuestionIndex];
+    if (imgPath && imgPath.trim() !== '') {
+        imgEl.src = imgPath;
+        imgEl.style.display = 'block';
+    } else {
+        imgEl.style.display = 'none';
+    }
+
     const innerData = rawQuestion.substring(openParenIdx + 1, closeParenIdx);
 
     if (innerData.includes('|')) {
@@ -129,7 +149,7 @@ function showQuestion() {
             const btn = document.createElement('button');
             btn.className = 'mcq-btn';
             btn.textContent = choice.trim();
-            btn.onclick = () => checkMCQAnswer(choice);
+            btn.onclick = () => checkMCQAnswer(choice, btn);
             mcqContainer.appendChild(btn);
         });
     } else {
@@ -152,30 +172,78 @@ function checkAnswer() {
     const cleanUserAnswer = inputElement.value.trim().toLowerCase().replace(/[\r\n\t]/g, "");
     const cleanCorrectAnswer = currentCorrectAnswer.trim().toLowerCase().replace(/[\r\n\t]/g, "");
 
+    inputElement.disabled = true;
+    let feedbackEl = document.getElementById('answerFeedback');
+    if (!feedbackEl) {
+        feedbackEl = document.createElement('div');
+        feedbackEl.id = 'answerFeedback';
+        feedbackEl.style.marginTop = '10px';
+        feedbackEl.style.fontSize = '14px';
+        feedbackEl.style.fontWeight = 'bold';
+        document.getElementById('textInputContainer').insertAdjacentElement('afterend', feedbackEl);
+    }
+
     if (cleanUserAnswer === cleanCorrectAnswer) {
         score++;
-        advanceQuiz();
+        inputElement.style.borderColor = "#2ecc71";
+        inputElement.style.backgroundColor = "rgba(46, 204, 113, 0.15)";
+        feedbackEl.textContent = "Correct!";
+        feedbackEl.style.color = "#2ecc71";
+
+        setTimeout(() => {
+            resetAnswerInputStyles(inputElement, feedbackEl);
+            advanceQuiz();
+        }, 900);
     } else {
-        inputElement.style.borderColor = "#ff007f";
-        setTimeout(() => inputElement.style.borderColor = "rgba(255,255,255,0.2)", 350);
-        inputElement.value = '';
+        inputElement.style.borderColor = "#e74c3c";
+        inputElement.style.backgroundColor = "rgba(231, 76, 60, 0.15)";
+        feedbackEl.textContent = `Incorrect — the answer was: ${currentCorrectAnswer.trim()}`;
+        feedbackEl.style.color = "#e74c3c";
+
+        setTimeout(() => {
+            resetAnswerInputStyles(inputElement, feedbackEl);
+            advanceQuiz();
+        }, 1400);
     }
 }
+function resetAnswerInputStyles(inputElement, feedbackEl) {
+    inputElement.disabled = false;
+    inputElement.style.borderColor = "rgba(255,255,255,0.2)";
+    inputElement.style.backgroundColor = "";
+    inputElement.style.color = "";
+    inputElement.value = "";
+    feedbackEl.textContent = "";
+}
 
-function checkMCQAnswer(selectedText) {
+function checkMCQAnswer(selectedText, btnElement) {
     const cleanUserAnswer = selectedText.trim().toLowerCase().replace(/[\r\n\t]/g, "");
     const cleanCorrectAnswer = currentCorrectAnswer.trim().toLowerCase().replace(/[\r\n\t]/g, "");
+    const mcqContainer = document.getElementById('mcqOptionsContainer');
+
+    // Disable all buttons immediately so the player can't click again mid-feedback
+    const allButtons = mcqContainer.querySelectorAll('.mcq-btn');
+    allButtons.forEach(btn => btn.disabled = true);
 
     if (cleanUserAnswer === cleanCorrectAnswer) {
         score++;
-        advanceQuiz();
-    } else {
-        const mcqContainer = document.getElementById('mcqOptionsContainer');
-        mcqContainer.style.opacity = "0.4";
+        btnElement.classList.add('correct-answer');
         setTimeout(() => {
-            mcqContainer.style.opacity = "1";
             advanceQuiz();
-        }, 300);
+        }, 700);
+    } else {
+        btnElement.classList.add('wrong-answer');
+
+        // Also highlight which one was correct, so the player learns the answer
+        allButtons.forEach(btn => {
+            const btnText = btn.textContent.trim().toLowerCase().replace(/[\r\n\t]/g, "");
+            if (btnText === cleanCorrectAnswer) {
+                btn.classList.add('correct-answer');
+            }
+        });
+
+        setTimeout(() => {
+            advanceQuiz();
+        }, 900);
     }
 }
 
@@ -220,7 +288,20 @@ function endQuiz() {
 }
 
 function quitQuiz() {
-    if (confirm("Are you sure you want to surrender this attempt?")) endQuiz();
+    const modal = document.getElementById('confirmModal');
+    modal.classList.remove('hidden');
+
+    const okBtn = document.getElementById('confirmModalOk');
+    const cancelBtn = document.getElementById('confirmModalCancel');
+
+    okBtn.addEventListener('click', () => {
+        modal.classList.add('hidden');
+        endQuiz();
+    }, { once: true });
+
+    cancelBtn.addEventListener('click', () => {
+        modal.classList.add('hidden');
+    }, { once: true });
 }
 
 function exitPlayer() {

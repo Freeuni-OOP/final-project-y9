@@ -22,7 +22,6 @@ async function loadProfile() {
     }
 
     try {
-        // Fetch the profile being viewed
         const response = await fetch(`${API_BASE}/${userId}`, {
             method: "GET",
             headers: {
@@ -126,5 +125,53 @@ async function logout() {
     window.location.href = "/login";
 }
 
-// Initialize execution
+function escapeHtml(s) {
+    return (s || "").replace(/[&<>"']/g, c =>
+        ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+
+async function loadAchievements() {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+    const headers = { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" };
+    try {
+        const [rarestRes, allRes] = await Promise.all([
+            fetch(`/achievements/${userId}/rarest?limit=3`, { headers }),
+            fetch(`/achievements/${userId}/view`, { headers })
+        ]);
+        if (rarestRes.ok) renderRarest(await rarestRes.json());
+        if (allRes.ok) renderAllAchievements(await allRes.json());
+    } catch (err) {
+        console.error("Could not load achievements:", err);
+    }
+}
+
+function renderRarest(items) {
+    const el = document.getElementById("rarest-achievements");
+    if (!el) return;
+    if (!items || items.length === 0) { el.innerHTML = ""; return; } // blank when none
+    el.innerHTML = items.map(a => `
+        <div class="rarest-item">
+            <div class="rarest-info">
+                <span class="rarest-name">${escapeHtml(a.name)}</span>
+                <span class="rarest-desc">${escapeHtml(a.description || "")}</span>
+            </div>
+                <span class="rarest-count" title="players who have this">${a.earnedCount}</span>
+        </div>`).join("");
+}
+
+function renderAllAchievements(items) {
+    const el = document.getElementById("achievements-grid");
+    if (!el) return;
+    if (!items || items.length === 0) {
+        el.innerHTML = `<p class="ach-empty">No achievements yet — go play!</p>`;
+        return;
+    }
+    el.innerHTML = items.map(a => `
+        <div class="achievement-badge unlocked" title="${escapeHtml(a.description || "")}">
+            <span class="badge-title">${escapeHtml(a.name)}</span>
+        </div>`).join("");
+}
+
 loadProfile();
+loadAchievements();

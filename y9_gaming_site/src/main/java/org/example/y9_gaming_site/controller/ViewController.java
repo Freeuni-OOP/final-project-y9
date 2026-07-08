@@ -33,4 +33,10 @@ public class ViewController {
     public String showWordle() {
         return "wordle";
     }
+    @GetMapping("/addQuiz")
+    public String showCreateForm() {
+        return "addQuiz";
+    }
 }
+
+

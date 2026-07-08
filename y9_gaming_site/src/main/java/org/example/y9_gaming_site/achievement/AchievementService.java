@@ -2,7 +2,11 @@ package org.example.y9_gaming_site.achievement;
 
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class AchievementService {
@@ -29,8 +33,36 @@ public class AchievementService {
         currAch.setEarnedTime(LocalDateTime.now());
 
         userAchievementRepository.save(currAch);
+    }
 
+    public void grantByCode(Long userId, String code){
+        if(userId==null || code==null) return;
+        achievementRepository.findByCode(code).ifPresent(a -> grantAchievement(userId, a.getId()));
+    }
 
+    public List<AchievementView> getEarnedView(Long userId){
+        List<UserAchievement> earned=userAchievementRepository.findByUserId(userId);
+        if(earned.isEmpty()) return List.of();
+        Map<Long, Achievement> catalog = achievementRepository.findAll().stream().collect(Collectors.toMap(
+                Achievement::getId,
+                achievement->achievement
+        ));
+        List<AchievementView> out = new ArrayList<>();
+        for(UserAchievement each:earned){
+            Achievement a = catalog.get(each.getAchievementId());
+            if(a==null) continue;
+
+            long earnedCount = userAchievementRepository.countByAchievementId(a.getId());
+            out.add(new AchievementView(a.getCode(), a.getName(), a.getDescription()
+            , each.getEarnedTime(), earnedCount));
+        }
+        return out;
+    }
+
+    public List<AchievementView> getRarestEarned(Long userId, int limit){
+        return getEarnedView(userId).stream().sorted(Comparator.comparingLong(
+                AchievementView::earnedCount).thenComparing(AchievementView::earnedTime,
+                Comparator.nullsLast(Comparator.reverseOrder()))).limit(Math.max(0, limit)).toList();
     }
 
 }

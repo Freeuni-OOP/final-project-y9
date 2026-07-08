@@ -17,6 +17,9 @@ function updateNavbar(user){
     if (navProfileLink) {
         navProfileLink.href = '/profile/' + user.id;
     }
+    if (adminLink && user.role === 'ADMIN') {
+        adminLink.style.display = 'block';
+    }
 }
 
 async function loadNavProfile() {
