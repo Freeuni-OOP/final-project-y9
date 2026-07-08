@@ -192,6 +192,7 @@ avatarForm.addEventListener("submit", function (event) {
         .then(function (result) {
             avatarImg.src = result.avatarUrl;
 
+            // Also update the navbar avatar simultaneously
             const navAvatar = document.getElementById("nav-avatar");
             if (navAvatar) {
                 navAvatar.src = result.avatarUrl;
@@ -238,7 +239,7 @@ async function loadAchievements() {
 function renderRarest(items) {
     const el = document.getElementById("rarest-achievements");
     if (!el) return;
-    if (!items || items.length === 0) { el.innerHTML = ""; return; }
+    if (!items || items.length === 0) { el.innerHTML = ""; return; } // blank when none
     el.innerHTML = items.map(a => `
         <div class="rarest-item">
             <div class="rarest-info">
@@ -261,6 +262,92 @@ function renderAllAchievements(items) {
             <span class="badge-title">${escapeHtml(a.name)}</span>
         </div>`).join("");
 }
+
+let myId = null;
+let friendshipStatus = null;
+
+async function loadFriendSection(){
+    const token = localStorage.getItem("token");
+    if(!token){
+        return;
+    }
+
+    try {
+        const res = await fetch("/api/users/me", {
+            headers: {"Authorization": "Bearer " + token}
+        });
+        if (!res.ok) {
+            return;
+        }
+
+        const me = await res.json();
+        myId = me.id;
+
+        if (String(myId) === String(userId)) {
+            return;
+        }
+
+        const statusRes = await fetch("/friends/status?myId=" + myId + "&otherId=" + userId);
+        if (!statusRes) {
+            return;
+        }
+
+        friendshipStatus = await statusRes.text();
+        friendshipStatus = friendshipStatus.replace(/"/g, "");
+
+        const section = document.getElementById("friend-section");
+        const btn = document.getElementById("friend-btn");
+        const text = document.getElementById("friend-status-text");
+
+        section.style.display = "block";
+
+        if (friendshipStatus === "FRIENDS") {
+            btn.style.display = "none";
+            text.textContent = "✅ FRIENDS"
+        } else if (friendshipStatus === "PENDING") {
+            btn.style.display = "none";
+            text.textContent = "⏳ The request has been sent";
+        } else {
+            btn.textContent = "➕ Add friend";
+            btn.style.display = "block";
+        }
+    }catch (err){
+        console.error(err);
+    }
+}
+
+async function handleFriendBtn(){
+    const token = localStorage.getItem("token");
+
+    try {
+        const res = await fetch("/friends/request", {
+            method: "POST",
+            headers: {
+                "Authorization": "Bearer " + token,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({senderId: myId, receiverId: userId})
+        });
+
+        if (!res.ok) {
+           const text = await res.text();
+           alert(text || "Request could not be sent");
+           return;
+        }
+
+        friendshipStatus = "PENDING";
+
+        document.getElementById("friend-btn").style.display = "none";
+        document.getElementById("friend-status-text").textContent = "⏳ The request has been sent";
+
+    }catch (err){
+        alert("Connection error");
+    }
+}
+
+document.addEventListener("DOMContentLoaded", function (){
+    loadFriendSection();
+});
 
 //initializers
 loadProfile();
