@@ -36,6 +36,11 @@ public class FriendshipController {
     public List<Friendship> getPendingRequests(@PathVariable("userId") Long userId) {
         return service.getPendingRequests(userId);
     }
+
+    @GetMapping("/status")
+    public String getStatus(@RequestParam Long myId, @RequestParam Long otherId) {
+        return service.getStatus(myId, otherId);
+    }
 }
 
 

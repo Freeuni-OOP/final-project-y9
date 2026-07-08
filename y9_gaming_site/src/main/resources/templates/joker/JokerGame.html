@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ka" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Y9 — ჯოკერი (მაგიდა)</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bitcount+Grid+Double+Ink&family=Noto+Sans+Georgian:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/homePage.css" />
+  <link rel="stylesheet" th:href="@{/css/navbar.css}">
+  <link rel="stylesheet" href="/css/joker.css" />
+  <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+</head>
+<body>
+
+<nav th:replace="~{fragments/navbar :: navbar(active='home')}"></nav>
+
+<div class="joker-game-wrap">
+
+  <div class="joker-game-topbar">
+    <div class="joker-game-info">
+      <div class="joker-info-label">ოთახი</div>
+      <div class="joker-info-value" id="roomCodeDisplay">————</div>
+    </div>
+    <div class="joker-game-info">
+      <div class="joker-info-label">რაუნდი</div>
+      <div class="joker-info-value" id="roundDisplay">— / —</div>
+    </div>
+    <div class="joker-game-info">
+      <div class="joker-info-label">კოზირი</div>
+      <div class="joker-info-value" id="trumpDisplay">—</div>
+    </div>
+    <div class="joker-game-info">
+      <div class="joker-info-label">სტატუსი</div>
+      <div class="joker-info-value" id="statusDisplay">—</div>
+    </div>
+
+    <button id="startBtn" class="joker-btn joker-btn--primary" style="display:none; width:auto; padding:8px 20px;" onclick="startGame()">
+      თამაშის დაწყება ▶
+    </button>
+  </div>
+
+  <div id="gameMsg" class="joker-msg"></div>
+
+  <div class="joker-game-body">
+
+    <div class="joker-sidebar">
+      <div class="joker-section-title">მოთამაშეები</div>
+      <div id="playersList" class="joker-players-list">
+      </div>
+    </div>
+
+    <div class="joker-main">
+
+      <div id="trumpSetterPanel" class="joker-trump-panel hidden">
+        <div class="joker-label" style="text-align:center; margin-bottom:12px;">აირჩიე კოზირი (ცვეტი)</div>
+        <div class="joker-suits-grid">
+          <button class="joker-suit-btn" onclick="setTrump('HEARTS')">♥ გული</button>
+          <button class="joker-suit-btn" onclick="setTrump('DIAMONDS')">♦ აგური</button>
+          <button class="joker-suit-btn" onclick="setTrump('CLUBS')">♣ ჯვარი</button>
+          <button class="joker-suit-btn" onclick="setTrump('SPADES')">♠ ყვავი</button>
+        </div>
+      </div>
+
+      <div id="bidPanel" class="joker-bid-panel hidden">
+        <div id="gameTypeDisplay" style="text-align:center; font-size:0.85rem; font-weight:bold; margin-bottom:10px;"></div>
+
+        <div class="joker-label" style="text-align:center;" id="bidInfo">რამდენ ხელს წაიღებ?</div>
+        <div class="joker-bid-row">
+          <button class="joker-btn joker-btn--alt" onclick="changeBid(-1)">-</button>
+          <div id="bidValue" class="joker-bid-value">0</div>
+          <button class="joker-btn joker-btn--alt" onclick="changeBid(1)">+</button>
+        </div>
+        <button class="joker-btn joker-btn--primary" onclick="submitBid()">დადასტურება</button>
+      </div>
+
+      <div class="joker-trick-area">
+        <div class="joker-label" style="text-align:center;">მაგიდა</div>
+        <div id="trickCards" class="joker-trick-cards">
+        </div>
+      </div>
+
+      <div class="joker-hand-area">
+        <div class="joker-label">შენი კარტები</div>
+        <div id="handCards" class="joker-hand-cards">
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div id="jokerModal" class="joker-modal hidden">
+  <div class="joker-modal-box">
+    <h3 style="color:#fff; margin-top:0; margin-bottom:15px;">ჯოკერის მოთხოვნა</h3>
+    <div class="joker-label" style="margin-bottom:10px;">აირჩიეთ სასურველი ცვეტი:</div>
+    <div id="jokerSuitPicker" class="joker-suits-grid" style="margin-bottom:20px;">
+    </div>
+    <div style="display:flex; gap:10px;">
+      <button class="joker-btn joker-btn--primary" onclick="confirmJoker('TAKE')">წაყვანა (უმაღლესი)</button>
+      <button class="joker-btn joker-btn--alt" onclick="confirmJoker('GIVE')">გატანხება (დაბალი)</button>
+    </div>
+    <button class="joker-btn joker-btn--danger" style="margin-top:10px;" onclick="cancelJoker()">გაუქმება</button>
+  </div>
+</div>
+
+<script src="/js/navbar.js"></script>
+<script src="/js/joker/JokerGame.js"></script>
+</body>
+</html>

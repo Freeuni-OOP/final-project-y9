@@ -37,6 +37,12 @@ public class ViewController {
     public String showCreateForm() {
         return "addQuiz";
     }
+
+    @GetMapping("/joker")
+    public String showJokerLobby() { return "joker/JokerLobby"; }
+
+    @GetMapping("/joker/{roomCode}")
+    public String showJokerGame() { return "joker/JokerGame"; }
 }
 
 
