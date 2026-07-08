@@ -200,6 +200,9 @@ async function submitGuess() {
         if (state.status === "WON" && window.sendTimeAnalytics) {
             window.sendTimeAnalytics(puzzleId, "Wordle", "WORD_PUZZLE", 0);
         }
+        if (window.showAchievementToasts && state.newAchievements && state.newAchievements.length) {
+            window.showAchievementToasts(state.newAchievements);
+        }
     } catch (err) {
         console.error("guess failed:", err);
         setMessage("კავშირის შეცდომა");

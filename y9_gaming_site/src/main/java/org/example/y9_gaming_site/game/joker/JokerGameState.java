@@ -2,12 +2,13 @@ package org.example.y9_gaming_site.game.joker;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
+import org.example.y9_gaming_site.achievement.UnlockedAchievementDto;
 
 import java.util.*;
 
 @Getter
 public class JokerGameState {
-    public enum GameStatus { WAITING, BIDDING, PLAYING, ROUND_END, FINISHED }
+    public enum GameStatus {WAITING, BIDDING, PLAYING, ROUND_END, FINISHED}
 
     private final JokerGameConfig config;
     private final List<JokerPlayer> players = new ArrayList<>();
@@ -21,6 +22,8 @@ public class JokerGameState {
     private final List<Card> activeDeck = new ArrayList<>();
     @JsonIgnore
     private JokerTrick currentTrick = null;
+    @JsonIgnore
+    private final Map<Long, List<UnlockedAchievementDto>> pendingAchievements = new HashMap<>();
 
     private GameStatus status = GameStatus.WAITING;
     private int currRound = 0;
@@ -70,7 +73,7 @@ public class JokerGameState {
         if (config.getRoundOption() == JokerGameConfig.RoundOption.QUICK_4) return 9;
         if (config.getRoundOption() == JokerGameConfig.RoundOption.SHORT_8) return round;
         if (config.getRoundOption() == JokerGameConfig.RoundOption.FULL_24) {
-            if (round <= 8)  return round;
+            if (round <= 8) return round;
             if (round <= 12) return 9;
             if (round <= 20) return 21 - round;
             return 9;
@@ -163,5 +166,15 @@ public class JokerGameState {
 
     public void endRound() {
         status = isGameOver() ? GameStatus.FINISHED : GameStatus.ROUND_END;
+    }
+
+    public void addPendingAchievement(Long userId, UnlockedAchievementDto achievement) {
+        pendingAchievements.computeIfAbsent(userId, k -> new ArrayList<>()).add(achievement);
+    }
+
+    public Map<Long, List<UnlockedAchievementDto>> drainPendingAchievements() {
+        Map<Long, List<UnlockedAchievementDto>> copy = new HashMap<>(pendingAchievements);
+        pendingAchievements.clear();
+        return copy;
     }
 }

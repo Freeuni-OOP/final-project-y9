@@ -2,12 +2,12 @@ package org.example.y9_gaming_site.game.wordle;
 
 
 import org.example.y9_gaming_site.achievement.AchievementService;
+import org.example.y9_gaming_site.achievement.UnlockedAchievementDto;
 import org.example.y9_gaming_site.game.wordle.dto.AttemptStateDto;
 import org.example.y9_gaming_site.game.wordle.dto.GuessFeedbackDto;
 import org.example.y9_gaming_site.gameRecord.GameRecordService;
 import org.example.y9_gaming_site.user.User;
 import org.example.y9_gaming_site.user.UserRepository;
-import org.example.y9_gaming_site.user.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,6 +15,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -78,7 +79,7 @@ public class WordleService {
     }
 
     public AttemptStateDto getAttemptState(Long userId, long puzzleId) {
-        return toDto(getOrStartAttempt(userId, puzzleId));
+        return toDto(getOrStartAttempt(userId, puzzleId), List.of());
     }
 
     public AttemptStateDto submitGuess(Long userId, Long puzzleId, String rawGuess) {
@@ -106,22 +107,66 @@ public class WordleService {
         }
 
         wordleAttemptRepository.save(attempt);
+        List<UnlockedAchievementDto> unlocked = new ArrayList<>();
         if(attempt.getStatus() == AttemptStatus.WON) {
             gameRecordService.recordResult(userId, GAME_KEY, puzzleId, (double) attempt.guessCount());
             int tries = attempt.guessCount();
-            achievementService.grantByCode(userId, "WORDLE_FIRST_WIN");
+
+            grant(userId, "WORDLE_FIRST_WIN", unlocked);
 
             if(tries <= 2){
-                achievementService.grantByCode(userId, "WORDLE_IN_TWO_TRIES");
+                grant(userId, "WORDLE_IN_TWO_TRIES", unlocked);
             }
             if(tries == 1){
-                achievementService.grantByCode(userId, "WORDLE_IN_ONE_TRY");
+                grant(userId, "WORDLE_IN_ONE_TRY", unlocked);
+            }
+            if (attempt.getPuzzle().getPuzzleDate() != null) {
+                if (computeDailyStreak(userId) >= 10) {
+                    grant(userId, "WORDLE_DAILY_STREAK_10", unlocked);
+                }
+                long dailyWins = wordleAttemptRepository.countByUser_IdAndStatusAndPuzzle_PuzzleDateIsNotNull(userId, AttemptStatus.WON);
+                if (dailyWins >= 50) {
+                    grant(userId, "WORDLE_WINS_50", unlocked);
+                }
+            }
+
+            if (isFlawlessWin(attempt)) {
+                grant(userId, "WORDLE_FLAWLESS", unlocked);
             }
         }
-        return toDto(attempt);
+        return toDto(attempt, unlocked);
     }
 
-    private AttemptStateDto toDto(WordleAttempt attempt) {
+    private void grant(Long userId, String code, List<UnlockedAchievementDto> unlocked) {
+        achievementService.grantByCode(userId, code).ifPresent(a -> unlocked.add(UnlockedAchievementDto.from(a)));
+    }
+
+    private int computeDailyStreak(Long userId) {
+        List<LocalDate> wonDates = wordleAttemptRepository.findWonDailyPuzzleDatesDesc(userId, AttemptStatus.WON);
+        int streak = 0;
+        LocalDate expected = LocalDate.now();
+        for (LocalDate date : wonDates) {
+            if (date.equals(expected)) {
+                streak++;
+                expected = expected.minusDays(1);
+            } else {
+                break;
+            }
+        }
+        return streak;
+    }
+
+    private boolean isFlawlessWin(WordleAttempt attempt) {
+        String answer = attempt.getPuzzle().getAnswerWord();
+        for (String guess : attempt.getGuessList()) {
+            if (WordGrader.grade(guess, answer).contains(LetterState.PRESENT)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private AttemptStateDto toDto(WordleAttempt attempt, List<UnlockedAchievementDto> newAchievements) {
         String answer = attempt.getPuzzle().getAnswerWord();
         boolean finished = attempt.getStatus() != AttemptStatus.IN_PROGRESS;
         List<GuessFeedbackDto> guess = attempt.getGuessList().stream()
@@ -129,7 +174,7 @@ public class WordleService {
 
         return new AttemptStateDto(
                 attempt.getPuzzle().getId(), WordleDict.WORD_LENGTh, MAX_GUESSES,
-                attempt.getStatus(), guess, finished ? answer:null
+                attempt.getStatus(), guess, finished ? answer:null, newAchievements
         );
     }
 }

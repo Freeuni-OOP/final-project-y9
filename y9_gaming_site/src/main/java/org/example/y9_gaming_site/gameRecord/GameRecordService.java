@@ -79,5 +79,28 @@ public class GameRecordService {
         return candidates.stream().sorted(comparator).limit(limit).collect(Collectors.toList());
     }
 
+    public long countRecords(Long userId, String gameKey) {
+        Game game = gameRepository.findByTitle(gameKey).orElseThrow(() -> new RuntimeException("No game found"));
+        return gameRecordRepository.countByUserIdAndGameId(userId, game.getId());
+    }
+
+    public List<GameRecord> findRecentRecords(Long userId, String gameKey, int limit) {
+        Game game = gameRepository.findByTitle(gameKey).orElseThrow(() -> new RuntimeException("No game found"));
+        return gameRecordRepository.findByUserIdAndGameIdOrderByRecordedAtDesc(userId, game.getId())
+                .stream().limit(limit).toList();
+    }
+
+    public boolean isBestInContext(GameRecord record) {
+        List<GameRecord> all = gameRecordRepository.findByGameIdAndContextId(record.getGame().getId(), record.getContextId());
+        GameResultEvaluator evaluator = gameResultEvaluatorRegistry.resolve(record.getGame().getTitle());
+        for (GameRecord other : all) {
+            if (other.getId().equals(record.getId())) continue;
+            if (evaluator.isBetter(other.getValue(), record.getValue())) {
+                return false;
+            }
+        }
+        return true;
+    }
+
 }
 
