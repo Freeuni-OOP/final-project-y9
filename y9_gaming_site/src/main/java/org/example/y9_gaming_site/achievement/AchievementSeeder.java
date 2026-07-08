@@ -1,10 +1,13 @@
 package org.example.y9_gaming_site.achievement;
 
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.annotation.Order;
+import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.List;
 
+@Component
+@Order(1)
 public class AchievementSeeder implements CommandLineRunner {
 
     private AchievementRepository achievementRepository;

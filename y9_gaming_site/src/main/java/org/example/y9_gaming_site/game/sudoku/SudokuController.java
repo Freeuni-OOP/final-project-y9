@@ -1,8 +1,11 @@
 package org.example.y9_gaming_site.game.sudoku;
 
+import org.example.y9_gaming_site.user.User;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -13,6 +16,16 @@ public class SudokuController {
 
     public SudokuController(SudokuService sudokuService) {
         this.sudokuService = sudokuService;
+    }
+
+    public record SolveRequest(Long puzzleId, String solution, Integer elapsedSeconds){}
+
+    @PostMapping("/solve")
+    public ResponseEntity<Map<String, Boolean>> solve (@RequestBody SolveRequest req, Authentication authentication){
+        Long userId = ((User) authentication.getPrincipal()).getId();
+        int elapsed = req.elapsedSeconds() == null ? 0 : req.elapsedSeconds();
+        boolean correct = sudokuService.recordSolve(userId, req.puzzleId(), req.solution(), elapsed);
+        return ResponseEntity.ok(Map.of("correct", correct));
     }
 
     //mode1: daily game u play once a day. like wordle puzzle

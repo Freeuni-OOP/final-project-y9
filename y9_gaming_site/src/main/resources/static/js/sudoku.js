@@ -127,6 +127,21 @@ async function submitSolutionCheck() {
         if (window.sendTimeAnalytics) {
             window.sendTimeAnalytics(activePuzzleId, "Sudoku", "BOARD_PUZZLE", secondsElapsed);
         }
+        // record the solve server-side (validates the grid + grants achievements)
+        try {
+            const token = localStorage.getItem('token');
+            const headers = { "Content-Type": "application/json" };
+            if (token) headers["Authorization"] = `Bearer ${token}`;
+            fetch("/api/sudoku/solve", {
+                method: "POST",
+                headers: headers,
+                body: JSON.stringify({
+                    puzzleId: activePuzzleId,
+                    solution: submissionString,
+                    elapsedSeconds: secondsElapsed
+                })
+            }).catch(() => {});
+        } catch (e) { /* non-blocking */ }
     } else {
         alert("❌ There are some mistakes on your board. Keep tracking!");
     }
