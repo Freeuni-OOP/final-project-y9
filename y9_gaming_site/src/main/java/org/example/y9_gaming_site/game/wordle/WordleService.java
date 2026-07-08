@@ -8,8 +8,10 @@ import org.example.y9_gaming_site.gameRecord.GameRecordService;
 import org.example.y9_gaming_site.user.User;
 import org.example.y9_gaming_site.user.UserRepository;
 import org.example.y9_gaming_site.user.UserService;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -89,7 +91,7 @@ public class WordleService {
             throw new RuntimeException("invalid guess format!");
         }
         if(!dict.isValidWord(guess)) {
-            throw new RuntimeException("invalid word!");
+            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "WORD_NOT_FOUND");
         }
 
         String answer = attempt.getPuzzle().getAnswerWord();

@@ -181,6 +181,15 @@ async function submitGuess() {
             headers: authHeaders(true),
             body: JSON.stringify({ guess: currentGuess })
         });
+        if (res.status === 401 || res.status === 403) {
+            setMessage("გთხოვთ გაიაროთ ავტორიზაცია", "lose");
+            return;
+        }
+        if (res.status === 422) {
+            setMessage("სიტყვა არ არსებობს");
+            shakeRow();
+            return;
+        }
         if (!res.ok) {
             setMessage("ასეთი სიტყვა ვერ მოიძებნა");
             shakeRow();
@@ -202,7 +211,7 @@ async function submitGuess() {
 
 document.addEventListener("keydown", (e) => {
     if (e.ctrlKey || e.metaKey || e.altKey) return;
-    if (e.key === "Enter") { gu(); return; }
+    if (e.key === "Enter") { submitGuess(); return; }
     if (e.key === "Backspace") { e.preventDefault(); removeLetter(); return; }
     if (e.key.length === 1 && ANBANI_SET.has(e.key)) addLetter(e.key);
 });
@@ -248,4 +257,3 @@ document.addEventListener("DOMContentLoaded", () => {
     const mode = new URLSearchParams(location.search).get("mode");
     if (mode === "practice") loadPractice(); else loadDaily();
 });
-
