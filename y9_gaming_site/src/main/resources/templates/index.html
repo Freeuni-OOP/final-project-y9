@@ -284,14 +284,24 @@
         e.preventDefault();
         clearRegisterErrors();
 
+        const passwordInput = document.getElementById('regPass').value;
+        const passwordRegex = /^(?=.*[@#$%^&+=!*?<>\/'{}])(?=.*[0-9])(?=.*[A-Z])(?=.*[a-z]).{8,}$/;
+        if (!passwordRegex.test(passwordInput)) {
+            document.getElementById('passwordError').innerHTML =
+                "Invalid password!<br>" +
+                "Must contain: at least 8 characters, 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character (@#$%...).";
+            return;
+        }
+
         const body = {
             username: document.getElementById('regUser').value,
             email: document.getElementById('regEmail').value,
             birthDate: document.getElementById('regBirth').value,
-            password: document.getElementById('regPass').value
+            password: passwordInput
         };
 
         try {
+            // მოვაშორე /register ბოლოდან, რადგან ჯავაში @PostMapping პირდაპირ /api/users-ზე გვაქ
             const res = await fetch(`${API}/register`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
