@@ -5,7 +5,7 @@ function onSearch(search){
 
     const result = document.getElementById("searchResults");
 
-    if(search.length<2){
+    if(search.trim().length<2){
         result.style.display = "none";
         result.innerHTML = "";
         return;
@@ -21,22 +21,31 @@ async function runSearch(search){
     result.innerHTML = "";
     result.style.display = "block";
 
-    const gameMatches = [];
-    for(let i=0; i<window.cachedGamesList.length; i++){
-        const game = window.cachedGamesList[i];
+    const gameMatches = []
+    const games = window.cachedGamesList || []
+
+    for(let i=0; i<games.length; i++){
+        const game = games[i];
+
         if(game.title.toLowerCase().includes(search.toLowerCase())){
             gameMatches.push(game);
         }
-        if(gameMatches.length===5) break;
+        if(gameMatches.length === 5){
+            break;
+        }
     }
 
     let userMatches = [];
     const token = localStorage.getItem("token");
-    const res = await fetch("/api/users/search?query=" + encodeURIComponent(search), {
-        headers: {"Authorization":"Bearer " + token}
-    });
-    if(res.ok){
-        userMatches = await res.json();
+    try {
+        const res = await fetch("/api/users/search?query=" + encodeURIComponent(search), {
+            headers: {"Authorization": "Bearer " + token}
+        });
+        if (res.ok) {
+            userMatches = await res.json();
+        }
+    }catch (e){
+        console.log(e);
     }
 
     if(gameMatches.length === 0 && userMatches.length === 0){
