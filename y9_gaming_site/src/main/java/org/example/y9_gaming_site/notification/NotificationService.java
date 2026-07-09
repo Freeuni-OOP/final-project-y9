@@ -20,10 +20,10 @@ public class NotificationService {
         this.userRepository = userRepository;
     }
 
-    public void createFriendRequest(Long senderId, Long receiverId, String senderUsername) {
+    public void createFriendRequest(Long senderId, Long receiverId) {
         User sender = userRepository.findById(senderId).orElseThrow();
 
-        Notification notification = new Notification(receiverId, senderId, "FRIEND_REQUEST",senderUsername + " sent you a friend request");
+        Notification notification = new Notification(receiverId, senderId, "FRIEND_REQUEST",sender.getUsername() + " sent you a friend request");
         notificationRepository.save(notification);
     }
 

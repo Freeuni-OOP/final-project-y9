@@ -1,5 +1,6 @@
 package org.example.y9_gaming_site.friendship;
 
+import org.example.y9_gaming_site.notification.NotificationService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -7,8 +8,10 @@ import java.util.List;
 @Service
 public class FriendshipService {
     private final FriendshipRepository friendshipRepository;
-    public FriendshipService(FriendshipRepository friendshipRepository) {
+    private final NotificationService notificationService;
+    public FriendshipService(FriendshipRepository friendshipRepository, NotificationService notificationService) {
         this.friendshipRepository = friendshipRepository;
+        this.notificationService = notificationService;
     }
 
     public Friendship sendRequest(Long senderId, Long receiverId) {
@@ -19,7 +22,10 @@ public class FriendshipService {
         }
 
         Friendship friendship = new Friendship(senderId,receiverId,"Pending");
-        return friendshipRepository.save(friendship);
+        friendshipRepository.save(friendship);
+
+        notificationService.createFriendRequest(senderId, receiverId);
+        return friendship;
     }
 
     public Friendship acceptRequest(Long friendshipId) {
