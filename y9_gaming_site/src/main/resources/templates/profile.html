@@ -7,6 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Bitcount+Grid+Double+Ink&display=swap" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/profile.css}">
     <link rel="stylesheet" th:href="@{/css/navbar.css}">
+    <link rel="stylesheet" th:href="@{/css/homePage.css}">
 </head>
 <body>
 
@@ -21,6 +22,10 @@
                  alt="Avatar" class="avatar">
 
             <h2 id="username-display">Loading...</h2>
+            <div id="friend-section" style="margin-top: 12px; display: none;">
+                <button id="friend-btn" onclick="handleFriendBtn()"></button>
+                <p id="friend-status-text" style="color: #aaa; font-size: 13px; margin-top: 6px;"></p>
+            </div>
             <p class="user-status">Online</p>
 
             <div id="avatar-upload-section" class="upload-section" hidden>
@@ -33,22 +38,8 @@
             </div>
             <p id="error-message" class="error" hidden></p>
         </div>
-    </div>
 
-    <div class="column-middle">
-        <div class="dashboard-card">
-            <h3>Rarest Achievements</h3>
-            <div id="rarest-achievements" class="rarest-list"></div>
-        </div>
-
-        <div class="dashboard-card achievements-card">
-            <h3>Achievements achieved</h3>
-            <div id="achievements-grid" class="achievements-grid"></div>
-        </div>
-    </div>
-
-    <div class="column-right">
-        <div class="dashboard-card friends-card">
+        <div class="dashboard-card friends-card" style="margin-top: 20px;">
             <h3>Friends List : </h3>
             <div class="friends-list">
                 <div class="friend-item">
@@ -76,6 +67,51 @@
         </div>
     </div>
 
+    <div class="column-middle">
+        <div class="dashboard-card">
+            <h3>Rarest Achievements</h3>
+            <div id="rarest-achievements" class="rarest-list"></div>
+        </div>
+
+        <div class="dashboard-card achievements-card">
+            <h3>Achievements achieved</h3>
+            <div id="achievements-grid" class="achievements-grid"></div>
+        </div>
+
+        <div id="recommendations-wrapper" class="dashboard-card recommendations-card" style="margin-top: 20px; display: none;">
+            <h3>Recommended For You</h3>
+            <div id="recommendations-container" class="profile-mini-grid">
+                <p class="ach-empty">Analyzing play style...</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="column-right">
+        <div class="dashboard-card stats-sidebar-card unified-stats-height">
+            <h3>Top Games</h3>
+            <div id="top-games-container" class="profile-mini-grid">
+                <p class="ach-empty">Loading tracking...</p>
+            </div>
+        </div>
+
+        <div class="dashboard-card stats-sidebar-card unified-stats-height" style="margin-top: 20px;">
+            <h3>Top Categories</h3>
+            <div id="top-categories-container" class="clickable-stats-list">
+                <p class="ach-empty">Loading tracking...</p>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div id="gameTheaterModal" class="theater-overlay hidden">
+    <div class="theater-header">
+        <h2 id="theaterGameTitle" class="theater-title">Game Room</h2>
+        <button class="close-theater-btn" onclick="window.closeGameTheater()">✕ Exit Game</button>
+    </div>
+    <div class="theater-body">
+        <iframe id="gameIframe" src="" allowfullscreen></iframe>
+    </div>
 </div>
 
 <script th:inline="javascript">

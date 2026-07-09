@@ -4,7 +4,7 @@ const API = "/api/joker";
 let selectedPlayerCount = "THREE";
 let selectedRoundOption = "SHORT_8";
 let selectedJokerAmount = 1;
-let selectedAllowRandoms = false;
+let selectedAllowRandoms = true;
 
 // --- Wizard State ---
 let currentStep = 1;
