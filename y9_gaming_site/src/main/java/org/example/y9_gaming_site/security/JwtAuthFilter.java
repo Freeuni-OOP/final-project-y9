@@ -54,27 +54,38 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         if (token != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             String username = TokenUtil.validateTokenAndGetUsername(token);
 
-            if (username != null) {
-                User user = userRepository.findByUsername(username).orElse(null);
-
-                if (user != null) {
-                    var auth = new UsernamePasswordAuthenticationToken(
-                            user,
-                            null,
-                            List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()))
-                    );
-                    SecurityContextHolder.getContext().setAuthentication(auth);
-                } else {
-                    Cookie expired = new Cookie("jwt", null);
-                    expired.setPath("/");
-                    expired.setMaxAge(0);
-                    response.addCookie(expired);
-                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                    return;
-                }
+            if (username == null) {
+                rejectBadToken(request, response);
+                return;
             }
+
+            User user = userRepository.findByUsername(username).orElse(null);
+            if (user == null) {
+                rejectBadToken(request, response);
+                return;
+            }
+
+            var auth = new UsernamePasswordAuthenticationToken(
+                    user,
+                    null,
+                    List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()))
+            );
+            SecurityContextHolder.getContext().setAuthentication(auth);
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    private void rejectBadToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        Cookie expired = new Cookie("jwt", null);
+        expired.setPath("/");
+        expired.setMaxAge(0);
+        response.addCookie(expired);
+
+        if (request.getRequestURI().startsWith("/api/")) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        } else {
+            response.sendRedirect("/");
+        }
     }
 }
