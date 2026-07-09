@@ -71,6 +71,10 @@ body {
     gap: 10px;
 }
 
+.upload-section[hidden] {
+    display: none;
+}
+
 .file-label {
     cursor: pointer;
     color: #e194d5;

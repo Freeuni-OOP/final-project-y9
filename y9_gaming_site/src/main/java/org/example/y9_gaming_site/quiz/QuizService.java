@@ -1,5 +1,7 @@
 package org.example.y9_gaming_site.quiz;
 
+import org.example.y9_gaming_site.achievement.AchievementService;
+import org.example.y9_gaming_site.achievement.UnlockedAchievementDto;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import tools.jackson.core.type.TypeReference;
@@ -12,11 +14,13 @@ import java.util.List;
 public class QuizService {
 
     private final JdbcTemplate jdbcTemplate;
+    private final AchievementService achievementService;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
 
-    public QuizService(JdbcTemplate jdbcTemplate) {
+    public QuizService(JdbcTemplate jdbcTemplate, AchievementService achievementService) {
         this.jdbcTemplate = jdbcTemplate;
+        this.achievementService = achievementService;
     }
 
     public List<Quiz> getAllQuizzes() {
@@ -92,5 +96,18 @@ public class QuizService {
     public void deleteQuiz(Long quizId) {
         String sql = "DELETE FROM quizzes WHERE id = ?";
         jdbcTemplate.update(sql, quizId);
+    }
+
+    public QuizCompletionResponse submitCompletion(Long userId, int correctCount, int totalQuestions) {
+        List<UnlockedAchievementDto> unlocked = new ArrayList<>();
+        grant(userId, "QUIZ_FIRST", unlocked);
+        if (totalQuestions > 0 && correctCount >= totalQuestions) {
+            grant(userId, "QUIZ_PERFECT", unlocked);
+        }
+        return new QuizCompletionResponse(unlocked);
+    }
+
+    private void grant(Long userId, String code, List<UnlockedAchievementDto> unlocked) {
+        achievementService.grantByCode(userId, code).ifPresent(a -> unlocked.add(UnlockedAchievementDto.from(a)));
     }
 }

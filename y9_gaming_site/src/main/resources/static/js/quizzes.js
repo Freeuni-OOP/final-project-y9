@@ -342,10 +342,36 @@ function updateTimerDisplay() {
 }
 
 function endQuiz() {
+    const completedFully = currentQuiz && currentQuestionIndex >= currentQuiz.questions.length;
     clearInterval(timerInterval);
     document.getElementById('gameActiveArea').classList.add('hidden');
     document.getElementById('gameScoreArea').classList.remove('hidden');
     document.getElementById('finalScoreText').textContent = `You scored ${score} out of ${currentQuiz.questions.length}!`;
+
+    //report to achievements if they actually finished every question
+    if (completedFully) {
+        reportQuizCompletionForAchievements(currentQuiz.id, score, currentQuiz.questions.length);
+    }
+}
+
+async function reportQuizCompletionForAchievements(quizId, correctCount, totalQuestions) {
+    try {
+        const token = localStorage.getItem('token');
+        const headers = { "Content-Type": "application/json" };
+        if (token) headers["Authorization"] = `Bearer ${token}`;
+
+        const res = await fetch(`/api/quizzes/${quizId}/complete`, {
+            method: "POST",
+            headers: headers,
+            body: JSON.stringify({ correctCount, totalQuestions })
+        });
+        const result = await res.json();
+        if (window.showAchievementToasts && result.newAchievements && result.newAchievements.length) {
+            window.showAchievementToasts(result.newAchievements);
+        }
+    } catch (err) {
+        console.error("Failed to report quiz completion for achievements : ", err);
+    }
 }
 
 function quitQuiz() {

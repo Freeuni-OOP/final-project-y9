@@ -1,8 +1,10 @@
 package org.example.y9_gaming_site.quiz;
 
+import org.example.y9_gaming_site.user.User;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -43,6 +45,16 @@ public class QuizController {
     @GetMapping("/{id}")
     public ResponseEntity<Quiz> getQuizById(@PathVariable Long id) {
         return ResponseEntity.ok(quizService.getQuizById(id));
+    }
+
+   @PostMapping("/{id}/complete")
+    public ResponseEntity<QuizCompletionResponse> completeQuiz(@PathVariable Long id, @RequestBody QuizCompletionRequest request,
+                                                               Authentication authentication) {
+        if (authentication == null || !(authentication.getPrincipal() instanceof User)) {
+            return ResponseEntity.status(401).build();
+        }
+        Long userId = ((User) authentication.getPrincipal()).getId();
+        return ResponseEntity.ok(quizService.submitCompletion(userId, request.correctCount(), request.totalQuestions()));
     }
 
     @DeleteMapping("/{id}")

@@ -32,8 +32,6 @@ public class GameRecord {
     @Column(name = "recorded_at", nullable = false)
     private LocalDateTime recordedAt = LocalDateTime.now();
 
-    public GameRecord() {}
-
     public GameRecord(User user, Game game, Long contextId, double value) {
         this.user = user;
         this.game = game;

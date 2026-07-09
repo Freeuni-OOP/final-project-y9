@@ -38,4 +38,17 @@ public class wordleDictTest {
     public void testSample6(){
         assertThat(dict.isCorrectFormat(null)).isFalse();
     }
+
+    @Test
+    void testSample7(){ // pickWord actually avoids words in a nonempty set
+        String first = dict.pickWord(Set.of());
+        String second = dict.pickWord(Set.of(first));
+        assertThat(second).isNotEqualTo(first);
+    }
+
+    @Test
+    void testSample8(){ // isValidWord is true for word thats actually in dictionary
+        String realWord = dict.pickWord(Set.of());
+        assertThat(dict.isValidWord(realWord)).isTrue();
+    }
 }

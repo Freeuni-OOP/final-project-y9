@@ -1,6 +1,8 @@
 package org.example.y9_gaming_site.game.sudoku;
 
+import org.example.y9_gaming_site.user.User;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
@@ -38,5 +40,16 @@ public class SudokuController {
 
         return randomPuzzle.map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @PostMapping("/{puzzleId}/solve")
+    public ResponseEntity<SudokuSolveResponse> solve(@PathVariable Long puzzleId,
+                                                     @RequestBody SudokuSolveRequest request,
+                                                     Authentication authentication) {
+        if (authentication == null || !(authentication.getPrincipal() instanceof User)) {
+            return ResponseEntity.status(401).build();
+        }
+        Long userId = ((User) authentication.getPrincipal()).getId();
+        return ResponseEntity.ok(sudokuService.submitSolve(userId, request.secondsTaken()));
     }
 }

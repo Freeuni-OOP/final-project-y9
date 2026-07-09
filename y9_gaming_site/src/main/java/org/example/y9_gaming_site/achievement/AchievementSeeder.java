@@ -41,9 +41,6 @@ public class AchievementSeeder implements CommandLineRunner {
                 new Def("SUDOKU_FIRST_SOLVE", "დამწყები", "ამოხსენი ნებისმიერი სუდოკუ"),
                 new Def("SUDOKU_IN_120", "სხარტი", "ამოხსენი სუდოკუ 2 წუთზე ნაკლებში"),
                 new Def("SUDOKU_IN_60", "wtf dude", "ამოხსენი სუდოკუ 1 წუთზე ნაკლებში"),
-                new Def("SUDOKU_DAILY_STREAK_10", "ოსტატი", "ამოხსენი დღის სუდოკუ ზედიზედ 10 დღე"),
-                new Def("SUDOKU_SOLVED_50", "სუდოკუს ვეტერანი", "ამოხსენი დღის სუდოკუ 50"),
-
                 // Quiz-ები
                 new Def("QUIZ_FIRST", "ცოდნის მაძიებელი", "დაასრულე ქვიიზი"),
                 new Def("QUIZ_PERFECT", "მცოდნე", "მიიღე მასიმალური ქულა ქვიზში")

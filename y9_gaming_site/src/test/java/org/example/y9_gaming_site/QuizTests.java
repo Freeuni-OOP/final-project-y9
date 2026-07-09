@@ -26,7 +26,7 @@ public class QuizTests extends TestCase {
         super.setUp();
 
         mockJdbcTemplate = Mockito.mock(JdbcTemplate.class);
-        quizService = new QuizService(mockJdbcTemplate);
+        quizService = new QuizService(mockJdbcTemplate, null);
 
         quiz1 = new Quiz();
         quiz1.setId(1L);

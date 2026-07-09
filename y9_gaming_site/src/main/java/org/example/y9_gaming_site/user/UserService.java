@@ -110,8 +110,7 @@ public class UserService {
     }
 
     public UserProfileResponse getProfile(Long id){
-        User user = userRepository.findById(id).orElse(null);
-        assert user != null;
+        User user = userRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("User id " + id + " not found"));
         return new UserProfileResponse(user.getId(), user.getUsername(), user.getAvatarUrl(), user.getRole().name());
     }
 
