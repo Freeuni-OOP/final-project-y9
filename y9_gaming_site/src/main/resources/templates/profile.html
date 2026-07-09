@@ -7,6 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Bitcount+Grid+Double+Ink&display=swap" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/profile.css}">
     <link rel="stylesheet" th:href="@{/css/navbar.css}">
+    <link rel="stylesheet" th:href="@{/css/homePage.css}">
 </head>
 <body>
 
@@ -38,16 +39,9 @@
             <p id="error-message" class="error" hidden></p>
         </div>
 
-        <div class="dashboard-card stats-sidebar-card">
+        <div class="dashboard-card stats-sidebar-card unified-stats-height">
             <h3>Top Games</h3>
-            <div id="top-games-container" class="clickable-stats-list">
-                <p class="ach-empty">Loading tracking...</p>
-            </div>
-        </div>
-
-        <div class="dashboard-card stats-sidebar-card">
-            <h3>Top Categories</h3>
-            <div id="top-categories-container" class="clickable-stats-list">
+            <div id="top-games-container" class="profile-mini-grid">
                 <p class="ach-empty">Loading tracking...</p>
             </div>
         </div>
@@ -92,8 +86,25 @@
                 </div>
             </div>
         </div>
+
+        <div class="dashboard-card stats-sidebar-card unified-stats-height">
+            <h3>Top Categories</h3>
+            <div id="top-categories-container" class="clickable-stats-list">
+                <p class="ach-empty">Loading tracking...</p>
+            </div>
+        </div>
     </div>
 
+</div>
+
+<div id="gameTheaterModal" class="theater-overlay hidden">
+    <div class="theater-header">
+        <h2 id="theaterGameTitle" class="theater-title">Game Room</h2>
+        <button class="close-theater-btn" onclick="window.closeGameTheater()">✕ Exit Game</button>
+    </div>
+    <div class="theater-body">
+        <iframe id="gameIframe" src="" allowfullscreen></iframe>
+    </div>
 </div>
 
 <script th:inline="javascript">

@@ -8,6 +8,9 @@ const avatarForm = document.getElementById("avatar-form");
 const avatarInput = document.getElementById("avatar-input");
 const uploadStatus = document.getElementById("upload-status");
 
+// for game configs
+window.cachedGamesList = [];
+
 function showError(message) {
     if (errorMessage) {
         errorMessage.textContent = message;
@@ -22,6 +25,34 @@ function formatPlaytime(totalSeconds) {
     const hrs = Math.floor(mins / 60);
     const remainingMins = mins % 60;
     return remainingMins > 0 ? `${hrs}h ${remainingMins}m` : `${hrs}h`;
+}
+
+async function prefetchGamesCatalog() {
+    try {
+        const res = await fetch('https://raw.githubusercontent.com/InterstellarNetwork/Interstellar/main/static/assets/json/g.min.json');
+        if (!res.ok) return;
+
+        const remoteGames = await res.json();
+        window.cachedGamesList = remoteGames
+            .filter(game => game && game.name && !game.name.startsWith('!') && !['Steam', 'Amazon Luna', 'Newgrounds'].includes(game.name))
+            .map((game, index) => {
+                let finalIcon = game.image || game.img || game.logo || '';
+                if (!finalIcon) {
+                    finalIcon = '/img/games/default.png';
+                } else if (finalIcon.startsWith('/')) {
+                    finalIcon = `https://raw.githubusercontent.com/InterstellarNetwork/Interstellar/main/static${finalIcon}`;
+                }
+                return {
+                    id: index,
+                    title: game.name || 'Unknown Web Game',
+                    sourceUrl: game.link || '',
+                    iconUrl: finalIcon,
+                    gameType: 'OPENSOURCE'
+                };
+            });
+    } catch (err) {
+        console.error("Profile matching cache loader bypassed:", err);
+    }
 }
 
 async function loadProfile() {
@@ -84,7 +115,6 @@ async function loadGameAnalytics() {
         "Content-Type": "application/json"
     };
 
-    // 1. Fetch Top 3 Games
     try {
         const gamesRes = await fetch(`/api/games/${userId}/top-3`, { headers });
         if (gamesRes.ok) {
@@ -97,7 +127,6 @@ async function loadGameAnalytics() {
         console.error("Error loading games tracking data:", err);
     }
 
-    // fetch top categories
     try {
         const catsRes = await fetch(`/api/games/${userId}/top-categories`, { headers });
         if (catsRes.ok) {
@@ -120,18 +149,27 @@ function renderTopGames(games) {
         return;
     }
 
+    container.className = "profile-mini-grid";
+
     container.innerHTML = games.map((g, index) => {
-        let rankClass = "rank-silver";
-        if (index === 0) rankClass = "rank-gold";
-        if (index === 1) rankClass = "rank-platinum";
+        const matched = window.cachedGamesList.find(x => x.title.toLowerCase() === g.gameTitle.toLowerCase());
+        const iconSrc = matched ? matched.iconUrl : '/img/games/default.png';
+        const categoryKey = matched ? matched.category : "ARCADE";
+
+        const clickAction = matched
+            ? `window.handlePlayGame('${matched.id}', '${matched.gameType}', '${matched.sourceUrl}', \`${escapeHtml(g.gameTitle)}\`, '${categoryKey}')`
+            : `window.location.href='/home'`;
 
         return `
-            <div class="stat-clickable-item" onclick="window.location.href='/games?play=${encodeURIComponent(g.gameTitle)}'">
-                <div class="stat-main-info">
-                    <span class="stat-item-title">${escapeHtml(g.gameTitle)}</span>
-                    <span class="stat-item-subtitle">Playtime: ${formatPlaytime(g.totalTimeSeconds)}</span>
+            <div class="profile-game-box rank-${index + 1}" onclick="${clickAction}">
+                <div class="profile-thumb-wrapper">
+                    <img class="profile-mini-icon" 
+                         src="${iconSrc}" 
+                         alt="${escapeHtml(g.gameTitle)}" 
+                         onerror="this.onerror=null; this.src='/img/games/default.png';" />
                 </div>
-                <span class="badge ${rankClass}">#${index + 1}</span>
+                <span class="profile-box-title" title="${escapeHtml(g.gameTitle)}">${escapeHtml(g.gameTitle)}</span>
+                <span class="profile-box-subtitle">${formatPlaytime(g.totalTimeSeconds)}</span>
             </div>
         `;
     }).join("");
@@ -146,18 +184,23 @@ function renderTopCategories(categories) {
         return;
     }
 
-    container.innerHTML = categories.map(c => `
-        <div class="stat-clickable-item" onclick="window.location.href='/games?category=${encodeURIComponent(c.category)}'">
-            <div class="stat-main-info">
-                <span class="stat-item-title">${escapeHtml(c.category)}</span>
-                <span class="stat-item-subtitle">Click to explore category</span>
-            </div>
-            <span class="rarest-count">${formatPlaytime(c.totalTimeSeconds)}</span>
-        </div>
-    `).join("");
-}
+    container.className = "clickable-stats-list";
 
-// File system listeners
+    container.innerHTML = categories.map(c => {
+        const targetUrl = `/home?category=${encodeURIComponent(c.category)}`;
+
+        return `
+            <div class="stat-clickable-item" onclick="window.location.href='${targetUrl}'">
+                <div class="stat-main-info">
+                    <span class="stat-item-title">${escapeHtml(c.category)}</span>
+                    <span class="stat-item-subtitle">Click to view all ${escapeHtml(c.category).toLowerCase()} games</span>
+                </div>
+                <span class="rarest-count">${formatPlaytime(c.totalTimeSeconds)}</span>
+            </div>
+        `;
+    }).join("");
+}
+// file system listeners
 if (avatarInput) {
     avatarInput.addEventListener("change", function () {
         if (avatarInput.files && avatarInput.files[0]) {
@@ -251,7 +294,82 @@ function renderAllAchievements(items) {
         </div>`).join("");
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+//session analytics tracking
+window.gameStartTime = null;
+window.activeGameTitle = null;
+window.activeGameId = null;
+window.activeGameCategory = null;
+
+window.handlePlayGame = function(id, type, sourceUrl, title) {
+    const modal = document.getElementById('gameTheaterModal');
+    const iframe = document.getElementById('gameIframe');
+    const titleHeader = document.getElementById('theaterGameTitle');
+
+    if (!modal || !iframe) {
+        window.location.href = `/home`;
+        return;
+    }
+
+    if (titleHeader) titleHeader.textContent = title.toUpperCase();
+    iframe.src = sourceUrl;
+    modal.classList.remove('hidden');
+
+    window.gameStartTime = Date.now();
+    window.activeGameTitle = title;
+    window.activeGameId = id;
+    window.activeGameCategory = "ARCADE";
+    console.log(`[PROFILE TRACKER] Active tracking session started for: ${window.activeGameTitle}`);
+};
+
+window.closeGameTheater = function() {
+    const modal = document.getElementById('gameTheaterModal');
+    const iframe = document.getElementById('gameIframe');
+    if (!modal || !iframe) return;
+
+    modal.classList.add('hidden');
+    iframe.src = "";
+
+    if (window.gameStartTime && window.activeGameTitle) {
+        const timeSpentSeconds = Math.max(1, Math.floor((Date.now() - window.gameStartTime) / 1000));
+        sendTimeAnalytics(window.activeGameId, window.activeGameTitle, window.activeGameCategory, timeSpentSeconds);
+    }
+
+    window.gameStartTime = null;
+    window.activeGameTitle = null;
+    window.activeGameId = null;
+    window.activeGameCategory = null;
+};
+
+async function sendTimeAnalytics(id, title, category, seconds) {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+
+    try {
+        console.log(`[PROFILE TRACKER] Syncing stats updates for game session...`);
+        const res = await fetch("/api/games/track-time", {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${token}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                gameId: id,
+                gameTitle: title,
+                category: category || "ARCADE",
+                durationSeconds: seconds
+            })
+        });
+
+        console.log(`[PROFILE TRACKER] Logged time metrics synced successfully (${res.status}). Refreshing view...`);
+        loadGameAnalytics();
+    } catch (err) {
+        console.error("Time tracking sync failed from profile scope:", err);
+    }
+}
+
+//startup order
+document.addEventListener("DOMContentLoaded", async () => {
+    await prefetchGamesCatalog();
     loadProfile().catch(err => console.error(err));
     loadAchievements().catch(err => console.error(err));
     loadGameAnalytics().catch(err => console.error(err));

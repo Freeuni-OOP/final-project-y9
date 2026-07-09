@@ -286,6 +286,18 @@
             window.location.href = "/login";
         }
     }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const categoryParam = urlParams.get('category');
+
+        if (categoryParam) {
+            console.log(`[ROUTER] Applying filter argument: ${categoryParam}`);
+            setTimeout(() => {
+                filterCategory(categoryParam.toUpperCase());
+            }, 500);
+        }
+    });
 </script>
 <script src = "/js/Search.js"></script>
 </body>
