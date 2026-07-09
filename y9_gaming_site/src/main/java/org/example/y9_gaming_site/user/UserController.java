@@ -47,12 +47,11 @@ public class UserController {
     @GetMapping("/me")
     public ResponseEntity<?> getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if(authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getName())) {
+        if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getName())) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("not logged in");
         }
-        User user = (User) authentication.getPrincipal();
-        String userName= user.getUsername();
-        try{
+        String userName = authentication.getName();
+        try {
             return ResponseEntity.ok(userService.getProfileByUsername(userName));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
@@ -63,10 +62,9 @@ public class UserController {
     public ResponseEntity<?> uploadAvatar(@RequestParam("avatar") MultipartFile avatar) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getName())) {
-            return  ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("You are not logged in");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("You are not logged in");
         }
-        User user = (User) authentication.getPrincipal();
-        String userName= user.getUsername();
+        String userName = authentication.getName();
 
         try {
             String avatarUrl = userService.updateOrCreateAvatar(userName, avatar);

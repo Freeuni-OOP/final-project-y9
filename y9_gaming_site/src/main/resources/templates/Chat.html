@@ -5,35 +5,17 @@
     <title>Chat</title>
     <link rel="stylesheet"  th:href="@{/css/navbar.css}">
     <link rel="stylesheet" href="/css/Chat.css" />
+    <link rel="stylesheet" th:href="@{/css/navbar.css}">
+    <style>
+        body {g
+            margin: 0;
+            padding: 0;
+        }
+    </style>
 </head>
 <body>
-<nav class="navbar">
-    <a class="navbar__brand" href="/home">Y9</a>
-    <ul class="navbar__links">
-        <li><a href="/home">Home</a></li>
-        <li><a href="/quizzes" class="active">Quizzes</a></li>
-        <li><a href="/leaderboard">Leaderboard</a></li>
-        <li><a href="/chat">Chat</a></li>
-        <li id="adminLink" style="display: none;">
-            <a th:href="@{/admin/dashboard}">Admin Panel</a>
-        </li>
-    </ul>
-    <div class="navbar__user">
-        <img id="nav-avatar"
-             class="navbar__avatar"
-             src="/img/avatars/default.png"
-             alt="avatar"
-             style="cursor: pointer;"
-             onclick="redirectToMyProfile()" />
+<nav th:replace="~{fragments/navbar :: navbar(active='home')}"></nav>
 
-        <span id="nav-username"
-              class="navbar__username"
-              style="cursor: pointer;"
-              onclick="redirectToMyProfile()">...</span>
-
-        <button onclick="logout()" class="navbar__logout">Log out</button>
-    </div>
-</nav>
     <div class="card">
         <h2>Chat with friend</h2>
         <p>you are logged in as: <strong id = "myUsernameLabel"></strong></p>

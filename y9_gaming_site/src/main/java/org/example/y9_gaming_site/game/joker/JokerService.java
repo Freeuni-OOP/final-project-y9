@@ -48,14 +48,17 @@ public class JokerService {
     public JokerGameState joinGame(String roomCode, Long userId, String username) {
         JokerGameState state = getActiveGame(roomCode);
 
+        // 1. თუ მომხმარებელი უკვე არის თამაშში, ერორს კი არ ვისვრით, უბრალოდ ვაბრუნებთ სტეიტს
+        if (isAlreadyInGame(state, userId)) {
+            return state;
+        }
+
+        // 2. დანარჩენი ვალიდაციები სრულდება მხოლოდ ახალი მოთამაშის შემოსვლისას
         if (state.getStatus() != GameStatus.WAITING) {
             throw new IllegalStateException("Game already started");
         }
         if (state.isFull()) {
             throw new IllegalStateException("Game is full");
-        }
-        if (isAlreadyInGame(state, userId)) {
-            throw new IllegalStateException("You are already in this game");
         }
 
         state.addPlayer(new JokerPlayer(userId, username));
@@ -64,8 +67,9 @@ public class JokerService {
 
     public List<JokerGameState> findOpenLobbies() {
         return activeGames.values().stream()
+                .filter(Objects::nonNull)
                 .filter(s -> s.getStatus() == GameStatus.WAITING)
-                .filter(s -> s.getConfig().isAllowRandoms())
+                .filter(s -> s.getConfig() != null && s.getConfig().isAllowRandoms())
                 .filter(s -> !s.isFull())
                 .toList();
     }

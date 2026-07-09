@@ -50,7 +50,7 @@ function connectWebSocket() {
     // SockJS + STOMP
     const socket = new SockJS("/ws");
     const stompClient = Stomp.client(socket); // loaded via CDN in HTML
-    stompClient.debug = null; // silence logs
+    //stompClient.debug = null; // silence logs
 
     stompClient.connect({}, () => {
         stompClient.subscribe(`/topic/joker/${roomCode}`, (message) => {

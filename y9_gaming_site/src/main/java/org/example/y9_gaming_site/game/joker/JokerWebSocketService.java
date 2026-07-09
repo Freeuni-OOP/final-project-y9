@@ -27,8 +27,8 @@ public class JokerWebSocketService {
 
     // --- Specific broadcasts ---
 
-    public void broadcastPlayerJoined(String roomCode, String username) {
-        broadcast(roomCode, "PLAYER_JOINED", username + " joined the lobby");
+    public void broadcastPlayerJoined(String roomCode, JokerGameState state) {
+        broadcast(roomCode, "PLAYER_JOINED", toPublicState(state));
     }
 
     public void broadcastGameStarted(String roomCode, JokerGameState state) {

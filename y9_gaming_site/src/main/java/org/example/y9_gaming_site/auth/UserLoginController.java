@@ -52,6 +52,7 @@ public class UserLoginController {
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         } catch (Exception e) {
+            System.out.println("EXCEPTION: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An unexpected error occurred.");
         }
     }
@@ -70,7 +71,20 @@ public class UserLoginController {
     }
 
     @PostMapping("/logout")
-    public String logout(HttpServletResponse response) {
+    public ResponseEntity<?> logout(@CookieValue(value = "jwt", required = false) String token, HttpServletResponse response) {
+        if (token != null && !token.isEmpty()) {
+            try {
+                String username = TokenUtil.getUsernameFromToken(token);
+                userRepository.findByUsername(username).ifPresent(user -> {
+                    if ("GUEST".equalsIgnoreCase(user.getRole().toString())) {
+                        userRepository.delete(user);
+                    }
+                });
+            } catch (Exception e) {
+                System.out.println("EXCEPTION DURING GUEST DELETION: " + e.getMessage());
+            }
+        }
+
         ResponseCookie cookie = ResponseCookie.from("jwt", "")
                 .httpOnly(true)
                 .secure(false)      // must match addJwtCookie exactly
@@ -79,7 +93,8 @@ public class UserLoginController {
                 .sameSite("Lax")
                 .build();
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
-        return "redirect:/login";
+
+        return ResponseEntity.ok(Map.of("message", "Logged out successfully"));
     }
 
     private void addJwtCookie(HttpServletResponse response, String token) {

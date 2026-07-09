@@ -10,6 +10,7 @@
 
 </head>
     <nav th:replace="~{fragments/navbar :: navbar(active='home')}"></nav>
+<div id="notification-dropdown" class="notification-dropdown"></div>
 
 <div class="search-wrapper">
     <input type="text" id="search-input" placeholder="🔍 search game or person..." autocomplete="off" oninput="onSearch(this.value)">
@@ -286,6 +287,18 @@
             window.location.href = "/login";
         }
     }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const categoryParam = urlParams.get('category');
+
+        if (categoryParam) {
+            console.log(`[ROUTER] Applying filter argument: ${categoryParam}`);
+            setTimeout(() => {
+                filterCategory(categoryParam.toUpperCase());
+            }, 500);
+        }
+    });
 </script>
 <script src = "/js/Search.js"></script>
 </body>

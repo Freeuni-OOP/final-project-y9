@@ -83,6 +83,19 @@ public class TokenUtil {
         }
     }
 
+    public static String getUsernameFromToken(String token) {
+        try {
+            String[] parts = token.split("\\.");
+            if (parts.length != 2) return null;
+
+            String payload = new String(Base64.getDecoder().decode(parts[0]));
+            String[] data = payload.split(":");
+            return data[0];
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
     public static String validateTokenAndGetUsername(String token) {
         try {
             String[] parts = token.split("\\.");

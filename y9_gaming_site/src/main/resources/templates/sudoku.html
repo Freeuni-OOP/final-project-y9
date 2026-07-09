@@ -26,12 +26,13 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            gap: 24px;
             padding: 40px 20px;
             box-sizing: border-box;
             min-height: 85vh;
         }
 
-        .game-panel {
+        .game-panel, .sudoku-controls-card {
             background: rgba(71, 44, 82, 0.6);
             backdrop-filter: blur(8px);
             border-radius: 16px;
@@ -40,8 +41,11 @@
             box-shadow: 0 10px 40px rgba(145, 60, 143, 0.25);
             width: 100%;
             max-width: 450px;
-            text-align: center;
             box-sizing: border-box;
+        }
+
+        .game-panel {
+            text-align: center;
         }
 
         .game-header h1 {
@@ -84,7 +88,7 @@
             height: 100%;
             min-width: 0;
             background: rgba(71, 44, 82, 0.85);
-            border: none;
+            border: 1px solid rgba(255, 255, 255, 0.03);
             color: #ffffff;
             text-align: center;
             font-size: 1.3rem;
@@ -92,12 +96,14 @@
             outline: none;
             box-sizing: border-box;
             padding: 0;
-            transition: background 0.15s, box-shadow 0.15s;
+            transition: background 0.15s, box-shadow 0.15s, color 0.15s, border-color 0.15s;
         }
 
-        .sudoku-cell:focus {
+        .sudoku-cell:focus, .sudoku-cell.focused-cell {
             background: #ffffff !important;
             color: rgba(186, 43, 124, 1) !important;
+            border-color: #e765e0 !important;
+            box-shadow: 0 0 8px rgba(231, 101, 224, 0.6);
         }
 
         .sudoku-cell.highlight-number-match {
@@ -119,6 +125,24 @@
             color: #cba8d8;
             cursor: default;
             caret-color: transparent;
+        }
+
+        /* --- Auto-Check Color States --- */
+        .sudoku-cell.check-error {
+            background-color: rgba(255, 107, 157, 0.25) !important;
+            color: #ff6b9d !important;
+            border: 1px solid #ff6b9d !important;
+        }
+
+        .sudoku-cell.check-correct {
+            background-color: rgba(78, 205, 196, 0.25) !important;
+            color: #4ecdc4 !important;
+            border: 1px solid #4ecdc4 !important;
+        }
+
+        .sudoku-cell.is-hint-provided {
+            color: #4ecdc4 !important;
+            font-style: italic;
         }
 
         .actions-row {
@@ -163,17 +187,179 @@
             background: rgba(179, 39, 201, 0.25) !important;
             color: #ffffff !important;
         }
+
+        /* --- Assistant Card Styles --- */
+        .sudoku-controls-card h3 {
+            margin: 0 0 16px 0;
+            font-size: 1.1rem;
+            color: #d07fd8;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 8px;
+        }
+
+        .controls-action-row {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .hint-btn {
+            background: rgba(186, 43, 124, 0.25);
+            border: 1px solid rgba(186, 43, 124, 0.6);
+            color: #e194d5;
+        }
+
+        .hint-btn:hover:not(.button-exhausted) {
+            background: rgba(186, 43, 124, 0.5) !important;
+            color: #fff !important;
+        }
+
+        .button-exhausted {
+            background: rgba(0, 0, 0, 0.3) !important;
+            border-color: rgba(255, 255, 255, 0.05) !important;
+            color: #666 !important;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+
+        .autocheck-toggle-label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+            font-size: 0.95rem;
+            color: #cba8d8;
+            gap: 12px;
+        }
+
+        .autocheck-toggle-label input {
+            display: none;
+        }
+
+        .custom-toggle-slider {
+            position: relative;
+            width: 42px;
+            height: 22px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            transition: background-color 0.2s, border-color 0.2s;
+        }
+
+        .custom-toggle-slider::before {
+            content: "";
+            position: absolute;
+            height: 14px;
+            width: 14px;
+            left: 3px;
+            bottom: 3px;
+            background-color: #fff;
+            border-radius: 50%;
+            transition: transform 0.2s;
+        }
+
+        input:checked + .custom-toggle-slider {
+            background-color: rgba(179, 39, 201, 0.5);
+            border-color: #b327c9;
+        }
+
+        input:checked + .custom-toggle-slider::before {
+            transform: translateX(20px);
+            background-color: #ffffff;
+        }
+
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .custom-toast {
+            background: rgba(30, 15, 36, 0.95);
+            backdrop-filter: blur(8px);
+            border-left: 4px solid #b327c9;
+            color: #fff;
+            padding: 14px 24px;
+            border-radius: 6px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+            font-size: 0.95rem;
+            font-weight: 600;
+            min-width: 250px;
+            max-width: 350px;
+            animation: slideIn 0.3s forwards, fadeOut 0.3s linear 4.5s forwards;
+        }
+
+        .custom-toast.toast-error { border-left-color: #ff6b9d; }
+        .custom-toast.toast-success { border-left-color: #4ecdc4; }
+        .custom-toast.toast-warn { border-left-color: #ffbe0b; }
+
+        @keyframes slideIn {
+            from { transform: translateX(120%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes fadeOut {
+            to { transform: translateY(-10px); opacity: 0; }
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(20, 10, 25, 0.8);
+            backdrop-filter: blur(6px);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.25s ease;
+        }
+        .modal-overlay.modal-open { opacity: 1; pointer-events: auto; }
+
+        .difficulty-card {
+            background: rgba(45, 25, 55, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 30px;
+            width: 90%; max-width: 400px;
+            text-align: center;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+        }
+        .difficulty-card h2 {
+            font-family: 'Bitcount Grid Double Ink', monospace;
+            color: #d07fd8; margin-top: 0; margin-bottom: 20px;
+        }
+        .difficulty-grid {
+            display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;
+        }
     </style>
 </head>
 <body>
 
 <nav th:replace="~{fragments/navbar :: navbar(active='home')}"></nav>
 
+<div id="toast-container" class="toast-container"></div>
+
 <main class="sudoku-container">
     <div class="game-panel">
         <div class="game-header">
-            <h1 id="mode-title">SUDOKU</h1>
-            <div class="timer-display" id="sudoku-timer">00:00</div>
+            <div class="game-header">
+                <h1 id="mode-title">SUDOKU</h1>
+                <div style="display: flex; gap: 10px; justify-content: center; margin-bottom: 25px;">
+                    <div class="timer-display" id="sudoku-timer">00:00</div>
+                    <div class="timer-display" id="mistakes-counter" style="background: rgba(255, 107, 157, 0.15); border-color: rgba(255, 107, 157, 0.4); color: #ff6b9d;">
+                        ❤️ ❤️ ❤️
+                    </div>
+                </div>
+            </div>
+
         </div>
 
         <div id="sudoku-grid" class="sudoku-grid"></div>
@@ -181,11 +367,38 @@
         <div class="actions-row">
             <button class="y9-btn" onclick="submitSolutionCheck()">Verify Solution</button>
             <button class="y9-btn y9-btn--alt" onclick="generateChallengeLink()">Challenge Friend</button>
-            <button class="y9-btn y9-btn--alt" onclick="loadSoloPracticeGame()">Infinite Mode</button>
+            <button class="y9-btn y9-btn--alt" onclick="openDifficultyModal()">Infinite Mode</button>
             <button class="y9-btn y9-btn--alt" style="border-color: rgba(255, 107, 157, 0.4); color: #ff6b9d;" onclick="giveUpAndReveal()">Reveal Solution 🏳️</button>
         </div>
     </div>
+
+    <div class="dashboard-card sudoku-controls-card">
+        <h3>Game Assistant</h3>
+        <div class="controls-action-row">
+            <button id="hint-btn" class="y9-btn hint-btn" onclick="triggerBoardCellHint()">
+                💡 Get Hint (3/3 left)
+            </button>
+
+            <label class="autocheck-toggle-label">
+                <input type="checkbox" id="auto-check-toggle">
+                <span class="custom-toggle-slider"></span>
+                Auto Check
+            </label>
+        </div>
+    </div>
 </main>
+
+<div id="difficulty-modal" class="modal-overlay" onclick="closeDifficultyModal()">
+    <div class="difficulty-card" onclick="event.stopPropagation()">
+        <h2>Select Difficulty</h2>
+        <div class="difficulty-grid">
+            <button class="y9-btn" onclick="selectDifficulty('EASY')">Easy </button>
+            <button class="y9-btn" onclick="selectDifficulty('MEDIUM')">Medium </button>
+            <button class="y9-btn" onclick="selectDifficulty('HARD')">Hard </button>
+        </div>
+        <button class="y9-btn y9-btn--alt" style="margin-top: 10px;" onclick="closeDifficultyModal()">Cancel</button>
+    </div>
+</div>
 
 <script src="/js/navbar.js"></script>
 <script src="/js/sudoku.js"></script>

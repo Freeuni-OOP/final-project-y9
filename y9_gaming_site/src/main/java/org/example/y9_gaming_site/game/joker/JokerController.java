@@ -16,6 +16,7 @@ import java.util.List;
 public class JokerController {
 
     private final JokerService jokerService;
+    private final JokerWebSocketService jokerWebSocketService;
 
     // --- DTOs ---
 
@@ -62,6 +63,10 @@ public class JokerController {
     ) {
         User user = (User) authentication.getPrincipal();
         JokerGameState state = jokerService.joinGame(roomCode, user.getId(), user.getUsername());
+
+        // გადავცემთ state-ს, რომ ვებ-სოკეტმა ყველას დაურენდეროს ახალი მოთამაშე
+        jokerWebSocketService.broadcastPlayerJoined(roomCode, state);
+
         return ResponseEntity.ok(state);
     }
 
@@ -88,6 +93,11 @@ public class JokerController {
     ) {
         User user = (User) authentication.getPrincipal();
         jokerService.startGame(roomCode, user.getId());
+
+
+        JokerGameState state = jokerService.getGameState(roomCode);
+        jokerWebSocketService.broadcastGameStarted(roomCode, state);
+
         return ResponseEntity.ok().build();
     }
 
