@@ -2,6 +2,7 @@ package org.example.y9_gaming_site.friendship;
 
 import org.example.y9_gaming_site.notification.NotificationService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -14,6 +15,7 @@ public class FriendshipService {
         this.notificationService = notificationService;
     }
 
+    @Transactional
     public Friendship sendRequest(Long senderId, Long receiverId) {
         Friendship existing1 = friendshipRepository.findBySenderIdAndReceiverId(senderId, receiverId);
         Friendship existing2 = friendshipRepository.findBySenderIdAndReceiverId(receiverId, senderId);
@@ -21,20 +23,20 @@ public class FriendshipService {
             throw new IllegalArgumentException("Friend request already exists");
         }
 
-        Friendship friendship = new Friendship(senderId,receiverId,"Pending");
+        Friendship friendship = new Friendship(senderId,receiverId,"PENDING");
         friendshipRepository.save(friendship);
 
-        notificationService.createFriendRequest(senderId, receiverId);
+        notificationService.createFriendRequest(senderId, receiverId, friendship.getId());
         return friendship;
     }
 
     public Friendship acceptRequest(Long friendshipId) {
         Friendship friendship = friendshipRepository.findById(friendshipId).orElseThrow();
-        friendship.setStatus("Accepted");
+        friendship.setStatus("ACCEPTED");
         return friendshipRepository.save(friendship);
     }
     public List<Friendship> getPendingRequests(Long userId) {
-        return friendshipRepository.findByReceiverIdAndStatus(userId,"Pending");
+        return friendshipRepository.findByReceiverIdAndStatus(userId,"PENDING");
     }
 
     public String getStatus(Long myId, Long otherId){
@@ -50,7 +52,7 @@ public class FriendshipService {
         if(friendship == null){
             return "NONE";
         }
-        if("Accepted".equals(friendship.getStatus())){
+        if("ACCEPTED".equals(friendship.getStatus())){
             return "FRIENDS";
         }
         return "PENDING";

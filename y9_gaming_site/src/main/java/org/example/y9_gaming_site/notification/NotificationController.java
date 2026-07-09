@@ -3,6 +3,7 @@ package org.example.y9_gaming_site.notification;
 import org.example.y9_gaming_site.friendship.Friendship;
 import org.example.y9_gaming_site.friendship.RequestDto;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,13 +18,13 @@ public class NotificationController {
 
 
     @GetMapping("/{userId}")
-    public List<Notification> getNotifications(@PathVariable Long userId){
-        return notificationService.getNotification(userId);
+    public ResponseEntity<List<Notification>> getNotifications(@PathVariable Long userId) {
+        return ResponseEntity.ok(notificationService.getNotifications(userId));
     }
 
     @GetMapping("/unread-count/{userId}")
-    public int getUnreadCount(@PathVariable Long userId){
-        return notificationService.getUnreadCount(userId);
+    public ResponseEntity<Integer> unreadCount(@PathVariable Long userId) {
+        return ResponseEntity.ok(notificationService.getUnreadCount(userId));
     }
 
     @PostMapping("/accept/{notificationId}")
