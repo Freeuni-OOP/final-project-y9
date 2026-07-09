@@ -231,3 +231,15 @@ CREATE TABLE IF NOT EXISTS joker_sessions (
                                               ended_at TIMESTAMP NULL,
                                               FOREIGN KEY (host_id) REFERENCES users(id)
 );
+
+CREATE TABLE IF NOT EXISTS notifications(
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    sender_id BIGINT NOT NULL,
+    type VARCHAR(50) NOT NULL,
+    message VARCHAR(255) NOT NULL,
+    is_read BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE CASCADE
+);
