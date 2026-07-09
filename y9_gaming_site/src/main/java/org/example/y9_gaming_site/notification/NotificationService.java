@@ -5,6 +5,7 @@ import org.example.y9_gaming_site.friendship.FriendshipRepository;
 import org.example.y9_gaming_site.user.User;
 import org.example.y9_gaming_site.user.UserRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -20,14 +21,14 @@ public class NotificationService {
         this.userRepository = userRepository;
     }
 
-    public void createFriendRequest(Long senderId, Long receiverId) {
+    public void createFriendRequest(Long senderId, Long receiverId, Long friendshipId) {
         User sender = userRepository.findById(senderId).orElseThrow();
 
-        Notification notification = new Notification(receiverId, senderId, "FRIEND_REQUEST",sender.getUsername() + " sent you a friend request");
+        Notification notification = new Notification(receiverId, senderId, "FRIEND_REQUEST",sender.getUsername() + " sent you a friend request", friendshipId);
         notificationRepository.save(notification);
     }
 
-    public List<Notification> getNotification(Long userId) {
+    public List<Notification> getNotifications(Long userId) {
         return notificationRepository.findByUserIdOrderByDateTimeDesc(userId);
     }
 
@@ -35,6 +36,7 @@ public class NotificationService {
         return notificationRepository.countByUserIdAndIsRead(userId, false);
     }
 
+    @Transactional
     public void acceptFriendship(Long notificationId) {
         Notification notification = notificationRepository.findById(notificationId).orElse(null);
 
@@ -42,35 +44,38 @@ public class NotificationService {
             throw new RuntimeException("Notification not found");
         }
 
+        if(notification.getFriendshipId() == null){
+            throw new RuntimeException("Friendship not found");
+        }
+
         Friendship friendship = friendshipRepository.findBySenderIdAndReceiverId(notification.getSenderId(), notification.getUserId());
         if (friendship == null) {
             throw new RuntimeException("Friend request not found");
         }
 
-        friendship.setStatus("Accepted");
+        friendship.setStatus("ACCEPTED");
         friendshipRepository.save(friendship);
 
         notification.setRead(true);
         notificationRepository.save(notification);
     }
 
+    @Transactional
     public void declineFriendship(Long notificationId) {
         Notification notification = notificationRepository.findById(notificationId).orElse(null);
 
-        Friendship friendship = friendshipRepository.findBySenderIdAndReceiverId(notification.getSenderId(), notification.getUserId());
+        if(notification == null){
+            throw new RuntimeException("Notification not found");
+        }
 
-        if(friendship != null) {
-            friendshipRepository.delete(friendship);
+        if(notification.getFriendshipId() != null){
+            friendshipRepository.findById(notification.getFriendshipId()).ifPresent(friendshipRepository::delete);
         }
 
         notificationRepository.delete(notification);
     }
 
     public void markRead(Long userId) {
-        List<Notification> list = notificationRepository.findByUserIdOrderByDateTimeDesc(userId);
-        for(Notification notification : list) {
-            notification.setRead(true);
-            notificationRepository.save(notification);
-        }
+        notificationRepository.markAllAsReadByUserId(userId);
     }
 }
