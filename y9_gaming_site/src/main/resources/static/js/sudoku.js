@@ -127,8 +127,29 @@ async function submitSolutionCheck() {
         if (window.sendTimeAnalytics) {
             window.sendTimeAnalytics(activePuzzleId, "Sudoku", "BOARD_PUZZLE", secondsElapsed);
         }
+        reportSolveForAchievements();
     } else {
         alert("❌ There are some mistakes on your board. Keep tracking!");
+    }
+}
+
+async function reportSolveForAchievements() {
+    try {
+        const token = localStorage.getItem('token');
+        const headers = { "Content-Type": "application/json" };
+        if (token) headers["Authorization"] = `Bearer ${token}`;
+
+        const res = await fetch(`/api/sudoku/${activePuzzleId}/solve`, {
+            method: "POST",
+            headers: headers,
+            body: JSON.stringify({ secondsTaken: secondsElapsed })
+        });
+        const result = await res.json();
+        if (window.showAchievementToasts && result.newAchievements && result.newAchievements.length) {
+            window.showAchievementToasts(result.newAchievements);
+        }
+    } catch (err) {
+        console.error("Failed to report solve for achievements : ", err);
     }
 }
 

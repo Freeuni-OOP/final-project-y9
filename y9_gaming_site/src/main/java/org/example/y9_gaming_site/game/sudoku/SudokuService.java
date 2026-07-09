@@ -1,18 +1,24 @@
 package org.example.y9_gaming_site.game.sudoku;
 
+import org.example.y9_gaming_site.achievement.AchievementService;
+import org.example.y9_gaming_site.achievement.UnlockedAchievementDto;
 import org.example.y9_gaming_site.game.SudokuPuzzleRepository;
 import org.example.y9_gaming_site.game.sudoku.SudokuPuzzle;
 import org.springframework.stereotype.Service;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Service
 public class SudokuService {
 
     private final SudokuPuzzleRepository sudokuPuzzleRepository;
+    private final AchievementService achievementService;
 
-    public SudokuService(SudokuPuzzleRepository sudokuPuzzleRepository) {
+    public SudokuService(SudokuPuzzleRepository sudokuPuzzleRepository, AchievementService achievementService) {
         this.sudokuPuzzleRepository = sudokuPuzzleRepository;
+        this.achievementService = achievementService;
     }
 
     //todays puzzle, if not found medium puzzle
@@ -36,5 +42,21 @@ public class SudokuService {
 
     public SudokuPuzzleRepository getSudokuPuzzleRepository() {
         return this.sudokuPuzzleRepository;
+    }
+
+    public SudokuSolveResponse submitSolve(Long userId, int secondsTaken) {
+        List<UnlockedAchievementDto> unlocked = new ArrayList<>();
+        grant(userId, "SUDOKU_FIRST_SOLVE", unlocked);
+        if (secondsTaken < 120) {
+            grant(userId, "SUDOKU_IN_120", unlocked);
+        }
+        if (secondsTaken < 60) {
+            grant(userId, "SUDOKU_IN_60", unlocked);
+        }
+        return new SudokuSolveResponse(unlocked);
+    }
+
+    private void grant(Long userId, String code, List<UnlockedAchievementDto> unlocked) {
+        achievementService.grantByCode(userId, code).ifPresent(a -> unlocked.add(UnlockedAchievementDto.from(a)));
     }
 }
