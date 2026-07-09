@@ -40,8 +40,7 @@ public class AchievementServiceTest {
     }
 
     @Test
-    @DisplayName("Granting a new achievement by id saves it and returns it")
-    void grantAchievementReturnsAchievementWhenNew() {
+    void testSample1() {
         when(userAchievementRepository.findByUserIdAndAchievementId(USER_ID, ACHIEVEMENT_ID)).thenReturn(Optional.empty());
         when(achievementRepository.findById(ACHIEVEMENT_ID)).thenReturn(Optional.of(achievement()));
 
@@ -53,8 +52,7 @@ public class AchievementServiceTest {
     }
 
     @Test
-    @DisplayName("Granting an already-earned achievement returns empty and does not save again")
-    void grantAchievementReturnsEmptyWhenAlreadyEarned() {
+    void testSample2() {
         when(userAchievementRepository.findByUserIdAndAchievementId(USER_ID, ACHIEVEMENT_ID))
                 .thenReturn(Optional.of(new UserAchievement()));
 
@@ -65,8 +63,7 @@ public class AchievementServiceTest {
     }
 
     @Test
-    @DisplayName("Granting by an unknown code returns empty and never touches the user-achievement table")
-    void grantByCodeReturnsEmptyForUnknownCode() {
+    void testSample3() {
         when(achievementRepository.findByCode("NOPE")).thenReturn(Optional.empty());
 
         Optional<Achievement> result = service.grantByCode(USER_ID, "NOPE");
@@ -76,8 +73,7 @@ public class AchievementServiceTest {
     }
 
     @Test
-    @DisplayName("Granting by code resolves the achievement through its code and grants it")
-    void grantByCodeGrantsResolvedAchievement() {
+    void testSample4() {
         when(achievementRepository.findByCode(CODE)).thenReturn(Optional.of(achievement()));
         when(userAchievementRepository.findByUserIdAndAchievementId(USER_ID, ACHIEVEMENT_ID)).thenReturn(Optional.empty());
         when(achievementRepository.findById(ACHIEVEMENT_ID)).thenReturn(Optional.of(achievement()));
@@ -89,13 +85,12 @@ public class AchievementServiceTest {
     }
 
     @Test
-    @DisplayName("A repeated grantByCode call for the same user+code only ever returns present once")
-    void grantByCodeIsIdempotent() {
+    void testSample5() {
         when(achievementRepository.findByCode(CODE)).thenReturn(Optional.of(achievement()));
         when(achievementRepository.findById(ACHIEVEMENT_ID)).thenReturn(Optional.of(achievement()));
         when(userAchievementRepository.findByUserIdAndAchievementId(USER_ID, ACHIEVEMENT_ID))
-                .thenReturn(Optional.empty()) // first call: not earned yet
-                .thenReturn(Optional.of(new UserAchievement())); // second call: now earned
+                .thenReturn(Optional.empty())
+                .thenReturn(Optional.of(new UserAchievement()));
 
         Optional<Achievement> first = service.grantByCode(USER_ID, CODE);
         Optional<Achievement> second = service.grantByCode(USER_ID, CODE);
@@ -106,8 +101,7 @@ public class AchievementServiceTest {
     }
 
     @Test
-    @DisplayName("Granting by code with a null userId or code is a no-op")
-    void grantByCodeHandlesNulls() {
+    void testSample6() {
         assertTrue(service.grantByCode(null, CODE).isEmpty());
         assertTrue(service.grantByCode(USER_ID, null).isEmpty());
         verifyNoInteractions(achievementRepository);
