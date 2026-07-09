@@ -471,3 +471,12 @@ button:active {
     color: #777;
     margin-top: 1px;
 }
+
+.recommendation-item {
+    border: 1px dashed rgba(255, 85, 153, 0.25) !important;
+}
+
+.recommendation-item:hover {
+    border-style: solid !important;
+    box-shadow: 0 0 12px rgba(255, 85, 153, 0.2) !important;
+}

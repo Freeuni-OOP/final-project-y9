@@ -39,28 +39,7 @@
             <p id="error-message" class="error" hidden></p>
         </div>
 
-        <div class="dashboard-card stats-sidebar-card unified-stats-height">
-            <h3>Top Games</h3>
-            <div id="top-games-container" class="profile-mini-grid">
-                <p class="ach-empty">Loading tracking...</p>
-            </div>
-        </div>
-    </div>
-
-    <div class="column-middle">
-        <div class="dashboard-card">
-            <h3>Rarest Achievements</h3>
-            <div id="rarest-achievements" class="rarest-list"></div>
-        </div>
-
-        <div class="dashboard-card achievements-card">
-            <h3>Achievements achieved</h3>
-            <div id="achievements-grid" class="achievements-grid"></div>
-        </div>
-    </div>
-
-    <div class="column-right">
-        <div class="dashboard-card friends-card">
+        <div class="dashboard-card friends-card" style="margin-top: 20px;">
             <h3>Friends List : </h3>
             <div class="friends-list">
                 <div class="friend-item">
@@ -86,8 +65,36 @@
                 </div>
             </div>
         </div>
+    </div>
 
+    <div class="column-middle">
+        <div class="dashboard-card">
+            <h3>Rarest Achievements</h3>
+            <div id="rarest-achievements" class="rarest-list"></div>
+        </div>
+
+        <div class="dashboard-card achievements-card">
+            <h3>Achievements achieved</h3>
+            <div id="achievements-grid" class="achievements-grid"></div>
+        </div>
+
+        <div id="recommendations-wrapper" class="dashboard-card recommendations-card" style="margin-top: 20px; display: none;">
+            <h3>Recommended For You</h3>
+            <div id="recommendations-container" class="profile-mini-grid">
+                <p class="ach-empty">Analyzing play style...</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="column-right">
         <div class="dashboard-card stats-sidebar-card unified-stats-height">
+            <h3>Top Games</h3>
+            <div id="top-games-container" class="profile-mini-grid">
+                <p class="ach-empty">Loading tracking...</p>
+            </div>
+        </div>
+
+        <div class="dashboard-card stats-sidebar-card unified-stats-height" style="margin-top: 20px;">
             <h3>Top Categories</h3>
             <div id="top-categories-container" class="clickable-stats-list">
                 <p class="ach-empty">Loading tracking...</p>
