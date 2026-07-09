@@ -46,4 +46,17 @@ public class WordGraderTest {
         assertThatThrownBy(() -> WordGrader.grade("არა", "კვახი"))
                 .isInstanceOf(RuntimeException.class).hasMessageContaining("5");
     }
+
+    @Test
+    public void testSample6(){ // null guess and null answer are each rejected
+        assertThatThrownBy(() -> WordGrader.grade(null, "ცხენი")).isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> WordGrader.grade("ცხენი", null)).isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    public void testSample7(){
+        List<LetterState> res = WordGrader.grade("ხხბბბ", "ბბგდე");
+        assertThat(res).containsExactly(LetterState.ABSENT, LetterState.ABSENT,
+                LetterState.PRESENT, LetterState.PRESENT, LetterState.ABSENT);
+    }
 }
