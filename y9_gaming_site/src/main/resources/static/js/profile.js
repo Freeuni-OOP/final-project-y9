@@ -47,7 +47,8 @@ async function prefetchGamesCatalog() {
                     title: game.name || 'Unknown Web Game',
                     sourceUrl: game.link || '',
                     iconUrl: finalIcon,
-                    gameType: 'OPENSOURCE'
+                    gameType: 'OPENSOURCE',
+                    category: game.category || 'ARCADE'
                 };
             });
     } catch (err) {
@@ -115,11 +116,14 @@ async function loadGameAnalytics() {
         "Content-Type": "application/json"
     };
 
+    let gamesData = [];
+    let categoriesData = [];
+
     try {
         const gamesRes = await fetch(`/api/games/${userId}/top-3`, { headers });
         if (gamesRes.ok) {
-            const games = await gamesRes.json();
-            renderTopGames(games);
+            gamesData = await gamesRes.json();
+            renderTopGames(gamesData);
         } else {
             if (gamesContainer) gamesContainer.innerHTML = `<p class="ach-empty">Failed to load statistics.</p>`;
         }
@@ -130,14 +134,16 @@ async function loadGameAnalytics() {
     try {
         const catsRes = await fetch(`/api/games/${userId}/top-categories`, { headers });
         if (catsRes.ok) {
-            const categories = await catsRes.json();
-            renderTopCategories(categories);
+            categoriesData = await catsRes.json();
+            renderTopCategories(categoriesData);
         } else {
             if (catsContainer) catsContainer.innerHTML = `<p class="ach-empty">Failed to load category stats.</p>`;
         }
     } catch (err) {
         console.error("Error loading categories tracking data:", err);
     }
+
+    generateRecommendations(gamesData, categoriesData);
 }
 
 function renderTopGames(games) {
@@ -459,3 +465,67 @@ async function handleFriendBtn(){
 document.addEventListener("DOMContentLoaded", function (){
     loadFriendSection();
 });
+
+function generateRecommendations(topGames, topCategories) {
+    const wrapper = document.getElementById("recommendations-wrapper");
+    const container = document.getElementById("recommendations-container");
+    if (!container || !wrapper) return;
+
+    if (myId === null || String(myId) !== String(userId)) {
+        wrapper.style.display = "none";
+        return;
+    }
+
+    wrapper.style.display = "block";
+
+    if (!window.cachedGamesList || window.cachedGamesList.length === 0) {
+        container.innerHTML = `<p class="ach-empty">Unable to fetch recommendations catalog.</p>`;
+        return;
+    }
+
+    const playedTitles = new Set((topGames || []).map(g => g.gameTitle.toLowerCase()));
+    const favoriteCategories = (topCategories || []).map(c => c.category.toUpperCase());
+
+    const friendElements = document.querySelectorAll(".friend-name");
+    const structuralFriendCount = friendElements.length;
+    const friendsPool = ["Stickman Archero Fight", "Helix Jump", "Retro Bowl", "Tunnel Rush", "Vex 4"];
+
+    let pool = window.cachedGamesList.filter(game => {
+        if (playedTitles.has(game.title.toLowerCase())) return false;
+
+        const matchesCategory = game.category && favoriteCategories.includes(game.category.toUpperCase());
+        const matchesFriends = structuralFriendCount > 0 && friendsPool.some(f => f.toLowerCase() === game.title.toLowerCase());
+
+        return matchesCategory || matchesFriends;
+    });
+
+    if (pool.length === 0) {
+        pool = window.cachedGamesList.filter(game => !playedTitles.has(game.title.toLowerCase()));
+    }
+
+    const shuffled = pool.sort(() => 0.5 - Math.random());
+    const selectedRecommendations = shuffled.slice(0, 3);
+
+    if (selectedRecommendations.length === 0) {
+        container.innerHTML = `<p class="ach-empty">Play more games to unlock tailored content.</p>`;
+        return;
+    }
+
+    container.className = "profile-mini-grid";
+    container.innerHTML = selectedRecommendations.map(game => {
+        const categoryKey = game.category || "ARCADE";
+
+        return `
+            <div class="profile-game-box recommendation-item" 
+                 onclick="window.handlePlayGame('${game.id}', '${game.gameType}', '${game.sourceUrl}', \`${escapeHtml(game.title)}\`, '${categoryKey}')">
+                <div class="profile-thumb-wrapper">
+                    <img class="profile-mini-icon" 
+                         src="${game.iconUrl}" 
+                         alt="${escapeHtml(game.title)}" 
+                         onerror="this.onerror=null; this.src='/img/games/default.png';" />
+                </div>
+                <span class="profile-box-title" title="${escapeHtml(game.title)}">${escapeHtml(game.title)}</span>
+            </div>
+        `;
+    }).join("");
+}
