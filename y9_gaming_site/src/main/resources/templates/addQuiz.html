@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Add New Quiz</title>
+    <script>
+        (function() {
+            const token = localStorage.getItem('token');
+            const role = localStorage.getItem('role');
+            if (!token || role === 'GUEST') {
+                window.location.href = '/home';
+            }
+        })();
+    </script>
+    <link rel="stylesheet" th:href="@{/css/addQuiz.css}">
+</head>
+<body>
+
+<div class="quiz-container" id="quizFormContainer">
+
+    <a href="/home" class="back-link">← Back to Site</a>
+
+    <div class="quiz-card-wrapper">
+        <div class="quiz-meta-bar">
+            <h2 class="quiz-card-title">➕ ADD NEW QUIZ</h2>
+
+            <form id="quizForm" th:action="@{/api/quizzes/new}" method="POST" enctype="multipart/form-data">
+
+                <div style="display: flex; gap: 16px; flex-wrap: wrap;">
+                    <div style="flex: 2; min-width: 220px;">
+                        <label class="field-label">Quiz Title</label>
+                        <input type="text" name="title" required placeholder="e.g., European History Masterclass" style="width: 100%;">
+                    </div>
+                    <div id="categoryContainer" style="flex: 1; min-width: 140px;">
+                        <label class="field-label">Category</label>
+                        <select id="categorySelect" name="category" style="width: 100%;">
+                            <option value="GEOGRAPHY">Geography</option>
+                            <option value="SCIENCE">Science</option>
+                            <option value="ENTERTAINMENT" selected>Entertainment</option>
+                        </select>
+                    </div>
+                    <div style="flex: 1; min-width: 120px;">
+                        <label class="field-label">Time Limit (s)</label>
+                        <input type="number" name="timeLimit" value="300" required style="width: 100%;">
+                    </div>
+                    <div style="flex: 2; min-width: 220px;">
+                        <label class="field-label">Description</label>
+                        <input type="text" name="description" placeholder="Short tagline..." style="width: 100%;">
+                    </div>
+                </div>
+
+                <div class="split-workspace">
+                    <div id="slideRail">
+                        <button type="button" id="addSlideBtn" class="add-slide-btn" onclick="addQuestionBlock()">+</button>
+                    </div>
+
+                    <div class="workspace-content">
+                        <div id="questionsContainer"></div>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 22px;">
+                    <a href="/home" class="btn-cancel">Cancel</a>
+                    <button type="submit" style="padding: 10px 25px; background: rgba(145,60,143,0.6); border: 1px solid #e194d5; color: white; font-weight: bold; border-radius: 6px; cursor: pointer;">Publish Quiz Deck</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<template id="questionTemplate">
+    <div class="question-block" data-slide="">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+            <span class="q-number">QUESTION 1</span>
+
+            <div>
+                <label class="field-label" style="margin-right: 8px; margin-bottom: 0;">Type:</label>
+                <select class="q-type-select">
+                    <option value="MCQ">Multiple Choice</option>
+                    <option value="WRITTEN">Written Answer</option>
+                </select>
+            </div>
+
+            <button type="button" onclick="removeQuestion(this)" style="background: none; border: none; color: #e07979; cursor: pointer; font-size: 13px; font-weight: 600;">🗑 Remove slide</button>
+        </div>
+
+        <input type="text" class="q-text" name="questionText" required placeholder="Start typing your question" style="width: 100%; margin-bottom: 14px;">
+
+        <label class="upload-zone">
+            🖼️ <span class="img-label">Add image (optional)</span>
+            <input type="file" class="q-image" name="questionImage" accept="image/*" style="display:none" onchange="previewImage(this)">
+        </label>
+        <img class="q-image-preview" style="display:none; max-height: 90px; border-radius: 6px; margin: -12px 0 20px;">
+
+        <div class="answer-grid mcq-section" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div class="answer-tile selected" data-color="#e21b3c" onclick="selectCorrect(this)" style="background: rgba(113,27,184,0.45);">
+                <input type="text" class="q-option" placeholder="Answer 1" required onclick="event.stopPropagation()">
+                <span class="tile-check">✓</span>
+            </div>
+            <div class="answer-tile" data-color="#1368ce" onclick="selectCorrect(this)" style="background: rgba(113, 27, 184, 0.45);">
+                <input type="text" class="q-option" placeholder="Answer 2" required onclick="event.stopPropagation()">
+                <span class="tile-check">✓</span>
+            </div>
+            <div class="answer-tile" data-color="#d89e00" onclick="selectCorrect(this)" style="background: rgba(113, 27, 184, 0.45);">
+                <input type="text" class="q-option" placeholder="Answer 3" required onclick="event.stopPropagation()">
+                <span class="tile-check">✓</span>
+            </div>
+            <div class="answer-tile" data-color="#26890c" onclick="selectCorrect(this)" style="background: rgba(113, 27, 184, 0.45);">
+                <input type="text" class="q-option" placeholder="Answer 4" required onclick="event.stopPropagation()">
+                <span class="tile-check">✓</span>
+            </div>
+            <p style="font-size: 12px; color: rgba(255,255,255,0.4); margin-top: 10px; grid-column: span 2;">Click a tile to mark it as the correct answer.</p>
+        </div>
+
+        <div class="written-section" style="display: none;">
+            <label class="field-label">Correct Answer</label>
+            <input type="text" class="q-written-answer" placeholder="Type the explicit answer here (e.g., Paris)" style="width: 100%;">
+            <p style="font-size: 12px; color: rgba(255,255,255,0.4); margin-top: 10px;">Players will have to type this exact text to score points.</p>
+        </div>
+    </div>
+</template>
+
+<template id="railThumbTemplate">
+    <div class="rail-thumb" onclick="activateSlide(this)">
+        <span class="rail-number"></span>
+        <div class="rail-dots"></div>
+    </div>
+</template>
+
+<script th:src="@{/js/addQuiz.js}"></script>
+</body>
+</html>

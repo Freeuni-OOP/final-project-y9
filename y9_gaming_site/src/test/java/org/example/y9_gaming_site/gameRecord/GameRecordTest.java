@@ -1,8 +1,7 @@
-package org.example.y9_gaming_site.gamerecord;
+package org.example.y9_gaming_site.gameRecord;
 
 import org.example.y9_gaming_site.game.Game;
 import org.example.y9_gaming_site.game.GameRepository;
-import org.example.y9_gaming_site.gameRecord.*;
 import org.example.y9_gaming_site.user.User;
 import org.example.y9_gaming_site.user.UserRepository;
 import org.junit.jupiter.api.BeforeEach;

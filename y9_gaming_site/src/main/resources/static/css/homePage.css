@@ -13,87 +13,6 @@ body {
     background-attachment: fixed;
     min-height: 100vh;
 }
-.navbar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 30px;
-    height: 62px;
-    background: rgba(186, 43, 124, 0.91);
-    backdrop-filter: blur(12px);
-    border-bottom: 1px solid rgb(163, 42, 107);
-    box-shadow:
-            0 10px 40px rgba(145, 60, 143, 0.78),
-            -4px -4px 20px rgba(0, 240, 255, 0.15),
-            4px 4px 20px rgba(255, 0, 127, 0.2);
-    position: sticky;
-    top: 0;
-    z-index: 100;
-}
-.navbar__brand {
-    font-family: 'Bitcount Grid Double Ink', monospace;
-    color: rgba(140, 55, 156, 0.91);
-    font-size: 26px;
-    letter-spacing: 3px;
-    text-decoration: none;
-}
-.navbar__links {
-    display: flex;
-    gap: 28px;
-    list-style: none;
-}
-.navbar__links a {
-    color: rgba(61, 19, 64, 0.89);
-    text-decoration: none;
-    font-size: 15px;
-    letter-spacing: 0.5px;
-    transition: color 0.2s;
-}
-.navbar__links a:hover {
-    color: #6e1b61;
-}
-.navbar__user {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.navbar__profile-link {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    text-decoration: none;
-    border-radius: 20px;
-    padding: 3px 10px 3px 3px;
-    transition: background 0.2s;
-}
-.navbar__profile-link:hover {
-    background: rgba(255, 255, 255, 0.12);
-}
-
-.navbar__avatar {
-    width: 34px;
-    height: 34px;
-    border-radius: 50%;
-    border: 2px solid #b327c9;
-    object-fit: cover;
-}
-.navbar__username {
-    font-size: 13px;
-    color: rgba(73, 30, 85, 0.87);
-}
-.navbar__logout {
-    font-size: 12px;
-    color: #ff6b9d;
-    text-decoration: none;
-    padding: 5px 12px;
-    border: 1px solid rgba(255, 107, 157, 0.4);
-    border-radius: 6px;
-    transition: all 0.2s;
-}
-.navbar__logout:hover {
-    background: rgba(255, 107, 157, 0.15);
-}
 .hero {
     text-align: center;
     padding: 55px 20px 35px;
@@ -426,3 +345,71 @@ body {
 }
 .badge--coming-soon { background: #444; color: #aaa; }
 .badge--play { background: #00ff66; color: #000; }
+
+.search-wrapper {
+    position: relative;
+    max-width: 600px;
+    margin:20px auto 0;
+    padding: 0 40px;
+}
+
+.search-wrapper input{
+    width: 100%;
+    padding: 13px 20px;
+    border-radius: 30px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: rgba(71,44, 82, 0.6);
+    color: #fff;
+    font-size: 15px;
+    outline: none;
+}
+
+.search-wrapper input:focus{
+    border-color: #b327c9;
+}
+
+.search-wrapper input::placeholder{
+    color: #aaa;
+}
+
+.search-results{
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 40px;
+    right: 40px;
+    background: rgba(40, 20, 50, 0.97);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    z-index: 200;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+.search-section-title{
+    font-size: 11px;
+    color: #b327c9;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    padding: 12px 16px 6px;
+    font-weight: bold;
+}
+
+.search-item{
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px;
+    cursor: pointer;
+    color: #fff;
+    text-decoration: none;
+}
+
+.search-item:hover{
+    background: rgba(179, 39, 201, 0.2);
+}
+
+.search-item img{
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    object-fit: cover;
+}

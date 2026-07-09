@@ -17,6 +17,9 @@ function updateNavbar(user){
     if (navProfileLink) {
         navProfileLink.href = '/profile/' + user.id;
     }
+    if (adminLink && user.role === 'ADMIN') {
+        adminLink.style.display = 'block';
+    }
 }
 
 async function loadNavProfile() {
@@ -39,6 +42,19 @@ async function loadNavProfile() {
         console.error('Nav profile sync failed: ', err);
     }
 }
+
+async function logout() {
+    try {
+        await fetch("/api/users/logout", { method: "POST" });
+    } catch (e) {
+        console.error("Backend logout call skipped.");
+    }
+    localStorage.removeItem("token");
+    localStorage.removeItem("role");
+    localStorage.removeItem("username");
+    window.location.href = "/login";
+}
+
 
 document.addEventListener('DOMContentLoaded', function (){
     if(window.location.pathname.indexOf('/profile') === -1){

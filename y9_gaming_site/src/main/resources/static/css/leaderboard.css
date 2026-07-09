@@ -6,107 +6,13 @@
 }
 
 body {
+    font-family: 'Segoe UI', sans-serif;
     background-image: linear-gradient(rgba(15, 15, 26, 0.45), rgba(15, 15, 26, 0.45)), url('../img/backgrounds/space.jpg');
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
     background-repeat: no-repeat;
     margin: 0;
-}
-
-
-
-.navbar {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: flex-start !important;
-    padding: 0 30px !important;
-    height: 62px !important;
-    background: rgba(30, 22, 46, 0.85) !important;
-    backdrop-filter: blur(12px) !important;
-    -webkit-backdrop-filter: blur(12px) !important;
-    box-shadow:
-            0 10px 40px rgba(145, 60, 143, 0.4),
-            -4px -4px 20px rgba(0, 240, 255, 0.1),
-            4px 4px 20px rgba(255, 0, 127, 0.15) !important;
-    position: sticky !important;
-    top: 0 !important;
-    z-index: 100 !important;
-    width: 100% !important;
-}
-
-.navbar__brand {
-    font-family: 'Bitcount Grid Double Ink', monospace !important;
-    color: #b327c9 !important;
-    font-size: 26px !important;
-    letter-spacing: 3px !important;
-    text-decoration: none !important;
-    text-shadow: 0 0 10px rgba(179, 39, 201, 0.6) !important;
-}
-
-.navbar__links {
-    display: flex !important;
-    flex-direction: row !important;
-    gap: 28px !important;
-    list-style: none !important;
-    padding: 0 !important;
-    margin: 0 40px 0 auto !important;
-}
-
-.navbar__links li {
-    list-style: none !important;
-    display: inline-block !important;
-}
-
-.navbar__links a {
-    color: rgba(178, 144, 201, 0.6) !important;
-    text-decoration: none !important;
-    font-size: 15px !important;
-    font-weight: 600 !important;
-    letter-spacing: 0.5px !important;
-    transition: all 0.2s ease !important;
-}
-
-
-.navbar__links a:hover, .navbar__links a.active {
-    color: rgba(178, 144, 201, 0.6) !important;
-    text-shadow: 0 0 8px rgba(178, 144, 201, 0.6) !important;
-}
-
-.navbar__user {
-    display: flex !important;
-    flex-direction: row !important;
-    align-items: center !important;
-    gap: 12px !important;
-}
-
-.navbar__avatar {
-    width: 34px !important;
-    height: 34px !important;
-    border-radius: 50% !important;
-    border: 2px solid #b327c9 !important;
-    object-fit: cover !important;
-}
-
-.navbar__username {
-    font-size: 14px !important;
-    color: #e194d5 !important;
-    font-weight: 600 !important;
-}
-
-.navbar__logout {
-    font-size: 12px !important;
-    color: #ff6b9d !important;
-    text-decoration: none !important;
-    padding: 5px 12px !important;
-    border: 1px solid rgba(255, 107, 157, 0.4) !important;
-    border-radius: 6px !important;
-    transition: all 0.2s ease !important;
-}
-
-.navbar__logout:hover {
-    background: rgba(255, 107, 157, 0.15) !important;
-    box-shadow: 0 0 10px rgba(255, 107, 157, 0.3) !important;
 }
 
 .leaderboard-main-title {

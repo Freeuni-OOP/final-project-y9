@@ -103,22 +103,22 @@ public class JokerTrick {
             if(currCard.jokerCall().equals("HIGH")) return currCard;
             return winnerCard;
         }
-        if(winnerCard.card().getIsJoker() && winnerCard.jokerCall.equals("HIGH")){
+        if(winnerCard.card().getIsJoker() && winnerCard.jokerCall().equals("HIGH")){
             //HIGH Joker loses if it asked for a non-trump suit, and challenger cuts with a trump card!
             if(!ledSuit.equals(trumpSuit) && currCard.card().getSuit().equals(trumpSuit)){
                 return currCard;
             }
         }
 
-        if(currCard.card().getIsJoker() && currCard.jokerCall.equals("HIGH")){
+        if(currCard.card().getIsJoker() && currCard.jokerCall().equals("HIGH")){
             return currCard;
         }
-        if(currCard.card().getIsJoker() && currCard.jokerCall.equals("LOW")){
+        if(currCard.card().getIsJoker() && currCard.jokerCall().equals("LOW")){
             return winnerCard;
         }
-        if(winnerCard.card().getIsJoker() && winnerCard.jokerCall.equals("LOW")){
+        if(winnerCard.card().getIsJoker() && winnerCard.jokerCall().equals("LOW")){
             // if joker was led it wins by default unless other card follows the declared suit or trumps
-            if(currCard.card().getSuit().equals(ledSuit) || currCard.card.getSuit().equals(trumpSuit)){
+            if(currCard.card().getSuit().equals(ledSuit) || currCard.card().getSuit().equals(trumpSuit)){
                 return currCard;
             }
             return winnerCard;

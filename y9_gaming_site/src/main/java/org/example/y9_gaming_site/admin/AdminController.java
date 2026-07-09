@@ -107,7 +107,7 @@ public class AdminController {
 
     @PostMapping("/challenges/create")
     public String createChallenge(@ModelAttribute ChallengeDTO dto,
-                                  @AuthenticationPrincipal User loggedInUser, // 👈 Spring gives you this for free now
+                                  @AuthenticationPrincipal User loggedInUser,
                                   RedirectAttributes ra) throws AccessDeniedException {
         adminService.createChallenge(dto, loggedInUser.getUsername());
         ra.addFlashAttribute("message", "Challenge created successfully.");
@@ -122,22 +122,22 @@ public class AdminController {
     }
 
 
-    //for custom created quizzes
-    @PostMapping("/quizzes/new")
-    public String saveManualQuiz(@RequestParam String title,
-                                 @RequestParam String category,
-                                 @RequestParam int timeLimit,
-                                 @RequestParam String description,
-                                 @RequestParam String rawQuestions,
-                                 RedirectAttributes redirectAttributes) {
-        try {
-            adminService.saveCustomQuiz(title, category, timeLimit, description, rawQuestions);
-            redirectAttributes.addFlashAttribute("message", "Successfully published custom quiz: " + title);
-        } catch(Exception e) {
-            redirectAttributes.addFlashAttribute("message", "Database Error: " + e.getMessage());
-        }
-        return "redirect:/admin/dashboard";
-    }
+//    //for custom created quizzes
+//    @PostMapping("/quizzes/new")
+//    public String saveManualQuiz(@RequestParam String title,
+//                                 @RequestParam String category,
+//                                 @RequestParam int timeLimit,
+//                                 @RequestParam String description,
+//                                 @RequestParam String rawQuestions,
+//                                 RedirectAttributes redirectAttributes) {
+//        try {
+//            adminService.saveCustomQuiz(title, category, timeLimit, description, rawQuestions);
+//            redirectAttributes.addFlashAttribute("message", "Successfully published custom quiz: " + title);
+//        } catch(Exception e) {
+//            redirectAttributes.addFlashAttribute("message", "Database Error: " + e.getMessage());
+//        }
+//        return "redirect:/admin/dashboard";
+//    }
 
 
 

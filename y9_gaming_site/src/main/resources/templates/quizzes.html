@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Y9 — Quizzes</title>
     <link href="https://fonts.googleapis.com/css2?family=Bitcount+Grid+Double+Ink&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/navbar.css}">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -17,55 +18,6 @@
             background-repeat: no-repeat;
             background-attachment: fixed;
             min-height: 100vh;
-        }
-
-        .navbar {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 30px;
-            height: 62px;
-            background: rgba(186, 43, 124, 0.91);
-            backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgb(163, 42, 107);
-            box-shadow: 0 10px 40px rgba(145, 60, 143, 0.78);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-        .navbar__brand {
-            font-family: 'Bitcount Grid Double Ink', monospace;
-            color: rgba(140, 55, 156, 0.91);
-            font-size: 26px;
-            letter-spacing: 3px;
-            text-decoration: none;
-        }
-        .navbar__links {
-            display: flex;
-            gap: 28px;
-            list-style: none;
-        }
-        .navbar__links a {
-            color: rgba(61, 19, 64, 0.89);
-            text-decoration: none;
-            font-size: 15px;
-            letter-spacing: 0.5px;
-            transition: color 0.2s;
-        }
-        .navbar__links a:hover, .navbar__links a.active {
-            color: #fff;
-            font-weight: bold;
-        }
-        .navbar__user { display: flex; align-items: center; gap: 10px; }
-        .navbar__avatar {
-            width: 34px; height: 34px; border-radius: 50%;
-            border: 2px solid #b327c9; object-fit: cover;
-        }
-        .navbar__username { font-size: 13px; color: rgba(73, 30, 85, 0.87); }
-        .navbar__logout {
-            font-size: 12px; color: #ff6b9d; text-decoration: none;
-            padding: 5px 12px; border: 1px solid rgba(255, 107, 157, 0.4);
-            border-radius: 6px;
         }
 
         .container {
@@ -148,6 +100,52 @@
         .play-btn:hover { background-color: #e194d5; color: #0f0f1a; }
 
         .hidden { display: none !important; }
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .modal-overlay.hidden { display: none; }
+
+        .modal-box {
+            background: linear-gradient(135deg, #523b5c, #5a2c5e);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 14px;
+            padding: 30px 35px;
+            max-width: 380px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        }
+        .modal-box p {
+            color: #fff;
+            font-size: 16px;
+            margin-bottom: 24px;
+        }
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+        .modal-btn-primary, .modal-btn-secondary {
+            padding: 10px 22px;
+            border-radius: 8px;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .modal-btn-primary {
+            background: #e74c3c;
+            color: white;
+        }
+        .modal-btn-secondary {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+        }
 
         .mcq-grid {
             display: grid;
@@ -173,42 +171,30 @@
             border-color: #00f0ff;
             box-shadow: 0 0 12px rgba(0, 240, 255, 0.4);
         }
+        .mcq-btn.correct-answer {
+            background-color: #2ecc71 !important;
+            border-color: #27ae60 !important;
+            color: white !important;
+            transition: background-color 0.2s ease;
+        }
+
+        .mcq-btn.wrong-answer {
+            background-color: #e74c3c !important;
+            border-color: #c0392b !important;
+            color: white !important;
+            transition: background-color 0.2s ease;
+        }
     </style>
 </head>
 <body>
+<nav th:replace="~{fragments/navbar :: navbar(active='quizzes')}"></nav>
 
-<nav class="navbar">
-    <a class="navbar__brand" href="/home">Y9</a>
-    <ul class="navbar__links">
-        <li><a href="/home">Home</a></li>
-        <li><a href="/quizzes" class="active">Quizzes</a></li>
-        <li><a href="/leaderboard">Leaderboard</a></li>
-        <li><a href="/chat">Chat</a></li>
-        <li id="adminLink" style="display: none;">
-            <a th:href="@{/admin/dashboard}">Admin Panel</a>
-        </li>
-    </ul>
-    <div class="navbar__user">
-        <img id="nav-avatar"
-             class="navbar__avatar"
-             src="/img/avatars/default.png"
-             alt="avatar"
-             style="cursor: pointer;"
-             onclick="redirectToMyProfile()" />
-
-        <span id="nav-username"
-              class="navbar__username"
-              style="cursor: pointer;"
-              onclick="redirectToMyProfile()">...</span>
-
-        <button onclick="logout()" class="navbar__logout">Log out</button>
-    </div>
-</nav>
 
 <main class="container">
     <h1 class="hub-title">🧠 Knowledge Vault 🧠</h1>
 
     <div id="filterBar" class="filter-bar">
+        <a href="/addQuiz"  class="filter-btn add-quiz-btn" style="text-decoration: none;" >➕ Add Quiz</a>
         <button class="filter-btn active" onclick="filterCategory(this, '')">All Topics</button>
         <button class="filter-btn" onclick="filterCategory(this, 'GEOGRAPHY')">Geography</button>
         <button class="filter-btn" onclick="filterCategory(this, 'SCIENCE')">Science</button>
@@ -259,6 +245,16 @@
         </div>
     </div>
 </main>
+<div id="confirmModal" class="modal-overlay hidden">
+    <div class="modal-box">
+        <p id="confirmModalText">Are you sure?</p>
+        <div class="modal-actions">
+            <button id="confirmModalCancel" class="modal-btn-secondary">Cancel</button>
+            <button id="confirmModalOk" class="modal-btn-primary">Yes, Give Up</button>
+        </div>
+    </div>
+</div>
+<script src="/js/navbar.js"></script>
 <script src="/js/quizzes.js"></script>
 <script>
     async function redirectToMyProfile() {
