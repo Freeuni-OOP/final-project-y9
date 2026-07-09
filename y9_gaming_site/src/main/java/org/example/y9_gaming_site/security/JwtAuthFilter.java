@@ -64,6 +64,13 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                             List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()))
                     );
                     SecurityContextHolder.getContext().setAuthentication(auth);
+                } else {
+                    Cookie expired = new Cookie("jwt", null);
+                    expired.setPath("/");
+                    expired.setMaxAge(0);
+                    response.addCookie(expired);
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    return;
                 }
             }
         }
