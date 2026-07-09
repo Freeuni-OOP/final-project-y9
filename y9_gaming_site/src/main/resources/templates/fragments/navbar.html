@@ -12,10 +12,17 @@
     </ul>
 
     <div class="navbar__user">
+        <div class="navbar__bell" onclick="toggleNotifications()">
+            🔔
+            <span id="bell-badge" class="bell-badge">0</span>
+        </div>
         <a id="nav-profile-link" href="/profile" class="navbar__profile-link">
             <img id="nav-avatar" class="navbar__avatar" src="/img/avatars/default.png" alt="avatar" />
             <span id="nav-username" class="navbar__username">...</span>
         </a>
+        <a href="/logout" class="navbar__logout">Log out</a>
+    </div>
+    <div id="notification-dropdown" class="notification-dropdown"></div>
         <a href="#" onclick="logout(); return false;" class="navbar__logout">Log out</a>    </div>
 </nav>
 </body>
