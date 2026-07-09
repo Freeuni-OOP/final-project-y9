@@ -23,9 +23,9 @@
 
         <div id="view-main" class="view-panel active">
             <div style="display: flex; flex-direction: column; gap: 14px;">
-                <button class="joker-btn joker-btn--primary" onclick="switchView('view-create')">ოთახის შექმნა</button>
-                <button class="joker-btn joker-btn--alt" onclick="switchView('view-browse')">ღია ოთახები</button>
-                <button class="joker-btn joker-btn--alt" onclick="switchView('view-join')">კოდით შესვლა</button>
+                <button class="joker-btn joker-menu-btn" onclick="switchView('view-create', this)">ოთახის შექმნა</button>
+                <button class="joker-btn joker-menu-btn" onclick="switchView('view-browse', this)">ღია ოთახები</button>
+                <button class="joker-btn joker-menu-btn" onclick="switchView('view-join', this)">კოდით შესვლა</button>
             </div>
         </div>
 
@@ -37,7 +37,7 @@
             <div class="wizard-step active" data-step="1">
                 <label class="joker-label wizard-q">რამდენი მოთამაშე ვიქნებით?</label>
                 <div class="joker-toggle-group">
-                    <button class="joker-toggle active" data-value="THREE">3 მოთამაშე</button>
+                    <button class="joker-toggle" data-value="THREE">3 მოთამაშე</button>
                     <button class="joker-toggle" data-value="FOUR">4 მოთამაშე</button>
                 </div>
             </div>
@@ -46,7 +46,7 @@
                 <label class="joker-label wizard-q">რამდენი რაუნდი ვითამაშოთ?</label>
                 <div class="joker-toggle-group">
                     <button class="joker-toggle" data-value="QUICK_4">4 (სწრაფი)</button>
-                    <button class="joker-toggle active" data-value="SHORT_8">8 (საშუალო)</button>
+                    <button class="joker-toggle" data-value="SHORT_8">8 (საშუალო)</button>
                     <button class="joker-toggle" data-value="FULL_24">24 (სრული)</button>
                 </div>
             </div>
@@ -54,16 +54,16 @@
             <div class="wizard-step" data-step="3">
                 <label class="joker-label wizard-q">რამდენი ჯოკერი იყოს დასტაში?</label>
                 <div class="joker-toggle-group">
-                    <button class="joker-toggle active" data-value="1">1 ჯოკერი</button>
+                    <button class="joker-toggle" data-value="1">1 ჯოკერი</button>
                     <button class="joker-toggle" data-value="2">2 ჯოკერი</button>
                 </div>
             </div>
 
             <div class="wizard-step" data-step="4">
-                <label class="joker-label wizard-q">ვის შეუძლია შემოსვლა?</label>
+                <label class="joker-label wizard-q">ოთახის ხილვადობა</label>
                 <div class="joker-toggle-group">
-                    <button class="joker-toggle active" data-value="false">მხოლოდ მეგობრები</button>
-                    <button class="joker-toggle" data-value="true">ყველა (ღია ლობი)</button>
+                    <button class="joker-toggle" data-value="false"> კერძო (მხოლოდ კოდით)</button>
+                    <button class="joker-toggle" data-value="true"> საჯარო (ღია ლობი)</button>
                 </div>
             </div>
 
@@ -76,9 +76,8 @@
         <div id="view-browse" class="view-panel">
             <button class="y9-btn--back" onclick="switchView('view-main')">← უკან</button>
 
-            <div class="joker-input-row">
-                <input class="joker-input" id="searchLobbyInput" type="text" placeholder="ფილტრი კოდით..." oninput="filterLobbies()" />
-                <button class="joker-btn joker-btn--alt" style="width:auto; padding:11px 16px;" onclick="loadLobbies()">↻</button>
+            <div style="display:flex; justify-content:flex-end; margin-bottom:12px;">
+                <button class="joker-btn joker-btn--alt" style="width:auto; padding:8px 16px;" onclick="loadLobbies()">↻ განახლება</button>
             </div>
 
             <div id="lobbiesList" class="joker-lobbies-list">

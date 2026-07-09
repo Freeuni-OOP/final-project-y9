@@ -20,7 +20,7 @@ public class JokerGameState {
     private final Map<Long, List<Boolean>> prophecyFulfilledPerPlayer = new HashMap<>();
     @JsonIgnore
     private final List<Card> activeDeck = new ArrayList<>();
-    @JsonIgnore
+
     private JokerTrick currentTrick = null;
     @JsonIgnore
     private final Map<Long, List<UnlockedAchievementDto>> pendingAchievements = new HashMap<>();
@@ -126,6 +126,7 @@ public class JokerGameState {
 
     public void setTrumpSuit(String suit) {
         this.trumpSuit = suit; // validation is in JokerService
+        this.currentTrick = new JokerTrick(suit);
     }
 
     public void setStatus(GameStatus status) {
@@ -176,5 +177,13 @@ public class JokerGameState {
         Map<Long, List<UnlockedAchievementDto>> copy = new HashMap<>(pendingAchievements);
         pendingAchievements.clear();
         return copy;
+    }
+
+    public void removePlayer(Long userId) {
+        players.removeIf(p -> p.getUserId().equals(userId));
+    }
+
+    public boolean isEmpty() {
+        return players.isEmpty();
     }
 }

@@ -6,10 +6,14 @@ import org.example.y9_gaming_site.game.joker.JokerGameConfig.RoundOption;
 import org.example.y9_gaming_site.game.joker.JokerGameState.GameStatus;
 import org.example.y9_gaming_site.user.User;
 import org.example.y9_gaming_site.user.UserRepository;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
@@ -18,6 +22,7 @@ public class JokerService {
     private final JokerScoringService scoringService;
     private final JokerDbService jokerDbService;
     private final UserRepository userRepository;
+    private final JokerWebSocketService jokerWebSocketService;
     private final Map<String, JokerGameState> activeGames = new ConcurrentHashMap<>();
 
     public JokerGameState createGame(Long hostId, String hostUsername,
@@ -175,13 +180,14 @@ public class JokerService {
 
             if (state.isRoundOver()) {
                 state.recordRoundRes(scoringService);
-                state.endRound();
+                state.endRound(); // status = ROUND_END ან FINISHED
 
                 if (state.isGameOver()) {
-                    jokerDbService.saveFinalScores(roomCode, state); // for achievement
+                    jokerDbService.saveFinalScores(roomCode, state);
                     jokerDbService.updateSessionStatus(roomCode, "FINISHED");
                 } else {
-                    state.startNextRound();
+                    // ავტომატურად გაუშვი timer, არ დაიწყო მაშინვე შემდეგი რაუნდი
+                    scheduleNextRound(roomCode);
                 }
             }
         } else {
@@ -237,7 +243,45 @@ public class JokerService {
                 .orElseThrow(() -> new IllegalArgumentException("Card not found: " + suit + ", " + value));
     }
 
+    public void leaveGame(String roomCode, Long userId) {
+        JokerGameState state = getActiveGame(roomCode);
+
+        if (state.getStatus() != GameStatus.WAITING) {
+            throw new IllegalStateException("თამაშის დაწყების შემდეგ გასვლა შეუძლებელია");
+        }
+
+        state.removePlayer(userId);
+
+        if (state.isEmpty()) {
+            // ოთახში აღარავინ დარჩა — მთლიანად ვშლით
+            activeGames.remove(roomCode);
+            jokerDbService.updateSessionStatus(roomCode, "CANCELLED");
+        } else {
+            jokerDbService.updateSessionStatus(roomCode, "WAITING"); // optional, თუ dbService-ს სჭირდება
+        }
+    }
+
     private String generateRoomCode() {
         return "JOKER-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+    }
+
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(2);
+
+    // ეს დაგჭირდება injectetd ჰქონდეს, თუ WS-ს აქედან უგზავნი (SimpMessagingTemplate)
+    private final SimpMessagingTemplate messagingTemplate;
+
+    private void scheduleNextRound(String roomCode) {
+        scheduler.schedule(() -> {
+            try {
+                JokerGameState state = activeGames.get(roomCode);
+                if (state == null) return;
+                if (state.getStatus() != GameStatus.ROUND_END) return;
+
+                state.startNextRound();
+                jokerWebSocketService.broadcastNewRound(roomCode, state);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }, 4, TimeUnit.SECONDS);
     }
 }

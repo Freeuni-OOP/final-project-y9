@@ -8,6 +8,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 import java.util.List;
 
@@ -17,18 +18,23 @@ public class JokerServiceTest {
 
     private JokerService service;
     private JokerScoringService scService;
+    private JokerWebSocketService jokerWebSocketService;
+    private SimpMessagingTemplate messagingTemplate;
 
     @BeforeEach
     void setUp() {
         scService = Mockito.mock(JokerScoringService.class);
         JokerDbService dbService = Mockito.mock(JokerDbService.class);
         UserRepository userRepository = Mockito.mock(UserRepository.class);
+        jokerWebSocketService = Mockito.mock(JokerWebSocketService.class);
+        messagingTemplate = Mockito.mock(SimpMessagingTemplate.class);
 
         // mock userRepository to return a fake user so createGame doesn't throw
         org.example.y9_gaming_site.user.User fakeUser = Mockito.mock(org.example.y9_gaming_site.user.User.class);
         Mockito.when(userRepository.findById(Mockito.any())).thenReturn(java.util.Optional.of(fakeUser));
 
-        service = new JokerService(scService, dbService, userRepository);
+        // FIXED: გადაეცემა ყველა ახალი საჭირო სერვისი კონსტრუქტორში
+        service = new JokerService(scService, dbService, userRepository, jokerWebSocketService, messagingTemplate);
     }
 
     @Test
@@ -42,7 +48,6 @@ public class JokerServiceTest {
         assertEquals("Lasha", state.getPlayers().get(0).getUsername());
     }
 
-
     @Test
     @DisplayName("Should block matching players from joining a full or already occupied active room slot")
     void testJoinGameValidations() {
@@ -53,13 +58,13 @@ public class JokerServiceTest {
         service.joinGame(roomId, 11L, "Giorgi");
         assertEquals(2, state.getPlayers().size());
 
-        // Exception test: Joining same game twice
-        assertThrows(IllegalStateException.class, () -> service.joinGame(roomId, 11L, "Giorgi"));
+        // FIXED: ახალი ბექენდის მიხედვით, ერთი და იგივე იუზერის შესვლაზე ერორი აღარ ვარდება, უბრალოდ ბრუნდება სტეიტი
+        JokerGameState sameState = service.joinGame(roomId, 11L, "Giorgi");
+        assertEquals(2, sameState.getPlayers().size());
 
         // Exception test: Joining non-existent code reference lookup dictionary key
         assertThrows(IllegalArgumentException.class, () -> service.joinGame("NON_EXIST", 12L, "Nino"));
     }
-
 
     @Test
     @DisplayName("Should correctly filter visible active open match room collections")
@@ -100,7 +105,8 @@ public class JokerServiceTest {
     @Test
     @DisplayName("Should catch illegal parameters and out-of-turn execution requests during bid inputs")
     void testPlaceBidPhaseValidations() {
-        JokerGameState state = service.createGame(10L, "Lasha", PlayerCount.FOUR, RoundOption.FULL_24, 2, true);
+        // შევქმნათ 3 მოთამაშიანი ოთახი, რათა მყისიერად შევამოწმოთ ფაზები
+        JokerGameState state = service.createGame(10L, "Lasha", PlayerCount.THREE, RoundOption.SHORT_8, 2, true);
         String roomId = state.getRoom().getRoomId();
 
         // Exception test: Bidding out of sequence when game phase state context is WAITING
@@ -110,7 +116,7 @@ public class JokerServiceTest {
     @Test
     @DisplayName("Should prevent players from executing play card requests outside active playing round loops")
     void testPlayCardPhaseValidations() {
-        JokerGameState state = service.createGame(10L, "Lasha", PlayerCount.FOUR, RoundOption.FULL_24, 2, true);
+        JokerGameState state = service.createGame(10L, "Lasha", PlayerCount.THREE, RoundOption.SHORT_8, 2, true);
         String roomId = state.getRoom().getRoomId();
 
         // Exception test: Phase mismatch rule execution rejection validation

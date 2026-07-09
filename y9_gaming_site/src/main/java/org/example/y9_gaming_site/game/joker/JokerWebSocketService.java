@@ -117,4 +117,9 @@ public class JokerWebSocketService {
 
     // FIXED: Expanded record payload data to preserve complete trick visibility rules for UI rendering
     public record CardPlayedEvent(String username, Card card, String jokerCall, String declaredSuit) {}
+
+    public void broadcastNewRound(String roomCode, JokerGameState state) {
+        broadcast(roomCode, "NEW_ROUND", toPublicState(state));
+    }
+
 }
