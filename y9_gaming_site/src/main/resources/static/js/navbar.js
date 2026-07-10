@@ -60,6 +60,11 @@ function updateNavbar(user){
     if (adminLink && user.role === 'ADMIN') {
         adminLink.style.display = 'block';
     }
+
+    // NEW: load streak once we know the user's id
+    if (user.id && typeof loadStreak === 'function') {
+        loadStreak(user.id);
+    }
 }
 
 async function loadNavProfile() {
