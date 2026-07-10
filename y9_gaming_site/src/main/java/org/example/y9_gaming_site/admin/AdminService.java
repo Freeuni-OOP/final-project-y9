@@ -101,13 +101,13 @@ public class AdminService {
 
     public List<Game> getAllGames(){return gameRepository.findAll();}
 
-    public void deleteGame(Long id){gameRepository.deleteById(id);}
-
-    //custom quiz making.
-    public void saveCustomQuiz(String title, String category, int timeLimit, String description, String rawQuestions) {
-        String formattedQuestions = rawQuestions.replace("\r\n", ";").replace("\n", ";");
-        String sql = "INSERT INTO quizzes (title, category, time_limit_seconds, description, questions_blob, created_at) " +
-                "VALUES (?, ?, ?, ?, ?, NOW())";
-        jdbcTemplate.update(sql, title, category.toUpperCase(), timeLimit, description, formattedQuestions);
-    }
+//    public void deleteGame(Long id){gameRepository.deleteById(id);}
+//
+//    //custom quiz making.
+//    public void saveCustomQuiz(String title, String category, int timeLimit, String description, String rawQuestions) {
+//        String formattedQuestions = rawQuestions.replace("\r\n", ";").replace("\n", ";");
+//        String sql = "INSERT INTO quizzes (title, category, time_limit_seconds, description, questions_blob, created_at) " +
+//                "VALUES (?, ?, ?, ?, ?, NOW())";
+//        jdbcTemplate.update(sql, title, category.toUpperCase(), timeLimit, description, formattedQuestions);
+//    }
 }
