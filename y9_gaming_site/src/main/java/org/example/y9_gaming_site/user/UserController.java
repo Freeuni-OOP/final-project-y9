@@ -3,9 +3,7 @@ package org.example.y9_gaming_site.user;
 import org.example.y9_gaming_site.dto.AvatarUploadResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -45,29 +43,25 @@ public class UserController {
 
     //used by navbar to show avatar of user
     @GetMapping("/me")
-    public ResponseEntity<?> getCurrentUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getName())) {
+    public ResponseEntity<?> getCurrentUser(@AuthenticationPrincipal User user) {
+        if (user == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("not logged in");
         }
-        String userName = authentication.getName();
         try {
-            return ResponseEntity.ok(userService.getProfileByUsername(userName));
+            return ResponseEntity.ok(userService.getProfileByUsername(user.getUsername()));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
 
     @PostMapping("/avatar")
-    public ResponseEntity<?> uploadAvatar(@RequestParam("avatar") MultipartFile avatar) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getName())) {
+    public ResponseEntity<?> uploadAvatar(@RequestParam("avatar") MultipartFile avatar, @AuthenticationPrincipal User user) {
+        if (user == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("You are not logged in");
         }
-        String userName = authentication.getName();
 
         try {
-            String avatarUrl = userService.updateOrCreateAvatar(userName, avatar);
+            String avatarUrl = userService.updateOrCreateAvatar(user.getUsername(), avatar);
             return ResponseEntity.ok(new AvatarUploadResponse(avatarUrl, "Updated successfully!"));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());

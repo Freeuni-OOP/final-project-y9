@@ -10,7 +10,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addViewControllers(ViewControllerRegistry registry) {
-        registry.addViewController("/profile").setViewName("profile");
         registry.addViewController("/home").setViewName("homePage");
         registry.addViewController("/quizzes").setViewName("quizzes");
         registry.addViewController("/leaderboard").setViewName("leaderboard");
@@ -24,4 +23,4 @@ public class WebConfig implements WebMvcConfigurer {
                 .addResourceLocations("file:uploads/");
 
     }
-} 
+}
