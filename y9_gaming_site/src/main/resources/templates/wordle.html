@@ -11,8 +11,9 @@
     <link rel="stylesheet" th:href="@{/css/navbar.css}">
     <link rel="stylesheet" href="/css/wordle.css" />
     <link rel="stylesheet" th:href="@{/css/achievement-toast.css}">
+    <link rel="stylesheet" th:href="@{/css/rules-modal.css}">
 </head>
-<body>
+<body data-game-key="WORDLE">
 
 <nav th:replace="~{fragments/navbar :: navbar(active='home')}"></nav>
 
@@ -28,6 +29,7 @@
         <div class="wordle-actions">
             <button id="daily-btn" class="y9-btn" onclick="loadDaily()">დღის თამაში</button>
             <button id="practice-btn" class="y9-btn y9-btn--alt" onclick="loadPractice()">ვარჯიში</button>
+            <button class="y9-btn y9-btn--alt" onclick="showGameRules('WORDLE')">წესები</button>
         </div>
     </div>
 </main>
@@ -35,6 +37,7 @@
 <script th:src="@{/js/navbar.js}"></script>
 <script th:src="@{/js/streak.js}"></script>
 <script th:src="@{/js/achievement-toast.js}"></script>
+<script th:src="@{/js/rules-modal.js}"></script>
 <script src="/js/wordle.js"></script>
 </body>
 </html>
