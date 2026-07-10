@@ -1,89 +1,107 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Chat</title>
+    <title>Y9 - Chat</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bitcount+Grid+Double+Ink&display=swap" rel="stylesheet">
     <link rel="stylesheet"  th:href="@{/css/navbar.css}">
     <link rel="stylesheet" href="/css/Chat.css" />
-    <link rel="stylesheet" th:href="@{/css/navbar.css}">
     <style>
-        body {g
-            margin: 0;
-            padding: 0;
-        }
+        body {margin: 0; padding: 0;}
     </style>
 </head>
 <body>
 <nav th:replace="~{fragments/navbar :: navbar(active='home')}"></nav>
 
-    <div class="card">
-        <h2>Chat with friend</h2>
-        <p>you are logged in as: <strong id = "myUsernameLabel"></strong></p>
-        <label>Friend's username</label>
-        <input type="text" id="othersUsername">
 
-        <button onclick="openFriendChat()">Open chat</button>
-    </div>
+<div class="chat-layout">
+    <div class="chat-sidebar">
+        <div class="chat-panel">
+            <h2>💬 Chat with friends</h2>
+            <p class="my-username-label">You are logged in as: <strong id="myUsernameLabel">...</strong></p>
 
-    <div class="card">
-        <h2>Create group chat</h2>
-        <label>Group name</label>
-        <input type="text" id="groupName">
-        <label>Write friend's username, separated by commas.</label>
-        <input type="text" id="groupUserNames">
-        <button onclick="createGroup()">Create group</button>
-    </div>
 
-    <div class="card" id="chatBox">
-        <h2>Room #<span id="roomIdLabel"></span></h2>
-        <div id="messages"></div>
-        <div class="sendRow">
-            <input type="text" id="messageInput" placeholder="write message">
-            <button onclick="sendMessage()">send</button>
+            <label>Friend's username</label>
+            <input type="text" id="othersUsername">
+
+
+            <button class="chat-btn" onclick="openFriendChat()">Open chat</button>
+        </div>
+
+
+        <div class="chat-panel">
+            <h2>👥 Create group chat</h2>
+
+
+            <label>Group name</label>
+            <input type="text" id="groupName">
+
+
+            <label>Friend usernames, separated by commas</label>
+            <input type="text" id="groupUserNames">
+
+
+            <button class="chat-btn" onclick="createGroup()">Create group</button>
         </div>
     </div>
-    <script src="/js/Chat.js"></script>
-    <script src="/js/navbar.js"></script>
 
-    <script>
-        async function redirectToMyProfile(){
-            const token = localStorage.getItem('token');
-            if(!token){
-                window.location.href = "/login";
-                return;
-            }
-            try {
-                const res = await fetch("/api/users/me",{
-                    method: "GET",
-                    headers:{
-                        "Authorization": `Bearer ${token}`,
-                        "Content-Type": "application/json"
-                }
-                });
-                if(res.ok){
-                    const user = await res.json();
-                    window.location.href = `/profile/${user.id}`;
-                }else{
-                    window.location.href = "/login";
-                }
-            }catch (err){
-                console.error("Failed to route to profile view:", err);
-                window.location.href = "/login";
-            }
+
+    <div class="chat-main" id="chatBox">
+        <div class="chat-panel">
+            <div class="chat-room-title">⚡ Room #<span id="roomIdLabel"></span></div>
+            <div id="messages"></div>
+            <div class="send-row">
+                <input type="text" id="messageInput" placeholder="write message...">
+                <button onclick="sendMessage()">Send -></button>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="/js/Chat.js"></script>
+<script src="/js/navbar.js"></script>
+
+
+<script>
+    async function redirectToMyProfile(){
+        const token = window.localStorage.getItem('token');
+        if(!token){
+            window.location.href = "/login";
+            return;
         }
-
-        async function logout(){
-            try{
-                await fetch("/api/users/logout", {method: "POST"});
-            }catch (e){
-                console.error("Logout request skipped.")
+        try {
+            const res = await fetch("/api/users/me",{
+                method: "GET",
+                headers:{
+                    "Authorization": `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                }
+            });
+            if(res.ok){
+                const user = await res.json();
+                window.location.href = `/profile/${user.id}`;
+            }else{
+                window.location.href = "/login";
             }
-            localStorage.removeItem("token");
-            localStorage.removeItem("role");
-            localStorage.removeItem("username");
+        }catch (err){
+            console.error("Failed to route to profile view:", err);
             window.location.href = "/login";
         }
-    </script>
+    }
+
+
+    async function logout(){
+        try{
+            await fetch("/api/users/logout", {method: "POST"});
+        }catch (e){
+            console.error("Logout request skipped.")
+        }
+        window.localStorage.removeItem("token");
+        window.localStorage.removeItem("role");
+        window.localStorage.removeItem("username");
+        window.location.href = "/login";
+    }
+</script>
+
 
 </body>
 </html>

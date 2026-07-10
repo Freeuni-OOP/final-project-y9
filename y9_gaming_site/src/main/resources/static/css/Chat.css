@@ -1,100 +1,273 @@
 *{
     box-sizing: border-box;
+    margin: 0;
+    padding: 0;
 }
 
-    body{
-        font-family: system-ui, Arial, sans-serif;
-        background: #ffe4ec;
-        margin: 0;
-        padding: 20px;
-        color: #4a2030;
+
+body{
+    font-family: 'Segoe UI', sans-serif;
+    color: #fff;
+    background-image: url('../img/backgrounds/final.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    min-height: 100vh;
+}
+
+
+.chat-layout{
+    display: flex;
+    gap: 24px;
+    padding: 24px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+
+.chat-sidebar{
+    width: 300px;
+    min-width: 300px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+
+.chat-panel{
+    background: rgba(71, 44, 82, 0.6);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 10px 40px rgba(145, 60, 143, 0.25);
+}
+
+
+.chat-panel h2{
+    font-family: 'Bitcount Grid Double Ink', monospace;
+    color: #d07fd8;
+    font-size: 18px;
+    margin-bottom: 16px;
+    letter-spacing: 1px;
+}
+
+
+.chat-panel label {
+    display: block;
+    font-size: 12px;
+    color: #cba8d8;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    margin-top: 12px;
+}
+
+
+.chat-panel input,
+.chat-panel select{
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(71, 44, 82, 0.4);
+    color: #fff;
+    font-size: 14px;
+    outline: none;
+}
+
+
+.chat-panel input:focus,
+.chat-panel select:focus{
+    border-color: #b327c9;
+}
+
+
+.chat-panel input::placeholder{
+    color: #aaa;
+}
+
+
+.chat-panel select option{
+    background: #3a1f4a;
+}
+
+
+.chat-btn{
+    margin-top: 14px;
+    width: 100%;
+    padding: 11px;
+    border: none;
+    border-radius: 8px;
+    background: #9a4eab;
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+
+.chat-btn:hover{
+    background: #b327c9;
+}
+
+
+.my-username-label{
+    font-size: 13px;
+    color: #cba8d8;
+    margin-bottom: 12px;
+}
+
+
+.my-username-label strong{
+    color: #e194d5;
+}
+
+
+.chat-main{
+    flex: 1;
+    display: none;
+    flex-direction: column;
+    gap: 0;
+}
+
+
+.chat-main.visible{
+    display: flex;
+}
+
+
+.chat-main .chat-panel{
+    display: flex;
+    flex-direction: column;
+    height: 600px;
+}
+
+
+.chat-room-title{
+    font-family: 'Bitcount Grid Double Ink', monospace;
+    color: #d07fd8;
+    font-size: 18px;
+    margin-bottom: 16px;
+    letter-spacing: 1px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding-bottom: 14px;
+}
+
+
+#messages{
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-right: 4px;
+}
+
+
+#messages::-webkit-scrollbar{
+    width: 4px;
+}
+
+
+#messages::-webkit-scrollbar-thumb{
+    background: rgba(179, 39, 201, 0.4);
+    border-radius: 4px;
+}
+
+
+.msg{
+    max-width: 70%;
+    padding: 10px 14px;
+    border-radius: 14px;
+    font-size: 14px;
+    line-height: 1.4;
+    word-wrap: break-word;
+}
+
+
+.mine{
+    background: #9a4eab;
+    color: white;
+    margin-left: auto;
+    border-bottom-right-radius: 4px;
+}
+
+
+.theirs{
+    background: rgba(71, 44, 82, 0.8);
+    color: #e8e8e8;
+    border-bottom-left-radius: 4px;
+}
+
+
+.senderName{
+    font-size: 11px;
+    color: #e194d5;
+    font-weight: bold;
+    margin-bottom: 3px;
+}
+
+
+.send-row{
+    display: flex;
+    gap: 8px;
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+
+.send-row input{
+    flex: 1;
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(71, 44, 82, 0.4);
+    color: #fff;
+    font-size: 14px;
+    outline: none;
+}
+
+
+.send-row input:focus {
+    border-color: #b327c9;
+}
+
+
+.send-row input::placeholder{
+    color: #aaa;
+}
+
+
+.send-row button{
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    background: #9a4eab;
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.2s;
+    white-space: nowrap;
+}
+
+
+.send-row button:hover{
+    background: #b327c9;
+}
+
+
+@media (max-width: 768px) {
+    .chat-layout{
+        flex-direction: column;
+        padding: 12px;
     }
-    .card{
-        max-width: 480px;
-        margin: 0 auto 20px auto;
-        background: #fff5f8;
-        border: 1px solid #ffc2d6;
-        border-radius: 10px;
-        padding: 16px;
-    }
-    h2{
-        margin-top:0;
-        font-size: 18px;
-        color: #d6336c;
-    }
-    label{
-        display: block;
-        font-size: 13px;
-        margin-top: 10px;
-        margin-bottom: 4px;
-        color: #b5476c;
-    }
-    input,select{
+    .chat-sidebar{
         width: 100%;
-        padding: 8px;
-        border: 1px solid #ffc2d6;
-        border-radius: 6px;
-        font-size: 14px;
-        background: #ffffff;
+        min-width: 100%;
     }
-    button{
-        margin-top: 14px;
-        width: 100%;
-        padding: 10px;
-        border:none;
-        border-radius: 6px;
-        background: #ff6fa5;
-        color:white;
-        font-size: 14px;
-        cursor: pointer;
-    }
-    button:hover{
-        background: #ff4f8f;
-    }
-    #chatBox{
-        display: none;
-    }
-    #messages{
-        height: 300px;
-        overflow-y: auto;
-        border: 1px solid #ffc2d6;
-        border-radius: 6px;
-        padding: 10px;
-        background: #fff0f5;
-    }
-    .msg{
-        max-width: 75%;
-        padding: 8px 12px;
-        border-radius: 14px;
-        margin-bottom: 8px;
-        font-size: 14px;
-        line-height: 1.3;
-        word-wrap: break-word;
-    }
-    .mine{
-        background: #ff6fa5;
-        color: white;
-        margin-left: auto;
-    }
-    .theirs{
-        background: #ffd1e1;
-        color: #4a2030;
-    }
-    .sendRow{
-        display: flex;
-        gap:8px;
-        margin-top: 10px;
-    }
-    .sendRow input{
-        flex: 1;
-    }
-    .sendRow button{
-        width: auto;
-        margin-top: 0;
-        padding: 10px 16px;
-    }
-    #errorBox{
-        color: #c0392b;
-        font-size: 13px;
-        margin-top: 8px;
-    }
+}
