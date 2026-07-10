@@ -2,6 +2,7 @@ const API = "/api/games/wordle";
 const ANBANI = "აბგდევზთიკლმნოპჟრსტუფქღყშჩცძწჭხჯჰ";
 const ANBANI_SET = new Set(ANBANI);
 const ROWS = ["აბგდევზთიკლ", "მნოპჟრსტუფქ", "ღყშჩცძწჭხჯჰ"];
+const HINT_COST = 50;
 
 let puzzleId = null;
 let wordLength = 5;
@@ -11,13 +12,17 @@ let currentRow = 0;
 let currentGuess = "";
 let busy = false;
 let loadToken = 0;
+let hints = [];
+let pointsBalance = 0;
+let knownPositions = new Set();
 
-let boardEl, kbEl, msgEl, subEl, dailyBtn, practiceBtn;
+let boardEl, kbEl, msgEl, subEl, dailyBtn, practiceBtn, hintBtn, pointsEl;
 
 function setBusy(value) {
     busy = value;
     if (dailyBtn) dailyBtn.disabled = value;
     if (practiceBtn) practiceBtn.disabled = value;
+    refreshHintButton();
 }
 
 function authHeaders(json = true) {
@@ -94,7 +99,14 @@ function drawActiveRow() {
         const tile = tileAt(currentRow, c);
         if (!tile) continue;
         const ch = currentGuess[c] || "";
-        tile.textContent = ch;
+        const hint = status === "IN_PROGRESS" ? hints.find(h => h.position === c) : null;
+        if (ch === "" && hint) {
+            tile.textContent = hint.letter;
+            tile.classList.add("hint-ghost");
+        } else {
+            tile.textContent = ch;
+            tile.classList.remove("hint-ghost");
+        }
         tile.classList.toggle("filled", ch !== "");
     }
 }
@@ -127,6 +139,13 @@ function resetKeyboardStates() {
     });
 }
 
+function refreshHintButton() {
+    if (!hintBtn) return;
+    const noneLeft = knownPositions.size >= wordLength;
+    hintBtn.disabled = busy || status !== "IN_PROGRESS" || noneLeft || pointsBalance < HINT_COST;
+    hintBtn.textContent = noneLeft ? "ყველა ასო ცნობილია" : `მინიშნება (−${HINT_COST})`;
+}
+
 function setMessage(text, kind = "") {
     msgEl.textContent = text || "";
     msgEl.className = "msg" + (kind ? " " + kind : "");
@@ -140,10 +159,20 @@ function render(state) {
     const guesses = state.guesses || [];
     currentRow = guesses.length;
     currentGuess = "";
+    hints = state.hints || [];
+    pointsBalance = state.pointsBalance || 0;
 
     buildBoard();
     resetKeyboardStates();
-    guesses.forEach((g, i) => applyGuessRow(i, g.guessWord, g.feedback));
+    knownPositions = new Set(hints.map(h => h.position));
+    guesses.forEach((g, i) => {
+        applyGuessRow(i, g.guessWord, g.feedback);
+        g.feedback.forEach((f, c) => { if (f === "CORRECT") knownPositions.add(c); });
+    });
+    drawActiveRow();
+
+    if (pointsEl) pointsEl.textContent = `ქულები: ${pointsBalance}`;
+    refreshHintButton();
 
     if (status === "WON") {
         setMessage("გამოიცანი!", "win");
@@ -222,6 +251,50 @@ async function submitGuess() {
     }
 }
 
+async function useHint() {
+    if (status !== "IN_PROGRESS" || busy) return;
+    const myToken = ++loadToken;
+    setBusy(true);
+    try {
+        const res = await fetch(`${API}/${puzzleId}/hint`, {
+            method: "POST",
+            headers: authHeaders(true)
+        });
+        if (myToken !== loadToken) return;
+        if (res.status === 401 || res.status === 403) {
+            setMessage("გთხოვთ გაიაროთ ავტორიზაცია", "lose");
+            return;
+        }
+        if (res.status === 402) {
+            setMessage("არასაკმარისი ქულები მინიშნებისთვის", "lose");
+            return;
+        }
+        if (res.status === 422) {
+            setMessage("ყველა ასო უკვე ცნობილია");
+            return;
+        }
+        if (!res.ok) {
+            setMessage("მინიშნება ვერ მოხერხდა");
+            return;
+        }
+        const state = await res.json();
+        const typedSoFar = currentGuess;
+        render(state);
+        currentGuess = typedSoFar;
+        drawActiveRow();
+        const newHint = state.hints && state.hints[state.hints.length - 1];
+        if (newHint) {
+            setMessage(`მინიშნება: მე-${newHint.position + 1} პოზიციაზე — „${newHint.letter}“`, "hint");
+        }
+    } catch (err) {
+        if (myToken !== loadToken) return;
+        console.error("hint failed:", err);
+        setMessage("კავშირის შეცდომა");
+    } finally {
+        if (myToken === loadToken) setBusy(false);
+    }
+}
+
 document.addEventListener("keydown", (e) => {
     if (e.ctrlKey || e.metaKey || e.altKey) return;
     if (e.key === "Enter") { submitGuess(); return; }
@@ -272,6 +345,8 @@ document.addEventListener("DOMContentLoaded", () => {
     subEl = document.getElementById("sub");
     dailyBtn = document.getElementById("daily-btn");
     practiceBtn = document.getElementById("practice-btn");
+    hintBtn = document.getElementById("hint-btn");
+    pointsEl = document.getElementById("points-balance");
 
     buildBoard();
     buildKeyboard();

@@ -21,6 +21,7 @@
     <div class="wordle-panel">
         <h1 class="wordle-title">ვორდლი</h1>
         <div class="wordle-sub" id="sub">დღის სიტყვა</div>
+        <div class="wordle-sub" id="points-balance">ქულები: —</div>
 
         <div id="board" class="board"></div>
         <div id="msg" class="msg" aria-live="polite"></div>
@@ -29,6 +30,7 @@
         <div class="wordle-actions">
             <button id="daily-btn" class="y9-btn" onclick="loadDaily()">დღის თამაში</button>
             <button id="practice-btn" class="y9-btn y9-btn--alt" onclick="loadPractice()">ვარჯიში</button>
+            <button id="hint-btn" class="y9-btn y9-btn--alt" onclick="useHint()">მინიშნება (−50)</button>
             <button class="y9-btn y9-btn--alt" onclick="showGameRules('WORDLE')">წესები</button>
         </div>
     </div>

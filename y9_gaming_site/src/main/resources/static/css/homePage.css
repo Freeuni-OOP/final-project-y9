@@ -5,7 +5,7 @@
 }
 body {
     font-family: 'Segoe UI', sans-serif;
-    color: #fff;
+    color: #f2ecef;
     background-image: url('../img/backgrounds/final.png');
     background-size: cover;
     background-position: center;
@@ -22,18 +22,18 @@ body {
     font-size: 12px;
     letter-spacing: 4px;
     text-transform: uppercase;
-    color: #cba8d8;
+    color: #b6a0c2;
     margin-bottom: 10px;
 }
 .hero__number {
     font-family: 'Bitcount Grid Double Ink', monospace;
     font-size: 80px;
-    color: #e194d5;
+    color: #d9a8c4;
     line-height: 1;
 }
 .hero__sub {
     font-size: 12px;
-    color: #aaa;
+    color: #9c92a3;
     margin-top: 10px;
     letter-spacing: 3px;
     text-transform: uppercase;
@@ -44,7 +44,7 @@ body {
 }
 .hub-title {
     font-family: 'Bitcount Grid Double Ink', monospace;
-    color: #b327c9;
+    color: #a8709e;
     text-align: center;
     margin-bottom: 28px;
     letter-spacing: 3px;
@@ -59,19 +59,24 @@ body {
     margin-top: 28px;
 }
 .card {
-    background: rgba(71, 44, 82, 0.6);
-    backdrop-filter: blur(8px);
+    background: rgba(70, 35, 90, 0.55);
+    backdrop-filter: blur(12px);
     border-radius: 16px;
     padding: 28px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: 0 10px 40px rgba(145, 60, 143, 0.25);
+    border: 1px solid rgba(255, 170, 230, 0.12);
+    box-shadow: 0 10px 35px rgba(180, 60, 150, 0.25);
 }
-.card__title {
-    font-family: 'Bitcount Grid Double Ink', monospace;
-    color: #d07fd8;
-    font-size: 18px;
-    margin-bottom: 20px;
-    letter-spacing: 1px;
+
+#daily-challenges-card {
+    background: rgba(170, 65, 125, 0.65);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(150, 96, 122, 0.6);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 10px 30px rgba(20, 14, 22, 0.35);
+}
+#daily-challenges-card .card__title {
+    color: #f2ecef;
 }
 .leaderboard { list-style: none; }
 .leaderboard li {
@@ -79,21 +84,21 @@ body {
     align-items: center;
     gap: 14px;
     padding: 11px 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
     font-size: 14px;
 }
 .leaderboard li:last-child { border-bottom: none; }
 .leaderboard__rank {
     font-family: 'Bitcount Grid Double Ink', monospace;
     font-size: 22px;
-    color: #b327c9;
+    color: #a8709e;
     min-width: 28px;
 }
-.leaderboard__name { flex: 1; color: #e8e8e8; }
-.leaderboard__score { color: #e194d5; font-weight: bold; font-size: 13px; }
+.leaderboard__name { flex: 1; color: #ded7dc; }
+.leaderboard__score { color: #d9a8c4; font-weight: bold; font-size: 13px; }
 .leaderboard__skeleton {
     height: 40px;
-    background: rgba(179, 39, 201, 0.1);
+    background: rgba(168, 112, 158, 0.1);
     border-radius: 6px;
     margin-bottom: 8px;
     animation: pulse 1.5s infinite;
@@ -104,15 +109,15 @@ body {
     align-items: flex-start;
     gap: 14px;
     padding: 11px 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 .achievements li:last-child { border-bottom: none; }
 .achievements__icon { font-size: 22px; min-width: 28px; text-align: center; }
-.achievements__name { color: #e8e8e8; font-weight: 600; font-size: 13px; margin-bottom: 3px; }
-.achievements__who  { font-size: 11px; color: #aaa; }
+.achievements__name { color: #ded7dc; font-weight: 600; font-size: 13px; margin-bottom: 3px; }
+.achievements__who  { font-size: 11px; color: #9c92a3; }
 .achievements__skeleton {
     height: 48px;
-    background: rgba(179, 39, 201, 0.1);
+    background: rgba(168, 112, 158, 0.1);
     border-radius: 6px;
     margin-bottom: 8px;
     animation: pulse 1.5s infinite;
@@ -125,14 +130,14 @@ body {
     position: fixed;
     top: 0; left: 0;
     width: 100vw; height: 100vh;
-    background-color: #0a0a12;
+    background-color: #14101a;
     z-index: 9999;
     display: flex;
     flex-direction: column;
 }
 .theater-header {
-    background-color: rgba(71, 44, 82, 0.9);
-    border-bottom: 2px solid #b327c9;
+    background-color: rgba(56, 44, 64, 0.92);
+    border-bottom: 2px solid #a8709e;
     padding: 15px 30px;
     display: flex;
     justify-content: space-between;
@@ -140,15 +145,15 @@ body {
 }
 .theater-title {
     font-family: 'Bitcount Grid Double Ink', monospace;
-    color: #e194d5;
+    color: #d9a8c4;
     letter-spacing: 2px;
     font-size: 22px;
     margin: 0;
 }
 .close-theater-btn {
     padding: 8px 18px;
-    background-color: #ff007f;
-    color: white;
+    background-color: #b05a72;
+    color: #f2ecef;
     border: none;
     border-radius: 6px;
     font-weight: bold;
@@ -156,7 +161,7 @@ body {
     font-size: 14px;
     transition: background 0.2s;
 }
-.close-theater-btn:hover { background-color: #ff5599; }
+.close-theater-btn:hover { background-color: #c47186; }
 .theater-body {
     flex-grow: 1;
     width: 100%;
@@ -178,24 +183,24 @@ body {
 .sidebar-categories {
     width: 260px;
     min-width: 260px;
-    background: rgba(186, 43, 124, 0.91);
+    background: rgba(170, 65, 125, 0.65);
     backdrop-filter: blur(12px);
-    border: 1px solid rgb(163, 42, 107);
+    border: 1px solid rgba(150, 96, 122, 0.6);
     border-radius: 12px;
     padding: 20px;
     box-sizing: border-box;
-    box-shadow: 0 10px 40px rgba(145, 60, 143, 0.4);
+    box-shadow: 0 10px 30px rgba(20, 14, 22, 0.35);
     position: sticky;
     top: 90px;
 }
 .sidebar-title {
     font-family: 'Bitcount Grid Double Ink', monospace;
-    color: #ffffff;
+    color: #f2ecef;
     font-size: 1.25rem;
     font-weight: bold;
     margin-top: 0;
     margin-bottom: 20px;
-    border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+    border-bottom: 2px solid rgba(255, 255, 255, 0.15);
     padding-bottom: 8px;
     letter-spacing: 1px;
 }
@@ -209,9 +214,9 @@ body {
 }
 .cat-btn {
     width: 100%;
-    background: rgba(255, 255, 255, 0.12);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    color: #ffffff;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    color: #f2ecef;
     padding: 12px 16px;
     text-align: left;
     font-size: 0.95rem;
@@ -221,10 +226,10 @@ body {
     transition: all 0.2s ease-in-out;
 }
 .cat-btn:hover, .cat-btn.active {
-    background: #ffffff !important;
-    color: rgba(186, 43, 124, 1) !important;
+    background: #d9a8c4 !important;
+    color: rgba(120, 70, 98, 1) !important;
     font-weight: bold;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 5px 15px rgba(217,168,196,0.35);
     transform: translateX(4px);
 }
 .main-content-flow {
@@ -242,9 +247,9 @@ body {
     margin-top: 20px;
 }
 .y8-game-box {
-    background: rgba(71, 44, 82, 0.4);
+    background: rgba(56, 44, 64, 0.4);
     backdrop-filter: blur(8px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 10px;
     padding: 10px;
     cursor: pointer;
@@ -256,18 +261,33 @@ body {
     box-sizing: border-box;
 }
 .y8-game-box:hover {
-    transform: translateY(-5px);
-    border-color: #e765e0;
-    box-shadow: 0 8px 16px rgba(145, 60, 143, 0.4);
+    transform: translateY(-4px);
+    border-color: #c98bb8;
+    box-shadow: 0 8px 16px rgba(20, 14, 22, 0.35);
+}
+
+#daily-challenges-card .y8-game-box:hover {
+    transform: translateX(4px);
+    background: #f2ecef;
+    border-color: #f2ecef;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}
+
+#daily-challenges-card .y8-game-box:hover h3 {
+    color: rgba(120,70,98,1) !important;
+}
+
+#daily-challenges-card .y8-game-box:hover div {
+    color: rgba(120,70,98,1) !important;
 }
 .y8-thumbnail-wrapper {
     width: 100%;
     aspect-ratio: 1 / 1;
     border-radius: 8px;
     overflow: hidden;
-    background: #121214;
+    background: #16121a;
     margin-bottom: 8px;
-    border: 2px solid rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.15);
 }
 .y8-icon {
     width: 100%;
@@ -276,7 +296,7 @@ body {
 }
 .y8-title-label {
     font-size: 0.85rem;
-    color: #ffffff;
+    color: #f2ecef;
     font-weight: 600;
     width: 100%;
     padding: 0 4px;
@@ -293,17 +313,22 @@ body {
     .navbar__links { display: none; }
 }
 .daily-dashboard {
-    background: #15151c;
-    border: 2px solid #282833;
+    background: rgba(120, 70, 98, 0.78);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(150, 96, 122, 0.6);
     border-radius: 12px;
     padding: 20px;
     margin-bottom: 30px;
+    box-shadow: 0 10px 30px rgba(20, 14, 22, 0.35);
 }
 .daily-dashboard__title {
-    font-size: 1.2rem;
-    color: #fff;
-    margin-bottom: 15px;
-    font-family: sans-serif;
+    font-family: 'Bitcount Grid Double Ink', monospace;
+    color: #f2ecef;
+    font-size: 1.25rem;
+    margin-bottom: 20px;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.15);
+    padding-bottom: 8px;
+    letter-spacing: 1px;
 }
 .daily-dashboard__row {
     display: flex;
@@ -313,21 +338,30 @@ body {
 .daily-card {
     flex: 1;
     min-width: 200px;
-    background: #1e1e26;
-    border: 1px solid #333344;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.16);
     border-radius: 8px;
     padding: 15px;
     display: flex;
     align-items: center;
     gap: 15px;
     text-decoration: none;
-    color: inherit;
-    transition: transform 0.2s, border-color 0.2s;
+    color: #f2ecef;
+    transition: all 0.2s ease-in-out;
 }
 .daily-card--active:hover {
-    transform: translateY(-2px);
-    border-color: #00ff66;
+    transform: translateX(4px);
+    background: #d9a8c4;
+    color: rgba(120, 70, 98, 1);
+    border-color: #d9a8c4;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
     cursor: pointer;
+}
+
+.daily-card--active:hover h3,
+.daily-card--active:hover p,
+.daily-card--active:hover .badge {
+    color: rgba(120, 70, 98, 1);
 }
 .daily-card__icon {
     font-size: 2rem;
@@ -335,7 +369,7 @@ body {
 .daily-card__info h3 {
     margin: 0 0 5px 0;
     font-size: 1.05rem;
-    color: #fff;
+    color: #f2ecef;
 }
 .badge {
     font-size: 0.75rem;
@@ -343,8 +377,8 @@ body {
     border-radius: 4px;
     font-weight: bold;
 }
-.badge--coming-soon { background: #444; color: #aaa; }
-.badge--play { background: #00ff66; color: #000; }
+.badge--coming-soon { background: #4a4650; color: #a89fb0; }
+.badge--play { background: #7fbf94; color: #14231a; }
 
 .search-wrapper {
     position: relative;
@@ -357,19 +391,19 @@ body {
     width: 100%;
     padding: 13px 20px;
     border-radius: 30px;
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    background: rgba(71,44, 82, 0.6);
-    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(56, 44, 64, 0.55);
+    color: #f2ecef;
     font-size: 15px;
     outline: none;
 }
 
 .search-wrapper input:focus{
-    border-color: #b327c9;
+    border-color: #a8709e;
 }
 
 .search-wrapper input::placeholder{
-    color: #aaa;
+    color: #9c92a3;
 }
 
 .search-results{
@@ -377,16 +411,16 @@ body {
     top: calc(100% + 8px);
     left: 40px;
     right: 40px;
-    background: rgba(40, 20, 50, 0.97);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(34, 26, 40, 0.97);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 12px;
     z-index: 200;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
 }
 
 .search-section-title{
     font-size: 11px;
-    color: #b327c9;
+    color: #a8709e;
     text-transform: uppercase;
     letter-spacing: 2px;
     padding: 12px 16px 6px;
@@ -399,12 +433,12 @@ body {
     gap: 12px;
     padding: 10px 16px;
     cursor: pointer;
-    color: #fff;
+    color: #f2ecef;
     text-decoration: none;
 }
 
 .search-item:hover{
-    background: rgba(179, 39, 201, 0.2);
+    background: rgba(168, 112, 158, 0.16);
 }
 
 .search-item img{

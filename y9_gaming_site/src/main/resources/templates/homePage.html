@@ -9,10 +9,26 @@
     <link href="https://fonts.googleapis.com/css2?family=Bitcount+Grid+Double+Ink&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/homePage.css" />
     <link rel="stylesheet" th:href="@{/css/navbar.css}">
-
+    <style>
+        #daily-challenges-card .card__title {
+            font-family: 'Bitcount Grid Double Ink', monospace;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        #daily-challenges-card .y8-game-box:hover {
+            transform: translateY(-5px) !important;
+            background: rgba(225, 148, 213, 0.35) !important;
+            border-color: #e765e0 !important;
+            box-shadow: 0 8px 16px rgba(145, 60, 143, 0.4) !important;
+        }
+        #daily-challenges-card .y8-game-box:hover h3,
+        #daily-challenges-card .y8-game-box:hover div {
+            color: #ffffff !important;
+        }
+    </style>
 </head>
-    <nav th:replace="~{fragments/navbar :: navbar(active='home')}"></nav>
-    <div th:replace="~{fragments/Notifications :: Notifications}"></div>
+<nav th:replace="~{fragments/navbar :: navbar(active='home')}"></nav>
+<div th:replace="~{fragments/Notifications :: Notifications}"></div>
 
 <div class="search-wrapper">
     <input type="text" id="search-input" placeholder="🔍 search game or person..." autocomplete="off" oninput="onSearch(this.value)">
@@ -141,7 +157,7 @@
             const remoteGames = await res.json();
 
             window.cachedGamesList = remoteGames
-                .filter(game => game && game.name && !game.name.startsWith('!') && !['Steam', 'Amazon Luna', 'Newgrounds'].includes(game.name))
+                .filter(game => game && game.name && !game.name.startsWith('!') && !['Steam', 'Amazon Luna', 'Newgrounds', 'Fancade'].includes(game.name))
                 .map((game, index) => {
                     const name = String(game.name).toLowerCase();
                     const tagString = game.categories && Array.isArray(game.categories)
@@ -303,10 +319,7 @@
         }
     });
 </script>
-<script src = "/js/Search.js"></script>
-<script src="/js/Notification.js"></script>
+<script th:src="@{/js/Search.js}"></script>
+<script th:src="@{/js/Notification.js}"></script>
 </body>
 </html>
-
-
-

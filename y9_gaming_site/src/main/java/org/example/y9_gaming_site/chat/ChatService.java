@@ -2,6 +2,8 @@ package org.example.y9_gaming_site.chat;
 
 import org.example.y9_gaming_site.friendship.Friendship;
 import org.example.y9_gaming_site.friendship.FriendshipRepository;
+import org.example.y9_gaming_site.notification.NotificationRepository;
+import org.example.y9_gaming_site.notification.NotificationService;
 import org.example.y9_gaming_site.user.User;
 import org.example.y9_gaming_site.user.UserRepository;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -23,13 +25,15 @@ public class ChatService {
     private final FriendshipRepository friendshipRepository;
     private ChatroomMemberRepository chatroomMemberRepository;
     private UserRepository userRepository;
+    private NotificationService notificationService;
 
-    public ChatService(MessageRepository messageRepository, ChatroomRepository chatroomRepository, FriendshipRepository friendshipRepository, ChatroomMemberRepository chatroomMemberRepository, UserRepository userRepository) {
+    public ChatService(MessageRepository messageRepository, ChatroomRepository chatroomRepository, FriendshipRepository friendshipRepository, ChatroomMemberRepository chatroomMemberRepository, UserRepository userRepository, NotificationService notificationService) {
         this.messageRepository = messageRepository;
         this.chatroomRepository = chatroomRepository;
         this.friendshipRepository = friendshipRepository;
         this.chatroomMemberRepository = chatroomMemberRepository;
         this.userRepository = userRepository;
+        this.notificationService = notificationService;
     }
 
     //finding user by username, returns id and username seperatly, not whole object
@@ -119,7 +123,15 @@ public class ChatService {
         messageEntity.setRoomId(roomId);
         messageEntity.setMessage(message);
         messageEntity.setTimestamp(LocalDateTime.now());
-        return messageRepository.save(messageEntity);
+        Message savedMessage =  messageRepository.save(messageEntity);
+
+        List<ChatroomMember> members = chatroomMemberRepository.findByRoomId(roomId);
+        for (ChatroomMember member : members) {
+            if(!member.getUserId().equals(senderId)) {
+                notificationService.createMessageNotification(senderId, member.getUserId(), roomId);
+            }
+        }
+        return savedMessage;
     }
 
     public List<Map<String, Object>> getMessages(Long roomId) {

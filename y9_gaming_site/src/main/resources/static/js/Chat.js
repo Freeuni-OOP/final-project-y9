@@ -181,3 +181,19 @@ async function sendMessage(){
     input.value = "";
     loadMessages();
 }
+
+async function openChatById(id){
+    if(!MyUserId){
+        console.error("User identity not loaded yet.")
+    }
+
+    roomId = id;
+
+    document.getElementById("roomIdLabel").textContent=roomId;
+    document.getElementById("chatBox").classList.add("visible");
+
+    loadMessages();
+
+    if(pollTimer) clearInterval(pollTimer);
+    pollTimer = setInterval(loadMessages, 3000);
+}

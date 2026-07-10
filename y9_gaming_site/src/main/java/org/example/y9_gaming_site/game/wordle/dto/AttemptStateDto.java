@@ -10,5 +10,7 @@ public record AttemptStateDto (Long puzzleId,
                                int maxGuesses,
                                AttemptStatus status,
                                List<GuessFeedbackDto> guesses,
+                               List<HintDto> hints,
+                               int pointsBalance,
                                String answerWord,
                                List<UnlockedAchievementDto> newAchievements){}
