@@ -1,8 +1,6 @@
 package org.example.y9_gaming_site.quiz;
 
 import org.example.y9_gaming_site.user.User;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -26,20 +24,18 @@ public class QuizController {
     private final QuizService quizService;
     private static final String UPLOAD_DIR = "uploads/quiz-images/";
 
-
-
     public QuizController(QuizService quizService) {
         this.quizService = quizService;
     }
 
     @GetMapping
-    public ResponseEntity<List<Quiz>> getAllQuizzes() {
-        return ResponseEntity.ok(quizService.getAllQuizzes());
+    public ResponseEntity<List<QuizSummary>> getAllQuizzes() {
+        return ResponseEntity.ok(quizService.getAllQuizSummaries());
     }
 
     @GetMapping("/category/{category}")
-    public ResponseEntity<List<Quiz>> getQuizzesByCategory(@PathVariable String category) {
-        return ResponseEntity.ok(quizService.getQuizzesByCategory(category));
+    public ResponseEntity<List<QuizSummary>> getQuizzesByCategory(@PathVariable String category) {
+        return ResponseEntity.ok(quizService.getQuizSummariesByCategory(category));
     }
 
     @GetMapping("/{id}")
@@ -47,7 +43,7 @@ public class QuizController {
         return ResponseEntity.ok(quizService.getQuizById(id));
     }
 
-   @PostMapping("/{id}/complete")
+    @PostMapping("/{id}/complete")
     public ResponseEntity<QuizCompletionResponse> completeQuiz(@PathVariable Long id, @RequestBody QuizCompletionRequest request,
                                                                Authentication authentication) {
         if (authentication == null || !(authentication.getPrincipal() instanceof User)) {
