@@ -5,7 +5,9 @@ import org.example.y9_gaming_site.achievement.AchievementService;
 import org.example.y9_gaming_site.achievement.UnlockedAchievementDto;
 import org.example.y9_gaming_site.game.wordle.dto.AttemptStateDto;
 import org.example.y9_gaming_site.game.wordle.dto.GuessFeedbackDto;
+import org.example.y9_gaming_site.game.wordle.dto.HintDto;
 import org.example.y9_gaming_site.gameRecord.GameRecordService;
+import org.example.y9_gaming_site.user.PointsService;
 import org.example.y9_gaming_site.user.User;
 import org.example.y9_gaming_site.user.Role;
 import org.example.y9_gaming_site.user.UserRepository;
@@ -20,6 +22,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 
 @Service
@@ -29,6 +32,7 @@ public class WordleService {
     public static final String GAME_KEY = "WORDLE";
     public static final int MAX_GUESSES = 6;
     public static final int PRACTICE_RETENTION_HOURS = 24;
+    public static final int HINT_COST = 50;
 
     private final WordlePuzzleRepository wordlePuzzleRepository;
     private final WordleAttemptRepository wordleAttemptRepository;
@@ -36,15 +40,19 @@ public class WordleService {
     private final GameRecordService gameRecordService;
     private final UserRepository userRepository;
     private final AchievementService achievementService;
+    private final PointsService pointsService;
+    private final Random random = new Random();
 
     public WordleService(WordlePuzzleRepository wordlePuzzleRepository, WordleAttemptRepository attemptRepository,
-                         WordleDict dict, GameRecordService gameRecordService,AchievementService achievementService, UserRepository userRepository) {
+                         WordleDict dict, GameRecordService gameRecordService,AchievementService achievementService,
+                         UserRepository userRepository, PointsService pointsService) {
         this.wordlePuzzleRepository = wordlePuzzleRepository;
         this.wordleAttemptRepository = attemptRepository;
         this.dict = dict;
         this.gameRecordService = gameRecordService;
         this.userRepository = userRepository;
         this.achievementService = achievementService;
+        this.pointsService = pointsService;
     }
 
     public WordlePuzzle getOrCreateDailyPuzzle() {
@@ -167,6 +175,45 @@ public class WordleService {
         achievementService.grantByCode(userId, code).ifPresent(a -> unlocked.add(UnlockedAchievementDto.from(a)));
     }
 
+    public AttemptStateDto useHint(Long userId, Long puzzleId) {
+        WordleAttempt attempt = getOrStartAttempt(userId, puzzleId);
+        if(attempt.getStatus() != AttemptStatus.IN_PROGRESS) {
+            throw new RuntimeException("no hints once the puzzle is finished!");
+        }
+
+        List<Integer> unknown = unknownPositions(attempt);
+        if(unknown.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "ALL_LETTERS_KNOWN");
+        }
+        if(!pointsService.hasEnough(userId, HINT_COST)) {
+            throw new ResponseStatusException(HttpStatus.PAYMENT_REQUIRED, "NOT_ENOUGH_POINTS");
+        }
+
+        pointsService.spend(userId, HINT_COST);
+        int position = unknown.get(random.nextInt(unknown.size()));
+        attempt.addHintedPosition(position);
+        wordleAttemptRepository.save(attempt);
+
+        return toDto(attempt, List.of());
+    }
+
+    // positions not yet revealed by a correct guess or an earlier hint
+    private List<Integer> unknownPositions(WordleAttempt attempt) {
+        String answer = attempt.getPuzzle().getAnswerWord();
+        Set<Integer> known = new HashSet<>(attempt.getHintedPositionList());
+        for (String guess : attempt.getGuessList()) {
+            List<LetterState> feedback = WordGrader.grade(guess, answer);
+            for (int i = 0; i < feedback.size(); i++) {
+                if(feedback.get(i) == LetterState.CORRECT) known.add(i);
+            }
+        }
+        List<Integer> unknown = new ArrayList<>();
+        for (int i = 0; i < answer.length(); i++) {
+            if(!known.contains(i)) unknown.add(i);
+        }
+        return unknown;
+    }
+
     private int computeDailyStreak(Long userId) {
         List<LocalDate> wonDates = wordleAttemptRepository.findWonDailyPuzzleDatesDesc(userId, AttemptStatus.WON);
         int streak = 0;
@@ -197,10 +244,13 @@ public class WordleService {
         boolean finished = attempt.getStatus() != AttemptStatus.IN_PROGRESS;
         List<GuessFeedbackDto> guess = attempt.getGuessList().stream()
                 .map(gues -> new GuessFeedbackDto(gues, WordGrader.grade(gues, answer))).toList();
+        List<HintDto> hints = attempt.getHintedPositionList().stream()
+                .map(pos -> new HintDto(pos, String.valueOf(answer.charAt(pos)))).toList();
+        int pointsBalance = pointsService.getBalance(attempt.getUser().getId());
 
         return new AttemptStateDto(
                 attempt.getPuzzle().getId(), WordleDict.WORD_LENGTh, MAX_GUESSES,
-                attempt.getStatus(), guess, finished ? answer:null, newAchievements
+                attempt.getStatus(), guess, hints, pointsBalance, finished ? answer:null, newAchievements
         );
     }
 }

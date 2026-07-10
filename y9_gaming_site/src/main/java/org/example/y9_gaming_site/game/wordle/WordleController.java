@@ -46,4 +46,10 @@ public class WordleController {
         Long userId = ((User) authentication.getPrincipal()).getId();
         return wordleService.submitGuess(userId, puzzleId, request.guess());
     }
+
+    @PostMapping("/{puzzleId}/hint")
+    public AttemptStateDto hint(@PathVariable("puzzleId") Long puzzleId, Authentication authentication) {
+        Long userId = ((User) authentication.getPrincipal()).getId();
+        return wordleService.useHint(userId, puzzleId);
+    }
 }

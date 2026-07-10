@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS users (
     role VARCHAR(20) DEFAULT 'USER',
     birth_date DATE NOT NULL,
     isBanned BOOLEAN NOT NULL,
+    points INT NOT NULL DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 
     );
