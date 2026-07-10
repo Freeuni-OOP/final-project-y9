@@ -23,6 +23,28 @@ public class QuizService {
         this.achievementService = achievementService;
     }
 
+    public List<QuizSummary> getAllQuizSummaries() {
+        String sql = "SELECT id, title, category, description, time_limit_seconds FROM quizzes";
+        return jdbcTemplate.query(sql, (rs, rowNum) -> new QuizSummary(
+                rs.getLong("id"),
+                rs.getString("title"),
+                rs.getString("category"),
+                rs.getString("description"),
+                rs.getInt("time_limit_seconds")
+        ));
+    }
+
+    public List<QuizSummary> getQuizSummariesByCategory(String category) {
+        String sql = "SELECT id, title, category, description, time_limit_seconds FROM quizzes WHERE category = ?";
+        return jdbcTemplate.query(sql, (rs, rowNum) -> new QuizSummary(
+                rs.getLong("id"),
+                rs.getString("title"),
+                rs.getString("category"),
+                rs.getString("description"),
+                rs.getInt("time_limit_seconds")
+        ), category);
+    }
+
     public List<Quiz> getAllQuizzes() {
         String sql = "SELECT * FROM quizzes";
         return jdbcTemplate.query(sql, (rs, rowNum) -> {
@@ -51,24 +73,40 @@ public class QuizService {
         });
     }
 
-    public List<Quiz> getQuizzesByCategory(String category) {
-        return getAllQuizzes().stream()
-                .filter(q -> q.getCategory().equalsIgnoreCase(category))
-                .toList();
-    }
-
     public Quiz getQuizById(Long id) {
-        return getAllQuizzes().stream()
-                .filter(quiz -> quiz.getId().equals(id))
-                .findFirst()
+        String sql = "SELECT * FROM quizzes WHERE id = ?";
+        List<Quiz> result = jdbcTemplate.query(sql, (rs, rowNum) -> {
+            Quiz q = new Quiz();
+            q.setId(rs.getLong("id"));
+            q.setTitle(rs.getString("title"));
+            q.setCategory(rs.getString("category"));
+            q.setDescription(rs.getString("description"));
+            q.setTimeLimitSeconds(rs.getInt("time_limit_seconds"));
+
+            String blob = rs.getString("questions_blob");
+            q.setQuestions(blob != null && !blob.isBlank()
+                    ? List.of(blob.split(";", -1)) : new ArrayList<>());
+
+            String imgJson = rs.getString("images");
+            List<String> images;
+            try {
+                images = (imgJson != null && !imgJson.isBlank())
+                        ? objectMapper.readValue(imgJson, new TypeReference<List<String>>() {})
+                        : new ArrayList<>();
+            } catch (Exception e) {
+                images = new ArrayList<>();
+            }
+            q.setImages(images);
+            return q;
+        }, id);
+
+        return result.stream().findFirst()
                 .orElseThrow(() -> new RuntimeException("Quiz ID " + id + " not found."));
     }
 
-
-
     public void createQuiz(String title, String category, String description, int timeLimit,
                            List<String> questionTexts, List<String> correctAnswers,
-                           List<String> wrongAnswers, List<String> imagePaths) {
+                           List<String> wrongAnswers, List<String> imagePaths, Long creatorId) {
 
         List<String> questions = new ArrayList<>();
         for (int i = 0; i < questionTexts.size(); i++) {
@@ -90,9 +128,10 @@ public class QuizService {
                 .map(p -> "\"" + (p == null ? "" : p.replace("\\", "\\\\").replace("\"", "\\\"")) + "\"")
                 .collect(java.util.stream.Collectors.joining(",", "[", "]"));
 
-        String sql = "INSERT INTO quizzes (title, category, description, time_limit_seconds, questions_blob, images, created_at) VALUES (?, ?, ?, ?, ?, ?, NOW())";
-        jdbcTemplate.update(sql, title, category, description, timeLimit, questionsBlob, imagesJson);
+        String sql = "INSERT INTO quizzes (title, category, description, time_limit_seconds, questions_blob, images, creator_id, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, NOW())";
+        jdbcTemplate.update(sql, title, category, description, timeLimit, questionsBlob, imagesJson, creatorId);
     }
+
     public void deleteQuiz(Long quizId) {
         String sql = "DELETE FROM quizzes WHERE id = ?";
         jdbcTemplate.update(sql, quizId);
@@ -109,5 +148,22 @@ public class QuizService {
 
     private void grant(Long userId, String code, List<UnlockedAchievementDto> unlocked) {
         achievementService.grantByCode(userId, code).ifPresent(a -> unlocked.add(UnlockedAchievementDto.from(a)));
+    }
+
+    public List<QuizSummary> getQuizSummariesByCreator(Long creatorId) {
+        String sql = """
+        SELECT id, title, category, description, time_limit_seconds
+        FROM quizzes
+        WHERE creator_id = ?
+        ORDER BY created_at DESC
+        """;
+
+        return jdbcTemplate.query(sql, (rs, rowNum) -> new QuizSummary(
+                rs.getLong("id"),
+                rs.getString("title"),
+                rs.getString("category"),
+                rs.getString("description"),
+                rs.getInt("time_limit_seconds")
+        ), creatorId);
     }
 }

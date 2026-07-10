@@ -22,15 +22,6 @@ CREATE TABLE IF NOT EXISTS friendships (
     FOREIGN KEY (receiver_id) REFERENCES users(id)
     );
 
-CREATE TABLE IF NOT EXISTS messages (
-                                        id BIGINT AUTO_INCREMENT PRIMARY KEY,
-                                        sender_id BIGINT NOT NULL,
-                                        room_id BIGINT NOT NULL,
-                                        message TEXT NOT NULL,
-                                        timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                                        FOREIGN KEY (sender_id) REFERENCES users(id),
-    FOREIGN KEY (room_id) REFERENCES chatrooms(id) ON DELETE CASCADE
-    );
 
 CREATE TABLE IF NOT EXISTS chatrooms (
                                          id BIGINT AUTO_INCREMENT PRIMARY KEY,
@@ -48,6 +39,16 @@ CREATE TABLE IF NOT EXISTS chatroom_members (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     UNIQUE KEY unique_room_user (room_id, user_id) -- Ensures a user can't join the same room twice
     );
+
+CREATE TABLE IF NOT EXISTS messages (
+                                        id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                                        sender_id BIGINT NOT NULL,
+                                        room_id BIGINT NOT NULL,
+                                        message TEXT NOT NULL,
+                                        timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                                        FOREIGN KEY (sender_id) REFERENCES users(id),
+                                        FOREIGN KEY (room_id) REFERENCES chatrooms(id) ON DELETE CASCADE
+);
 
 CREATE TABLE IF NOT EXISTS achievements (
                                             id BIGINT AUTO_INCREMENT PRIMARY KEY,

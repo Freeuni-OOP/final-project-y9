@@ -69,13 +69,20 @@ async function deleteQuizCard(quizId, buttonElement) {
     }
 }
 
-// Ensure global context visibility for inline HTML onClick bindings
 window.deleteQuizCard = deleteQuizCard;
 
 async function fetchAndRenderQuizzes(category) {
     const grid = document.getElementById('quizGrid');
-    let url = category ? `/api/quizzes/category/${category}` : '/api/quizzes';
 
+    let url;
+
+    if (!category) {
+        url = '/api/quizzes';
+    } else if (category === 'MY') {
+        url = '/api/quizzes/my';
+    } else {
+        url = `/api/quizzes/category/${category}`;
+    }
     try {
         const token = localStorage.getItem('token');
         const res = await fetch(url, {
@@ -94,7 +101,6 @@ async function fetchAndRenderQuizzes(category) {
         quizzes.forEach(quiz => {
             const userRole = localStorage.getItem('role');
 
-            // 1. Create the conditional button string if user is an ADMIN
             let deleteButtonHtml = '';
             if (userRole && userRole.trim().toUpperCase() === 'ADMIN') {
                 deleteButtonHtml = `
@@ -105,7 +111,6 @@ async function fetchAndRenderQuizzes(category) {
                 `;
             }
 
-            // 2. Build and attach the correct card node configuration block
             const card = document.createElement('div');
             card.className = 'quiz-card';
 
@@ -132,12 +137,13 @@ async function fetchAndRenderQuizzes(category) {
 
 async function startQuiz(id) {
     try {
-        const categoryActive = document.querySelector('.filter-btn.active').getAttribute('onclick').match(/'([^']*)'/)[1];
-        let url = categoryActive ? `/api/quizzes/category/${categoryActive}` : '/api/quizzes';
-
-        const res = await fetch(url);
-        const quizzes = await res.json();
-        currentQuiz = quizzes.find(q => q.id === id);
+        const token = localStorage.getItem('token');
+        const res = await fetch(`/api/quizzes/${id}`, {
+            method: 'GET',
+            headers: { 'Authorization': token ? `Bearer ${token}` : '' }
+        });
+        if (!res.ok) throw new Error();
+        currentQuiz = await res.json();
 
         if (!currentQuiz || !currentQuiz.questions || currentQuiz.questions.length === 0) {
             alert("This quiz doesn't have any question nodes loaded.");

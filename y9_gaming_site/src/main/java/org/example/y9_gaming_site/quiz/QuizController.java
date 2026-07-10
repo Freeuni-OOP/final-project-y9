@@ -1,8 +1,6 @@
 package org.example.y9_gaming_site.quiz;
 
 import org.example.y9_gaming_site.user.User;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -26,20 +24,18 @@ public class QuizController {
     private final QuizService quizService;
     private static final String UPLOAD_DIR = "uploads/quiz-images/";
 
-
-
     public QuizController(QuizService quizService) {
         this.quizService = quizService;
     }
 
     @GetMapping
-    public ResponseEntity<List<Quiz>> getAllQuizzes() {
-        return ResponseEntity.ok(quizService.getAllQuizzes());
+    public ResponseEntity<List<QuizSummary>> getAllQuizzes() {
+        return ResponseEntity.ok(quizService.getAllQuizSummaries());
     }
 
     @GetMapping("/category/{category}")
-    public ResponseEntity<List<Quiz>> getQuizzesByCategory(@PathVariable String category) {
-        return ResponseEntity.ok(quizService.getQuizzesByCategory(category));
+    public ResponseEntity<List<QuizSummary>> getQuizzesByCategory(@PathVariable String category) {
+        return ResponseEntity.ok(quizService.getQuizSummariesByCategory(category));
     }
 
     @GetMapping("/{id}")
@@ -47,7 +43,7 @@ public class QuizController {
         return ResponseEntity.ok(quizService.getQuizById(id));
     }
 
-   @PostMapping("/{id}/complete")
+    @PostMapping("/{id}/complete")
     public ResponseEntity<QuizCompletionResponse> completeQuiz(@PathVariable Long id, @RequestBody QuizCompletionRequest request,
                                                                Authentication authentication) {
         if (authentication == null || !(authentication.getPrincipal() instanceof User)) {
@@ -77,7 +73,13 @@ public class QuizController {
                              @RequestParam("correctAnswer") List<String> correctAnswers,
                              @RequestParam("wrongAnswers") List<String> wrongAnswers,
                              @RequestParam("questionImage") List<MultipartFile> images,
+                             Authentication authentication,
                              RedirectAttributes redirectAttributes) throws IOException {
+
+        if (authentication == null || !(authentication.getPrincipal() instanceof User)) {
+            throw new RuntimeException("Unauthorized user attempting to create a quiz.");
+        }
+        Long creatorId = ((User) authentication.getPrincipal()).getId();
 
         Files.createDirectories(Paths.get(UPLOAD_DIR));
         List<String> imagePaths = new ArrayList<>();
@@ -94,9 +96,21 @@ public class QuizController {
         }
 
         quizService.createQuiz(title, category, description, timeLimit,
-                questionTexts, correctAnswers, wrongAnswers, imagePaths);
+                questionTexts, correctAnswers, wrongAnswers, imagePaths, creatorId);
 
         redirectAttributes.addFlashAttribute("message", "Quiz published!");
         return "redirect:/home";
+    }
+
+    @GetMapping("/my")
+    public ResponseEntity<List<QuizSummary>> getMyQuizzes(Authentication authentication) {
+
+        if (authentication == null || !(authentication.getPrincipal() instanceof User)) {
+            return ResponseEntity.status(401).build();
+        }
+
+        Long creatorId = ((User) authentication.getPrincipal()).getId();
+
+        return ResponseEntity.ok(quizService.getQuizSummariesByCreator(creatorId));
     }
 }
