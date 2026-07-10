@@ -1,5 +1,6 @@
 package org.example.y9_gaming_site.game;
 
+import org.example.y9_gaming_site.user.Role;
 import org.example.y9_gaming_site.user.User;
 import org.example.y9_gaming_site.user.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,6 +45,10 @@ public class GameAnalyticsController {
     public ResponseEntity<?> logTime(Authentication authentication, @RequestBody TimeTrackingRequest req) {
         if (authentication == null || !(authentication.getPrincipal() instanceof User user)) {
             return ResponseEntity.status(401).build();
+        }
+
+        if (user.getRole() == Role.GUEST) {   // adjust to your actual enum type/name
+            return ResponseEntity.status(403).body(Map.of("error", "Guests are not tracked"));
         }
 
         UserGameTime tracking = userGameTimeRepository.findByUserAndGameTitle(user, req.gameTitle)
