@@ -211,6 +211,16 @@ VALUES (
         CURRENT_TIMESTAMP
        );
 
+INSERT IGNORE INTO games(title, description, max_players, icon_url, created_at)
+VALUES (
+           'SUDOKU',
+           'Classic number puzzle, solved solo against the clock',
+           1,
+           '/images/games/sudoku.png',
+           CURRENT_TIMESTAMP
+       );
+
+
 CREATE TABLE IF NOT EXISTS joker_sessions (
                                               id BIGINT AUTO_INCREMENT PRIMARY KEY,
                                               room_code VARCHAR(20) NOT NULL UNIQUE,  -- join key

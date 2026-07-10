@@ -19,7 +19,7 @@ public class SudokuTests extends TestCase {
     protected void setUp() throws Exception {
         super.setUp();
         mockRepository = Mockito.mock(SudokuPuzzleRepository.class);
-        sudokuService = new SudokuService(mockRepository, null);
+        sudokuService = new SudokuService(mockRepository, null, null);
 
         String blankBoardStr = "000260701680070090190004500820100040004602900050003028009300074040050036703018000";
         String solvedBoardStr = "435269781682571394197834562826195347374682915951743628219364874548957236763418259";

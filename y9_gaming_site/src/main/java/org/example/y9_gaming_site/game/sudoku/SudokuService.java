@@ -4,6 +4,7 @@ import org.example.y9_gaming_site.achievement.AchievementService;
 import org.example.y9_gaming_site.achievement.UnlockedAchievementDto;
 import org.example.y9_gaming_site.game.SudokuPuzzleRepository;
 import org.example.y9_gaming_site.game.sudoku.SudokuPuzzle;
+import org.example.y9_gaming_site.gameRecord.GameRecordService;
 import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -13,12 +14,17 @@ import java.util.Optional;
 @Service
 public class SudokuService {
 
+    public static final String GAME_KEY = "SUDOKU";
     private final SudokuPuzzleRepository sudokuPuzzleRepository;
     private final AchievementService achievementService;
+    private final GameRecordService gameRecordService;
 
-    public SudokuService(SudokuPuzzleRepository sudokuPuzzleRepository, AchievementService achievementService) {
+    public SudokuService(SudokuPuzzleRepository sudokuPuzzleRepository,
+                         AchievementService achievementService,
+                         GameRecordService gameRecordService) {
         this.sudokuPuzzleRepository = sudokuPuzzleRepository;
         this.achievementService = achievementService;
+        this.gameRecordService = gameRecordService;
     }
 
     //todays puzzle, if not found medium puzzle
@@ -44,7 +50,9 @@ public class SudokuService {
         return this.sudokuPuzzleRepository;
     }
 
-    public SudokuSolveResponse submitSolve(Long userId, int secondsTaken) {
+    public SudokuSolveResponse submitSolve(Long userId, Long puzzleId, int secondsTaken) {
+        gameRecordService.recordResult(userId, GAME_KEY, puzzleId, secondsTaken);
+
         List<UnlockedAchievementDto> unlocked = new ArrayList<>();
         grant(userId, "SUDOKU_FIRST_SOLVE", unlocked);
         if (secondsTaken < 120) {
