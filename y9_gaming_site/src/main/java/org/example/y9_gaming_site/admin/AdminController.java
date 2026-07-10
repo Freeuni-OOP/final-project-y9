@@ -26,14 +26,11 @@ public class AdminController {
     @GetMapping("/dashboard")
     public String dashboard(Model model) {
         CompletableFuture<List<User>> usersF = CompletableFuture.supplyAsync(adminService::getAllUsers);
-        CompletableFuture<List<Announcement>> announcementsF = CompletableFuture.supplyAsync(adminService::getAllAnnouncements);
         CompletableFuture<List<Challenge>> challengesF = CompletableFuture.supplyAsync(adminService::getAllChallenges);
         CompletableFuture<List<Game>> gamesF = CompletableFuture.supplyAsync(adminService::getAllGames);
 
-        CompletableFuture.allOf(usersF, announcementsF, challengesF, gamesF).join();
 
         model.addAttribute("users", usersF.join());
-        model.addAttribute("announcements", announcementsF.join());
         model.addAttribute("challenges", challengesF.join());
         model.addAttribute("games", gamesF.join());
         return "admin/dashboard";
@@ -83,28 +80,8 @@ public class AdminController {
         return "redirect:/admin/users";
     }
 
-    @GetMapping("/announcements")
-    public String viewAnnouncements(Model model) {
-        model.addAttribute("announcements", adminService.getAllAnnouncements());
-        model.addAttribute("newAnnouncement", new AnnouncementDTO());
-        return "admin/announcements";
-    }
 
-    @PostMapping("/announcements/create")
-    public String createAnnouncement(@ModelAttribute AnnouncementDTO dto,
-                                     @AuthenticationPrincipal User loggedInUser,
-                                     RedirectAttributes ra) {
-        adminService.createAnnouncement(dto, loggedInUser.getUsername());
-        ra.addFlashAttribute("message", "Announcement posted.");
-        return "redirect:/admin/announcements";
-    }
 
-    @PostMapping("/announcements/{id}/delete")
-    public String deleteAnnouncement(@PathVariable Long id, RedirectAttributes ra) {
-        adminService.deleteAnnouncement(id);
-        ra.addFlashAttribute("message", "Announcement deleted.");
-        return "redirect:/admin/announcements";
-    }
 
     @GetMapping("/challenges")
     public String viewChallenges(Model model, @AuthenticationPrincipal User loggedInUser) {

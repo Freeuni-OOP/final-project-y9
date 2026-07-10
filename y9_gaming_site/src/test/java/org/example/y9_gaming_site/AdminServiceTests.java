@@ -30,7 +30,6 @@ public class AdminServiceTests extends TestCase {
     private UserRepository userRepository;
 
 
-    private AnnouncementRepository announcementRepository;
 
 
     private ChallengeRepository challengeRepository;
@@ -48,11 +47,10 @@ public class AdminServiceTests extends TestCase {
     protected void setUp() throws Exception {
         super.setUp();
         userRepository = Mockito.mock(UserRepository.class);
-        announcementRepository = Mockito.mock(AnnouncementRepository.class);
         challengeRepository = Mockito.mock(ChallengeRepository.class);
         gameRepository = Mockito.mock(GameRepository.class);
         mockJdbcTemplate = mock(JdbcTemplate.class);
-        adminService = new AdminService(userRepository, announcementRepository, challengeRepository,gameRepository, mockJdbcTemplate);
+        adminService = new AdminService(userRepository, challengeRepository,gameRepository, mockJdbcTemplate);
         testUser = new User();
         testUser.setId(1L);
         testUser.setUsername("testuser");
@@ -120,35 +118,6 @@ public class AdminServiceTests extends TestCase {
     }
 
 
-
-    public void testGetAllAnnouncements() {
-        Announcement a = new Announcement();
-        a.setTitle("Test Announcement");
-        when(announcementRepository.findAll()).thenReturn(List.of(a));
-
-        List<Announcement> result = adminService.getAllAnnouncements();
-
-        assertEquals(1, result.size());
-        assertEquals("Test Announcement", result.get(0).getTitle());
-    }
-
-
-    public void testCreateAnnouncement() {
-        AnnouncementDTO dto = new AnnouncementDTO("Title", "Content");
-
-        Mockito.when(userRepository.findByUsername("testUser"))
-                .thenReturn(Optional.of(testUser));
-
-        adminService.createAnnouncement(dto, "testUser");
-
-        Mockito.verify(announcementRepository, Mockito.times(1)).save(Mockito.any(Announcement.class));
-    }
-
-    public void testDeleteAnnouncement() {
-        adminService.deleteAnnouncement(1L);
-
-        verify(announcementRepository, times(1)).deleteById(1L);
-    }
 
 
 
