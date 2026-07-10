@@ -9,18 +9,28 @@ import java.time.LocalDateTime;
 public class Message {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-
     private Long id;
+
+    @Column(name = "sender_id")
     private Long senderId;
+    @Column(name = "room_id")
     private Long roomId;
+    @Column(name = "message")
     private String message;
+    @Column(name = "timestamp")
     private LocalDateTime timestamp;
 
     public Message() {}
 
+    public Message(Long senderId, Long roomId, String message) {
+        this.senderId = senderId;
+        this.roomId = roomId;
+        this.message = message;
+    }
     public Long getId() {
         return id;
     }
+    public  void setId(Long id) {this.id = id;}
     public Long getSenderId() {
         return senderId;
     }
