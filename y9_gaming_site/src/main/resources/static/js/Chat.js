@@ -188,16 +188,30 @@ async function createGroup(){
         memberIds.push(id);
     }
 
+    const token = localStorage.getItem("token");
     const url = `/chat/create-group?name=${encodeURIComponent(groupName)}&type=GROUP`;
     await openRoomRequest(url,{
         method: "POST",
-        headers: {"Content-Type": "application/json"},
+        headers: {"Authorization": "Bearer " + token,
+            "Content-Type": "application/json"},
         body: JSON.stringify(memberIds)
     });
+
+    document.getElementById("groupName").value="";
+    document.getElementById("groupUserNames").value="";
 }
 
 async function openRoomRequest(url, options){
     try{
+        if(!options.headers){
+            options.headers = {};
+        }
+
+        const token = localStorage.getItem("token");
+        if(token && !options.headers["Authorization"]){
+            options.headers["Authorization"] = "Bearer " + token;
+        }
+
         const res = await fetch(`${API_BASE}${url}`, options);
         if(!res.ok){
             const text = await res.text();
@@ -216,6 +230,7 @@ async function openRoomRequest(url, options){
         if(pollTimer) clearInterval(pollTimer);
         pollTimer = setInterval(loadMessages, 3000);
     }catch (err){
+        console.error(err);
         alert("Unable to connect to the server");
     }
 }
@@ -260,9 +275,12 @@ async function sendMessage(){
     const text = input.value.trim();
     if(!text) return;
 
+    const token = localStorage.getItem("token");
+
     await fetch(`${API_BASE}/chat/send`, {
         method: "POST",
-        headers: {"Content-Type":"application/json"},
+        headers: {"Authorization": "Bearer " + token,
+            "Content-Type":"application/json"},
         body: JSON.stringify({
             senderId: MyUserId,
             roomId: roomId,
