@@ -116,7 +116,7 @@ public class JokerService {
         if (state.getStatus() != GameStatus.BIDDING) {
             throw new IllegalStateException("Not in bidding phase");
         }
-        if (!state.getCurrPlayer().getUserId().equals(userId)) {
+        if (!state.resolveCurrPlayer().getUserId().equals(userId)) {
             throw new IllegalStateException("It's not your turn to bid");
         }
         if (bid < 0) {
@@ -163,7 +163,7 @@ public class JokerService {
         if (state.getStatus() != GameStatus.PLAYING) {
             throw new IllegalStateException("Not in playing phase");
         }
-        if (!state.getCurrPlayer().getUserId().equals(userId)) {
+        if (!state.resolveCurrPlayer().getUserId().equals(userId)) {
             throw new IllegalStateException("It's not your turn");
         }
 

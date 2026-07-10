@@ -55,9 +55,14 @@ public class JokerGameState {
         if (!isFull()) throw new IllegalStateException("Not enough players to start");
         if (currRound >= config.getTotalRounds()) throw new IllegalStateException("Game already finished");
 
+        boolean isFirstRound = (currRound == 0);
+
         currRound++;
         dealer = (currRound - 1) % players.size();
-        currPlayer = (dealer + 1) % players.size();
+
+        if (isFirstRound) {
+            currPlayer = (dealer + 1) % players.size();
+        }
 
         players.forEach(JokerPlayer::resetRoundInfo);
         room.shuffle();
@@ -79,6 +84,10 @@ public class JokerGameState {
             return 9;
         }
         throw new IllegalArgumentException("Unknown round option");
+    }
+
+    public int getCardsThisRound() {
+        return cardsForRound(currRound);
     }
 
     private void dealCards() {
@@ -120,6 +129,7 @@ public class JokerGameState {
             boolean fulfilled = scoringService.fulfilledProphecy(player);
             roundScoresPerPlayer.get(player.getUserId()).add(score);
             prophecyFulfilledPerPlayer.get(player.getUserId()).add(fulfilled);
+            player.addRoundRecord(currRound, player.getProphecy(), player.getCurrent(), score);
             player.addScores(score);
         }
     }
@@ -133,7 +143,7 @@ public class JokerGameState {
         this.status = status;
     }
 
-    public JokerPlayer getCurrPlayer() {
+    public JokerPlayer resolveCurrPlayer() {
         return players.get(currPlayer);
     }
 
@@ -186,4 +196,6 @@ public class JokerGameState {
     public boolean isEmpty() {
         return players.isEmpty();
     }
+
+
 }

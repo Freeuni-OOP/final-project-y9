@@ -106,7 +106,7 @@ public class JokerWebSocketService {
                 state.getCurrRound(),
                 state.getConfig().getTotalRounds(),
                 state.getTrumpSuit(),
-                state.getCurrPlayer().getUsername(), // FIXED: Renamed method from getCurrentPlayer() to getCurrPlayer()
+                state.resolveCurrPlayer().getUsername(),
                 publicPlayers
         );
     }

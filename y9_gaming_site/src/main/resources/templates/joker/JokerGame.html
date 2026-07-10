@@ -39,6 +39,10 @@
     <div style="margin-left:auto; display:flex; align-items:center; gap:12px;">
       <span id="roomTypeBadge" class="joker-room-type-badge">—</span>
 
+      <button id="viewHistoryBtn" class="joker-btn" style="width:auto; padding:8px 16px; background: rgba(179,39,201,0.15); border-color: rgba(179,39,201,0.3);" onclick="toggleHistoryModal()">
+        📊 ცხრილის ნახვა
+      </button>
+
       <button id="startBtn" class="joker-btn joker-btn--primary" style="display:none; width:auto; padding:8px 20px;" onclick="startGame()">
         თამაშის დაწყება ▶
       </button>
@@ -72,16 +76,22 @@
         </div>
       </div>
 
-      <div id="bidPanel" class="joker-bid-panel hidden">
-        <div id="gameTypeDisplay" style="text-align:center; font-size:0.85rem; font-weight:bold; margin-bottom:10px;"></div>
+      <div id="gameTypeDisplay" class="joker-gametype-badge hidden"></div>
 
+      <div id="bidPanel" class="joker-bid-panel hidden">
         <div class="joker-label" style="text-align:center;" id="bidInfo">რამდენ ხელს წაიღებ?</div>
-        <div class="joker-bid-row">
+
+        <div class="joker-bid-row" id="bidControls">
           <button class="joker-btn joker-btn--alt" onclick="changeBid(-1)">-</button>
           <div id="bidValue" class="joker-bid-value">0</div>
           <button class="joker-btn joker-btn--alt" onclick="changeBid(1)">+</button>
         </div>
-        <button class="joker-btn joker-btn--primary" onclick="submitBid()">დადასტურება</button>
+
+        <button id="submitBidBtn" class="joker-btn joker-btn--primary" onclick="submitBid()">დადასტურება</button>
+      </div>
+
+      <div id="playTurnPanel" class="joker-bid-panel hidden">
+        <div class="joker-label" style="text-align:center;" id="playTurnInfo"></div>
       </div>
 
       <div class="joker-trick-area">
@@ -102,15 +112,30 @@
 
 <div id="jokerModal" class="joker-modal hidden">
   <div class="joker-modal-box">
-    <h3 style="color:#fff; margin-top:0; margin-bottom:15px;">ჯოკერის მოთხოვნა</h3>
-    <div class="joker-label" style="margin-bottom:10px;">აირჩიეთ სასურველი ცვეტი:</div>
-    <div id="jokerSuitPicker" class="joker-suits-grid" style="margin-bottom:20px;">
+    <h3 id="jokerModalTitle" style="color:#fff; margin-top:0; margin-bottom:15px;">ჯოკერის მოთხოვნა</h3>
+
+    <div id="jokerSuitSection">
+      <div class="joker-label" style="margin-bottom:10px;">აირჩიეთ სასურველი ცვეტი:</div>
+      <div id="jokerSuitPicker" class="joker-suits-grid" style="margin-bottom:20px;">
+      </div>
     </div>
+
     <div style="display:flex; gap:10px;">
-      <button class="joker-btn joker-btn--primary" onclick="confirmJoker('TAKE')">წაყვანა (უმაღლესი)</button>
-      <button class="joker-btn joker-btn--alt" onclick="confirmJoker('GIVE')">გატანხება (დაბალი)</button>
+      <button class="joker-btn joker-btn--primary" onclick="confirmJoker('TAKE')">მაქვს (უმაღლესი)</button>
+      <button class="joker-btn joker-btn--alt" onclick="confirmJoker('GIVE')">ვაძლევ (დაბალი)</button>
     </div>
     <button class="joker-btn joker-btn--danger" style="margin-top:10px;" onclick="cancelJoker()">გაუქმება</button>
+  </div>
+</div>
+
+<div id="historyModal" class="joker-modal hidden">
+  <div class="joker-modal-box" style="max-width: 650px; width: 90%;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid rgba(179,39,201,0.3); padding-bottom: 10px;">
+      <h3 style="color: var(--orchid-2); margin: 0;">📊 თამაშის ფურცელი (ქულების ისტორია)</h3>
+      <button class="joker-btn joker-btn--danger" onclick="toggleHistoryModal()" style="padding: 5px 12px; font-size: 0.8rem;">✕ დახურვა</button>
+    </div>
+    <!-- აი აქ ჩაიხატება დინამიური ცხრილი JS-ის მიერ -->
+    <div id="historyTableWrap" style="overflow-x: auto; max-height: 400px;"></div>
   </div>
 </div>
 
