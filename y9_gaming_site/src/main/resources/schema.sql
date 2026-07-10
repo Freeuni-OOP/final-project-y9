@@ -55,7 +55,9 @@ CREATE TABLE IF NOT EXISTS achievements (
                                             id BIGINT AUTO_INCREMENT PRIMARY KEY,
                                             name VARCHAR(100) NOT NULL,
     description VARCHAR(255),
-    icon VARCHAR(255)
+    icon VARCHAR(255),
+    points INT NOT NULL DEFAULT 0
+
     );
 
 CREATE TABLE IF NOT EXISTS user_achievements (
@@ -63,6 +65,7 @@ CREATE TABLE IF NOT EXISTS user_achievements (
                                                  user_id BIGINT NOT NULL,
                                                  achievement_id BIGINT NOT NULL,
                                                  earned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                                                 points INT NOT NULL DEFAULT 0,
                                                  FOREIGN KEY (user_id) REFERENCES users(id),
     FOREIGN KEY (achievement_id) REFERENCES achievements(id)
     );

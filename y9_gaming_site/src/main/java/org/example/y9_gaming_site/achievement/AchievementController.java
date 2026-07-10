@@ -24,7 +24,6 @@ public class AchievementController {
 
     @GetMapping("/achievements/{userId}/rarest")
     public List<AchievementView> getRarest(@PathVariable Long userId, @RequestParam(defaultValue = "3") int limit){
-        // top 3 achievements of this user
         return achService.getRarestEarned(userId, limit);
     }
 

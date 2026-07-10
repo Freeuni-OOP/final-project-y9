@@ -1,4 +1,5 @@
 package org.example.y9_gaming_site.achievement;
+import org.springframework.transaction.annotation.Transactional;
 
 import org.example.y9_gaming_site.user.Role;
 import org.example.y9_gaming_site.user.UserRepository;
@@ -28,27 +29,27 @@ public class AchievementService {
         return userAchievementRepository.findByUserId(userId);
     }
 
-    public Optional<Achievement> grantAchievement(Long userId, long achievementId){
-        if(isGuest(userId)) return Optional.empty();
-
-        boolean alreadyEarned=userAchievementRepository.
-                findByUserIdAndAchievementId(userId,achievementId).isPresent();
-        if(alreadyEarned) return Optional.empty();
-        UserAchievement currAch=new UserAchievement();
-        currAch.setUserId(userId);
-        currAch.setAchievementId(achievementId);
-        currAch.setEarnedTime(LocalDateTime.now());
-
-        userAchievementRepository.save(currAch);
-        return achievementRepository.findById(achievementId);
-    }
+//    public Optional<Achievement> grantAchievement(Long userId, long achievementId){
+//        if(isGuest(userId)) return Optional.empty();
+//
+//        boolean alreadyEarned=userAchievementRepository.
+//                findByUserIdAndAchievementId(userId,achievementId).isPresent();
+//        if(alreadyEarned) return Optional.empty();
+//        UserAchievement currAch=new UserAchievement();
+//        currAch.setUserId(userId);
+//        currAch.setAchievementId(achievementId);
+//        currAch.setEarnedTime(LocalDateTime.now());
+//
+//        userAchievementRepository.save(currAch);
+//        return achievementRepository.findById(achievementId);
+//    }
 
     private boolean isGuest(Long userId){
         return userRepository.findById(userId)
                 .map(u -> u.getRole() == Role.GUEST)
                 .orElse(false);
     }
-
+    @Transactional
     public Optional<Achievement> grantByCode(Long userId, String code){
         if(userId==null || code==null) return Optional.empty();
         return achievementRepository.findByCode(code).flatMap(a -> grantAchievement(userId, a.getId()));
@@ -79,5 +80,24 @@ public class AchievementService {
                 Comparator.nullsLast(Comparator.reverseOrder()))).limit(Math.max(0, limit)).toList();
     }
 
+    @Transactional
+    public Optional<Achievement> grantAchievement(Long userId, long achievementId){
+        if(isGuest(userId)) return Optional.empty();
+
+        boolean alreadyEarned = userAchievementRepository
+                .findByUserIdAndAchievementId(userId, achievementId).isPresent();
+        if(alreadyEarned) return Optional.empty();
+
+        UserAchievement currAch = new UserAchievement();
+        currAch.setUserId(userId);
+        currAch.setAchievementId(achievementId);
+        currAch.setEarnedTime(LocalDateTime.now());
+        userAchievementRepository.save(currAch);
+
+        Optional<Achievement> achievement = achievementRepository.findById(achievementId);
+        achievement.ifPresent(a -> userRepository.addPoints(userId, a.getPointReward()));
+
+        return achievement;
+    }
 }
 
