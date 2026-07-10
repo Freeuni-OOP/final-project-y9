@@ -7,6 +7,7 @@ import org.example.y9_gaming_site.game.wordle.dto.AttemptStateDto;
 import org.example.y9_gaming_site.game.wordle.dto.GuessFeedbackDto;
 import org.example.y9_gaming_site.gameRecord.GameRecordService;
 import org.example.y9_gaming_site.user.User;
+import org.example.y9_gaming_site.user.Role;
 import org.example.y9_gaming_site.user.UserRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -73,6 +74,9 @@ public class WordleService {
                 ()->{
                     WordlePuzzle puzzle = getPuzzleById(puzzleId);
                     User user =  userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("Puzzle id " + puzzleId + " not found!"));
+                    if(puzzle.getPuzzleDate() == null && user.getRole() == Role.GUEST) {
+                        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "GUESTS_CANNOT_PLAY_PRACTICE");
+                    }
                     return wordleAttemptRepository.save(new WordleAttempt(user, puzzle));
                 }
         );

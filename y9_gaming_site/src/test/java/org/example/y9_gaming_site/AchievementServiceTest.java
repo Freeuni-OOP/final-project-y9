@@ -27,7 +27,7 @@ public class AchievementServiceTest {
     void setUp() {
         achievementRepository = Mockito.mock(AchievementRepository.class);
         userAchievementRepository = Mockito.mock(UserAchievementRepository.class);
-        service = new AchievementService(achievementRepository, userAchievementRepository);
+        service = new AchievementService(achievementRepository, userAchievementRepository, null);
     }
 
     private Achievement achievement() {

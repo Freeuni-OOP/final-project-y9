@@ -99,6 +99,7 @@ public class GameRecordService {
 
         return bestPerUser.stream().sorted(comparator).limit(limit).collect(Collectors.toList());
     }
+
     public long countRecords(Long userId, String gameKey) {
         Game game = gameRepository.findByTitle(gameKey).orElseThrow(() -> new RuntimeException("No game found"));
         return gameRecordRepository.countByUserIdAndGameId(userId, game.getId());

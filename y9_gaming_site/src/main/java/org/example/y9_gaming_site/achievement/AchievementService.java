@@ -1,5 +1,7 @@
 package org.example.y9_gaming_site.achievement;
 
+import org.example.y9_gaming_site.user.Role;
+import org.example.y9_gaming_site.user.UserRepository;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -13,10 +15,12 @@ import java.util.stream.Collectors;
 public class AchievementService {
     private final AchievementRepository achievementRepository;
     private  final UserAchievementRepository userAchievementRepository;
+    private final UserRepository userRepository;
 
-    public AchievementService(AchievementRepository achievementRepository, UserAchievementRepository userAchievementRepository){
+    public AchievementService(AchievementRepository achievementRepository, UserAchievementRepository userAchievementRepository, UserRepository userRepository){
         this.achievementRepository=achievementRepository;
         this.userAchievementRepository=userAchievementRepository;
+        this.userRepository=userRepository;
     }
 
     //returns all achievements this specific user has earned
@@ -25,6 +29,8 @@ public class AchievementService {
     }
 
     public Optional<Achievement> grantAchievement(Long userId, long achievementId){
+        if(isGuest(userId)) return Optional.empty();
+
         boolean alreadyEarned=userAchievementRepository.
                 findByUserIdAndAchievementId(userId,achievementId).isPresent();
         if(alreadyEarned) return Optional.empty();
@@ -35,6 +41,12 @@ public class AchievementService {
 
         userAchievementRepository.save(currAch);
         return achievementRepository.findById(achievementId);
+    }
+
+    private boolean isGuest(Long userId){
+        return userRepository.findById(userId)
+                .map(u -> u.getRole() == Role.GUEST)
+                .orElse(false);
     }
 
     public Optional<Achievement> grantByCode(Long userId, String code){
