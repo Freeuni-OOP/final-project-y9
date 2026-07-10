@@ -18,18 +18,15 @@ import java.util.stream.Collectors;
 public class AdminService {
 
     private final UserRepository userRepository;
-    private final AnnouncementRepository announcementRepository;
     private final ChallengeRepository challengeRepository;
     private final GameRepository gameRepository;
     private final JdbcTemplate jdbcTemplate;
 
     public AdminService(UserRepository userRepository,
-                        AnnouncementRepository announcementRepository,
                         ChallengeRepository challengeRepository,
                         GameRepository gameRepository, JdbcTemplate jdbcTemplate) {
 
         this.userRepository = userRepository;
-        this.announcementRepository = announcementRepository;
         this.challengeRepository = challengeRepository;
         this.gameRepository = gameRepository;
 
@@ -78,23 +75,6 @@ public class AdminService {
     }
 
 
-    public List<Announcement> getAllAnnouncements() {
-        return announcementRepository.findAll();
-    }
-
-    public void createAnnouncement(AnnouncementDTO dto, String username) {
-        Announcement announcement = new Announcement();
-        announcement.setTitle(dto.getTitle());
-        announcement.setContent(dto.getContent());
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new EntityNotFoundException("User not found with username: " + username));
-
-        announcement.setAdmin_id(user.getId());
-        announcementRepository.save(announcement);
-    }
-    public void deleteAnnouncement(Long id) {
-        announcementRepository.deleteById(id);
-    }
 
 
 
