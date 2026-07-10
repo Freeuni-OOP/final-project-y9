@@ -87,4 +87,8 @@ public class FriendshipService {
         }
         return matches;
     }
+
+    public List<Friendship> getAcceptedFriendships(Long userId) {
+        return friendshipRepository.findByStatusAndSenderIdOrStatusAndReceiverId("ACCEPTED", userId, "ACCEPTED", userId);
+    }
 }

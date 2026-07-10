@@ -50,6 +50,11 @@ public class FriendshipController {
         }
         return service.searchFriends(myId, query.trim());
     }
+
+    @GetMapping("/accepted/{userId}")
+    public List<Friendship> getAcceptedFriendships(@PathVariable("userId") Long userId) {
+        return service.getAcceptedFriendships(userId);
+    }
 }
 
 

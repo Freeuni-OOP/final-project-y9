@@ -389,6 +389,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     loadProfile().catch(err => console.error(err));
     loadAchievements().catch(err => console.error(err));
     loadGameAnalytics().catch(err => console.error(err));
+    loadFriendsList().catch(err => console.error(err));
 });
 let myId = null;
 let friendshipStatus = null;
@@ -538,4 +539,78 @@ function generateRecommendations(topGames, topCategories) {
             </div>
         `;
     }).join("");
+}
+async function loadFriendsList(){
+    const Friends = document.getElementById("friends-list-container");
+    if(!Friends){
+        return;
+    }
+
+    const token = localStorage.getItem("token");
+    if(!token){
+        return;
+    }
+
+    try{
+        const res = await fetch(`/friends/accepted/${userId}`,{
+            headers: {"Authorization": 'Bearer ${token}'}
+        });
+
+        if(!res.ok){
+            Friends.innerHTML = `<p class ="ach-empty">Failed to load friends list.</p>`;
+            return;
+        }
+
+        const friendships = await res.json();
+
+        if(!friendships || friendships.length === 0){
+            Friends.innerHTML = `<p class="ach-empty">No friends added yet.</p>`;
+            return;
+        }
+
+        Friends.innerHTML = "";
+
+        for(const friend of friendships){
+            let friendId;
+
+            const currentUserIdStr = String(userId);
+            const senderIdStr = String(friend.senderId);
+
+            if(currentUserIdStr === senderIdStr){
+                friendId = friend.receiverId;
+            }else{
+                friendId = friend.senderId;
+            }
+
+            try{
+                const userRes = await fetch(`/api/users/${friendId}`, {
+                    headers: {"Authorization": `Bearer ${token}`}
+                });
+
+                if(userRes.ok){
+                    const friendshipProfile = await userRes.json();
+
+                    const avatarSrc = friendshipProfile.avatarUrl || "/img/avatars/default.png";
+
+                    const friendProfileUrl = `/profile/${friendId}`;
+
+                    const friendHtml = `<div class="friend-item" onclick="window.location.href='${friendProfileUrl}'" style = "cursor: pointer;">
+                        <img src="${avatarSrc}" class="friend-avatar-placeholder" style="object-fit: cover;" 
+                                 onerror="this.onerror=null; this.src='/img/avatars/default.png';" />
+                            <div class="friend-info">
+                                <span class="friend-name">${escapeHtml(friendshipProfile.username)}</span>
+                                <span class="friend-status online">View Profile</span>
+                            </div>
+                            </div>`;
+                    Friends.insertAdjacentHTML("beforeend", friendHtml);
+                }
+            }catch (err){
+                console.error("Error fetching friend profile details:", err);
+            }
+        }
+    }catch (error){
+        console.error("Error loading friends list:", error);
+        Friends.innerHTML = `<p class="ach-empty">Error connecting to friends service.</p>`;
+        Friends.innerHTML = `<p class="ach-empty">Error connecting to friends service.</p>`;
+    }
 }
