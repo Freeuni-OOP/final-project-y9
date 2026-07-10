@@ -66,12 +66,17 @@ body {
     border: 1px solid rgba(255, 255, 255, 0.08);
     box-shadow: 0 10px 40px rgba(145, 60, 143, 0.25);
 }
-.card__title {
-    font-family: 'Bitcount Grid Double Ink', monospace;
-    color: #d07fd8;
-    font-size: 18px;
-    margin-bottom: 20px;
-    letter-spacing: 1px;
+
+#daily-challenges-card {
+    background: rgba(186, 43, 124, 0.91);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgb(163, 42, 107);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 10px 40px rgba(145, 60, 143, 0.4);
+}
+#daily-challenges-card .card__title {
+    color: #ffffff;
 }
 .leaderboard { list-style: none; }
 .leaderboard li {
@@ -260,6 +265,21 @@ body {
     border-color: #e765e0;
     box-shadow: 0 8px 16px rgba(145, 60, 143, 0.4);
 }
+
+#daily-challenges-card .y8-game-box:hover {
+    transform: translateX(4px);
+    background: #ffffff;
+    border-color: #ffffff;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+#daily-challenges-card .y8-game-box:hover h3 {
+    color: rgba(186,43,124,1) !important;
+}
+
+#daily-challenges-card .y8-game-box:hover div {
+    color: rgba(186,43,124,1) !important;
+}
 .y8-thumbnail-wrapper {
     width: 100%;
     aspect-ratio: 1 / 1;
@@ -293,17 +313,22 @@ body {
     .navbar__links { display: none; }
 }
 .daily-dashboard {
-    background: #15151c;
-    border: 2px solid #282833;
+    background: rgba(186, 43, 124, 0.91);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgb(163, 42, 107);
     border-radius: 12px;
     padding: 20px;
     margin-bottom: 30px;
+    box-shadow: 0 10px 40px rgba(145, 60, 143, 0.4);
 }
 .daily-dashboard__title {
-    font-size: 1.2rem;
-    color: #fff;
-    margin-bottom: 15px;
-    font-family: sans-serif;
+    font-family: 'Bitcount Grid Double Ink', monospace;
+    color: #ffffff;
+    font-size: 1.25rem;
+    margin-bottom: 20px;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+    padding-bottom: 8px;
+    letter-spacing: 1px;
 }
 .daily-dashboard__row {
     display: flex;
@@ -313,21 +338,30 @@ body {
 .daily-card {
     flex: 1;
     min-width: 200px;
-    background: #1e1e26;
-    border: 1px solid #333344;
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 8px;
     padding: 15px;
     display: flex;
     align-items: center;
     gap: 15px;
     text-decoration: none;
-    color: inherit;
-    transition: transform 0.2s, border-color 0.2s;
+    color: #fff;
+    transition: all 0.2s ease-in-out;
 }
 .daily-card--active:hover {
-    transform: translateY(-2px);
-    border-color: #00ff66;
+    transform: translateX(4px);
+    background: #e194d5;
+    color: rgba(186, 43, 124, 1);
+    border-color: #e194d5;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
     cursor: pointer;
+}
+
+.daily-card--active:hover h3,
+.daily-card--active:hover p,
+.daily-card--active:hover .badge {
+    color: rgba(186, 43, 124, 1);
 }
 .daily-card__icon {
     font-size: 2rem;
