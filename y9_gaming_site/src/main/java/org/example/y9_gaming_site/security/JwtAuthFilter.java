@@ -63,24 +63,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             if (user == null) {
                 rejectBadToken(request, response);
                 return;
-            if (username != null) {
-                User user = userRepository.findByUsername(username).orElse(null);
-
-                if (user != null) {
-                    var auth = new UsernamePasswordAuthenticationToken(
-                            username,
-                            null,
-                            List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()))
-                    );
-                    SecurityContextHolder.getContext().setAuthentication(auth);
-                } else {
-                    Cookie expired = new Cookie("jwt", null);
-                    expired.setPath("/");
-                    expired.setMaxAge(0);
-                    response.addCookie(expired);
-                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                    return;
-                }
             }
 
             var auth = new UsernamePasswordAuthenticationToken(
