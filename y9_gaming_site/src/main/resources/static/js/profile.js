@@ -306,7 +306,7 @@ window.activeGameTitle = null;
 window.activeGameId = null;
 window.activeGameCategory = null;
 
-window.handlePlayGame = function(id, type, sourceUrl, title) {
+window.handlePlayGame = function(id, type, sourceUrl, title, category) {
     const modal = document.getElementById('gameTheaterModal');
     const iframe = document.getElementById('gameIframe');
     const titleHeader = document.getElementById('theaterGameTitle');
@@ -323,9 +323,10 @@ window.handlePlayGame = function(id, type, sourceUrl, title) {
     window.gameStartTime = Date.now();
     window.activeGameTitle = title;
     window.activeGameId = id;
-    window.activeGameCategory = "ARCADE";
+    window.activeGameCategory = category || "ARCADE";
     console.log(`[PROFILE TRACKER] Active tracking session started for: ${window.activeGameTitle}`);
 };
+
 
 window.closeGameTheater = function() {
     const modal = document.getElementById('gameTheaterModal');

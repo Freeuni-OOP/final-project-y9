@@ -4,13 +4,14 @@ import org.example.y9_gaming_site.user.User;
 import org.example.y9_gaming_site.user.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import org.springframework.data.domain.PageRequest;
+
 @RestController
 @RequestMapping("/api/games")
 public class GameAnalyticsController {
@@ -40,11 +41,10 @@ public class GameAnalyticsController {
     }
 
     @PostMapping("/track-time")
-    public ResponseEntity<?> logTime(Principal principal, @RequestBody TimeTrackingRequest req) {
-        if (principal == null) return ResponseEntity.status(401).build();
-
-        User user = userRepository.findByUsername(principal.getName())
-                .orElseThrow(() -> new RuntimeException("User missing"));
+    public ResponseEntity<?> logTime(Authentication authentication, @RequestBody TimeTrackingRequest req) {
+        if (authentication == null || !(authentication.getPrincipal() instanceof User user)) {
+            return ResponseEntity.status(401).build();
+        }
 
         UserGameTime tracking = userGameTimeRepository.findByUserAndGameTitle(user, req.gameTitle)
                 .orElse(new UserGameTime());
@@ -63,7 +63,6 @@ public class GameAnalyticsController {
         return ResponseEntity.ok().build();
     }
 
-
     public static class GameTimeResponse {
         public Long gameId;
         public String gameTitle;
@@ -77,7 +76,6 @@ public class GameAnalyticsController {
             this.totalTimeSeconds = t.getTotalTimeSeconds();
         }
     }
-
 
     @GetMapping("/{userId}/top-3")
     public ResponseEntity<?> getTop3(@PathVariable Long userId) {
