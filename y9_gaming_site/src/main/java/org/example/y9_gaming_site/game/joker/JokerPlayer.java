@@ -17,9 +17,30 @@ public class JokerPlayer {
     @Setter private int current=0; //how many tricks  user has for this time
     private  int totalScore=0;
 
+    private final List<RoundRecord> roundHistory = new ArrayList<>();
+
     public JokerPlayer(Long userId, String username) {
         this.userId = userId;
         this.username = username;
+    }
+
+    @Getter
+    public static class RoundRecord {
+        private final int round;
+        private final int bid;
+        private final int taken;
+        private final int score;
+
+        public RoundRecord(int round, int bid, int taken, int score) {
+            this.round = round;
+            this.bid = bid;
+            this.taken = taken;
+            this.score = score;
+        }
+    }
+
+    public void addRoundRecord(int round, int bid, int taken, int score) {
+        roundHistory.add(new RoundRecord(round, bid, taken, score));
     }
 
     //calling this while dealing cards

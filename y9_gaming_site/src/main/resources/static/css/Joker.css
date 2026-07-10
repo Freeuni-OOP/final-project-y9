@@ -412,3 +412,103 @@
     .joker-sidebar { width: 100%; min-width: 0; }
     .joker-game-topbar { gap: 16px; padding: 10px 16px; }
 }
+
+/* ========== JOKER HISTORY SCOREBOARD ========== */
+.joker-history-wrap {
+    background: rgba(179, 39, 201, 0.04);
+    border: 1px solid rgba(179, 39, 201, 0.2);
+    border-radius: 12px;
+    padding: 12px;
+    overflow-x: auto;
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+.joker-history-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.8rem;
+}
+
+.joker-history-table th,
+.joker-history-table td {
+    padding: 8px 6px;
+    text-align: center;
+    color: #eee;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    white-space: nowrap;
+}
+
+.joker-history-table th {
+    color: var(--orchid-2);
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid rgba(179, 39, 201, 0.3);
+}
+
+.hist-bid-taken {
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+.joker-history-table .hist-score {
+    display: block;
+    font-size: 0.7rem;
+    opacity: 0.8;
+    margin-top: 2px;
+}
+
+
+.joker-history-table .hist-hit {
+    color: #5af55a;
+    background: rgba(90, 245, 90, 0.04);
+}
+.joker-history-table .hist-hit .hist-score {
+    color: #a3ffa3;
+}
+
+
+.joker-history-table .hist-miss {
+    color: var(--pink);
+    background: rgba(255, 107, 157, 0.04);
+}
+.joker-history-table .hist-miss .hist-score {
+    color: #ff9cb7;
+}
+
+
+.joker-history-table .hist-total-row td {
+    border-top: 2px solid rgba(179, 39, 201, 0.4);
+    color: var(--gold);
+    font-weight: bold;
+    font-size: 0.9rem;
+    background: rgba(224, 161, 27, 0.05);
+    padding-top: 10px;
+}
+
+.joker-gametype-badge {
+    text-align: center;
+    font-size: 0.9rem;
+    font-weight: bold;
+    padding: 8px 16px;
+    border-radius: 10px;
+    margin-bottom: 4px;
+    transition: all 0.2s;
+}
+
+.joker-gametype-badge.gt-neutral {
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    color: #aaa;
+}
+
+.joker-gametype-badge.gt-shetenva {
+    background: rgba(224, 161, 27, 0.12);
+    border: 1px solid var(--gold);
+    color: var(--gold);
+}
+
+.joker-gametype-badge.gt-tsaglejva {
+    background: rgba(255, 107, 157, 0.12);
+    border: 1px solid var(--pink);
+    color: var(--pink);
+}
