@@ -1,4 +1,4 @@
-package org.example.y9_gaming_site;
+package org.example.y9_gaming_site.FriendshipTests;
 
 import junit.framework.TestCase;
 import org.example.y9_gaming_site.friendship.Friendship;
@@ -13,28 +13,27 @@ import java.util.Optional;
 
 import static org.mockito.Mockito.*;
 
-public class TestFriendship extends TestCase {
+public class FriendshipServiceTest extends TestCase {
 
     private FriendshipRepository mockFriendshipRepository;
     private NotificationService mockNotificationService;
     private FriendshipService friendshipService;
     private Friendship sampleFriendship;
 
-    /*
     @Override
     protected void setUp() throws Exception {
         super.setUp();
         mockFriendshipRepository = Mockito.mock(FriendshipRepository.class);
         mockNotificationService = Mockito.mock(NotificationService.class);
 
-        friendshipService = new FriendshipService(mockFriendshipRepository, mockNotificationService);
+        friendshipService = new FriendshipService(mockFriendshipRepository, mockNotificationService, null);
 
         sampleFriendship = new Friendship(1L, 2L, "PENDING");
         java.lang.reflect.Field idField = Friendship.class.getDeclaredField("id");
         idField.setAccessible(true);
         idField.set(sampleFriendship, 100L);
     }
-*/
+
     public void testSendRequest_Success() {
         when(mockFriendshipRepository.findBySenderIdAndReceiverId(1L, 2L)).thenReturn(null);
         when(mockFriendshipRepository.findBySenderIdAndReceiverId(2L, 1L)).thenReturn(null);
