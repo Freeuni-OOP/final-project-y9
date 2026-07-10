@@ -10,10 +10,7 @@
 
 </head>
     <nav th:replace="~{fragments/navbar :: navbar(active='home')}"></nav>
-<div id="notification-dropdown" class="notification-dropdown">
-    <div class="notification-dropdown-title">🔔 Notifications</div>
-    <div class="notification-empty">loading...</div>
-</div>
+    <div th:replace="~{fragments/Notifications :: Notifications}"></div>
 
 <div class="search-wrapper">
     <input type="text" id="search-input" placeholder="🔍 search game or person..." autocomplete="off" oninput="onSearch(this.value)">
