@@ -25,7 +25,6 @@ async function loadLeaderboard() {
     const loading = document.getElementById('loading');
     const tbody = document.getElementById('leaderboard-body');
 
-    //loading.style.display = 'block';
     tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#ccc; padding:20px;">Synchronizing database rows...</td></tr>`;
 
     let url = `/api/leaderboard/${currentGame}`;
@@ -120,7 +119,6 @@ function formatScore(score) {
 async function loadUserProfile() {
     const token = localStorage.getItem('token');
 
-    // Safety redirect: If someone tries to browse the leaderboard without being logged in
     if (!token) {
         window.location.href = "/login";
         return;
@@ -141,8 +139,6 @@ async function loadUserProfile() {
             const navAvatar = document.getElementById("nav-avatar");
 
             if (navUser) navUser.textContent = user.username;
-
-            // Fixed property lookup to match your UserController keys precisely
             if (navAvatar && user.avatarUrl && user.avatarUrl !== 'null' && user.avatarUrl !== '') {
                 navAvatar.src = user.avatarUrl;
                 navAvatar.onerror = function() {
@@ -176,7 +172,6 @@ async function redirectToMyProfile() {
 
         if (res.ok) {
             const user = await res.json();
-            // Redirects to your secure dynamic Thymeleaf route (e.g., /profile/4)
             window.location.href = `/profile/${user.id}`;
         } else {
             window.location.href = "/login";

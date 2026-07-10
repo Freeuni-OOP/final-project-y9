@@ -1,4 +1,4 @@
-package org.example.y9_gaming_site.dto;
+package org.example.y9_gaming_site.profile;
 
 public class UserProfileResponse {
     private Long id;
