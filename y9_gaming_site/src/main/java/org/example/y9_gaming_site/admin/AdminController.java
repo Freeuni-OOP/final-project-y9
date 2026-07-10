@@ -2,6 +2,7 @@ package org.example.y9_gaming_site.admin;
 
 import org.example.y9_gaming_site.user.User;
 import org.example.y9_gaming_site.user.Role;
+import org.example.y9_gaming_site.game.Game;
 import org.springframework.stereotype.Controller;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.ui.Model;
@@ -10,6 +11,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.nio.file.AccessDeniedException;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @Controller
 @RequestMapping("/admin")
@@ -23,10 +25,17 @@ public class AdminController {
 
     @GetMapping("/dashboard")
     public String dashboard(Model model) {
-        model.addAttribute("users", adminService.getAllUsers());
-        model.addAttribute("announcements", adminService.getAllAnnouncements());
-        model.addAttribute("challenges", adminService.getAllChallenges());
-        model.addAttribute("games", adminService.getAllGames());
+        CompletableFuture<List<User>> usersF = CompletableFuture.supplyAsync(adminService::getAllUsers);
+        CompletableFuture<List<Announcement>> announcementsF = CompletableFuture.supplyAsync(adminService::getAllAnnouncements);
+        CompletableFuture<List<Challenge>> challengesF = CompletableFuture.supplyAsync(adminService::getAllChallenges);
+        CompletableFuture<List<Game>> gamesF = CompletableFuture.supplyAsync(adminService::getAllGames);
+
+        CompletableFuture.allOf(usersF, announcementsF, challengesF, gamesF).join();
+
+        model.addAttribute("users", usersF.join());
+        model.addAttribute("announcements", announcementsF.join());
+        model.addAttribute("challenges", challengesF.join());
+        model.addAttribute("games", gamesF.join());
         return "admin/dashboard";
     }
 
