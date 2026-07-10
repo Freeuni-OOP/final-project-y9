@@ -1,4 +1,4 @@
-package org.example.y9_gaming_site.game;
+package org.example.y9_gaming_site.game.sudoku;
 
 import org.example.y9_gaming_site.game.sudoku.SudokuPuzzle;
 import org.springframework.data.jpa.repository.JpaRepository;

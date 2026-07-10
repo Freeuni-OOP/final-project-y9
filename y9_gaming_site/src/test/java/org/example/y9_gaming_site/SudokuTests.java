@@ -1,7 +1,7 @@
 package org.example.y9_gaming_site;
 
 import junit.framework.TestCase;
-import org.example.y9_gaming_site.game.SudokuPuzzleRepository;
+import org.example.y9_gaming_site.game.sudoku.SudokuPuzzleRepository;
 import org.example.y9_gaming_site.game.sudoku.*;
 import org.mockito.Mockito;
 
