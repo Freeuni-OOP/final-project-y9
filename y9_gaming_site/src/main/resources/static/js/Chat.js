@@ -65,7 +65,7 @@ async function openFriendChat(){
     if(!otherId){
         return;
     }
-    await openRoomRequest(`/chat/open-private/${MyUserId}/{otherId}`, {method: "POST"});
+    await openRoomRequest(`/chat/open-private/${MyUserId}/${otherId}`, {method: "POST"});
 }
 
 async function createGroup(){
@@ -118,7 +118,7 @@ async function openRoomRequest(url, options){
         roomId = room.id;
 
         document.getElementById("roomIdLabel").textContent = roomId;
-        document.getElementById("chatBox").style.display = "block";
+        document.getElementById("chatBox").classList.add("visible");
 
 
         loadMessages();
