@@ -1,4 +1,4 @@
-package org.example.y9_gaming_site;
+package org.example.y9_gaming_site.FriendshipTests;
 
 import junit.framework.TestCase;
 import org.example.y9_gaming_site.friendship.AcceptDto;

@@ -1,11 +1,10 @@
-package org.example.y9_gaming_site;
+package org.example.y9_gaming_site.NotificationTests;
 
 import junit.framework.TestCase;
 import org.example.y9_gaming_site.notification.Notification;
 import org.example.y9_gaming_site.notification.NotificationController;
 import org.example.y9_gaming_site.notification.NotificationService;
 import org.mockito.Mockito;
-import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 

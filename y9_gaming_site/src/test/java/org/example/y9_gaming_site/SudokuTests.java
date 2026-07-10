@@ -33,7 +33,7 @@ public class SudokuTests extends TestCase {
 
         randomPuzzle = new SudokuPuzzle();
         randomPuzzle.setId(2L);
-        randomPuzzle.setPuzzleDate(null); // Infinite practice boards have no date assigned
+        randomPuzzle.setPuzzleDate(null);
         randomPuzzle.setDefinition(blankBoardStr);
         randomPuzzle.setSolution(solvedBoardStr);
         randomPuzzle.setDifficulty("HARD");
