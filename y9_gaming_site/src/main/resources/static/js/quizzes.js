@@ -132,12 +132,13 @@ async function fetchAndRenderQuizzes(category) {
 
 async function startQuiz(id) {
     try {
-        const categoryActive = document.querySelector('.filter-btn.active').getAttribute('onclick').match(/'([^']*)'/)[1];
-        let url = categoryActive ? `/api/quizzes/category/${categoryActive}` : '/api/quizzes';
-
-        const res = await fetch(url);
-        const quizzes = await res.json();
-        currentQuiz = quizzes.find(q => q.id === id);
+        const token = localStorage.getItem('token');
+        const res = await fetch(`/api/quizzes/${id}`, {
+            method: 'GET',
+            headers: { 'Authorization': token ? `Bearer ${token}` : '' }
+        });
+        if (!res.ok) throw new Error();
+        currentQuiz = await res.json();
 
         if (!currentQuiz || !currentQuiz.questions || currentQuiz.questions.length === 0) {
             alert("This quiz doesn't have any question nodes loaded.");
