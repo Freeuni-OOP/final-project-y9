@@ -480,7 +480,11 @@ async function playSelectedCard(jokerCall, declaredSuit) {
         });
         if (!res.ok) {
             const err = await res.text();
-            setMsg(err || "არასწორი სვლა", "error");
+            let displayMsg = err;
+            if (err.includes("illegal card")) {
+                displayMsg = "თქვენ ვერ ითამაშებთ ამ ბარათს — არასწორი სვლაა!";
+            }
+            setMsg(displayMsg || "არასწორი სვლა", "error");
         } else {
             selectedCard = null;
             await loadState();
