@@ -231,20 +231,26 @@ button:active {
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 8px;
+    padding: 8px 12px; /* ოდნავ გავზარდეთ შიდა დაშორება სისუფთავისთვის */
     border-radius: 8px;
-    transition: background 0.15s ease;
+    background: rgba(255, 255, 255, 0.02); /* დეფოლტად ძლივს შესამჩნევი მუქი ბაზა */
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
 }
 
+
 .friend-item:hover {
-    background: #FFF8F9;
+    background: rgba(179, 39, 201, 0.12);
+    transform: translateX(4px);
+    box-shadow: 0 0 12px rgba(179, 39, 201, 0.2);
 }
 
 .friend-avatar-placeholder {
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    background: #FFD0DB;
+    background: rgba(71, 44, 82, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .friend-info {
@@ -255,6 +261,7 @@ button:active {
 .friend-name {
     font-weight: 600;
     font-size: 0.9rem;
+    color: #fff;
 }
 
 .friend-status {
