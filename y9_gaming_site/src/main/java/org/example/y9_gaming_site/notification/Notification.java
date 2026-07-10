@@ -24,6 +24,8 @@ public class Notification {
     private LocalDateTime dateTime;
     @Column(name = "friendship_id")
     private Long friendshipId;
+    @Column(name = "room_id")
+    private Long roomId;
 
     public Notification() {}
 
@@ -35,6 +37,16 @@ public class Notification {
         this.isRead = false;
         this.dateTime = LocalDateTime.now();
         this.friendshipId = friendshipId;
+    }
+
+    public Notification(Long userId, Long senderId, String type, String message, Long roomId, boolean isRead) {
+        this.userId = userId;
+        this.senderId = senderId;
+        this.type = type;
+        this.message = message;
+        this.isRead = false;
+        this.dateTime = LocalDateTime.now();
+        this.roomId = roomId;
     }
 
     public Long getId() {
@@ -91,6 +103,12 @@ public class Notification {
     }
     public void setFriendshipId(Long friendshipId) {
         this.friendshipId = friendshipId;
+    }
+    public Long getRoomId() {
+        return roomId;
+    }
+    public void setRoomId(Long roomId) {
+        this.roomId = roomId;
     }
 }
 

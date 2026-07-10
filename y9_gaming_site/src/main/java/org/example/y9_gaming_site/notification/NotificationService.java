@@ -80,4 +80,12 @@ public class NotificationService {
     public void markRead(Long userId) {
         notificationRepository.markAllAsReadByUserId(userId);
     }
+
+    public void createMessageNotification(Long senderId, Long receiverId, Long roomId) {
+        User sender = userRepository.findById(senderId).orElseThrow();
+
+
+        Notification notification = new Notification(receiverId, senderId, "NEW_MESSAGE", sender.getUsername() + " sent you a message ", roomId, true);
+        notificationRepository.save(notification);
+    }
 }
