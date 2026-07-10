@@ -1,10 +1,7 @@
-import org.example.y9_gaming_site.profile.UserProfileResponse;
+
 import org.example.y9_gaming_site.profile.FileStorageService;
-import org.example.y9_gaming_site.user.Role;
-import org.example.y9_gaming_site.user.User;
-import org.example.y9_gaming_site.user.UserRegisterDto;
-import org.example.y9_gaming_site.user.UserRepository;
-import org.example.y9_gaming_site.user.UserService;
+import org.example.y9_gaming_site.profile.UserProfileResponse;
+import org.example.y9_gaming_site.user.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -15,6 +12,7 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -32,6 +30,15 @@ public class UserServiceTest{
     private FileStorageService fileStorageService;
     @InjectMocks
     private UserService userService;
+
+    private UserRegisterDto validDto(String username, String email) {
+        UserRegisterDto dto = new UserRegisterDto();
+        dto.setUsername(username);
+        dto.setEmail(email);
+        dto.setPassword("Passw0rd!");
+        dto.setBirthDate(LocalDate.of(2000, 1, 1));
+        return dto;
+    }
 
     @Test
     void testSample1(){// get Profile should return Dto when User Exists
@@ -79,48 +86,64 @@ public class UserServiceTest{
     }
 
     @Test
-    void testSample5(){
-        UserRegisterDto flagged = new UserRegisterDto();
-        flagged.setUsername("hack");
-        flagged.setEmail("hack@test.com");
-        flagged.setPassword("Passw0rd!");
-        flagged.setBirthDate(LocalDate.of(2000, 1, 1));
-        assertThatThrownBy(() -> userService.addNewUser(flagged)).isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("inappropriate");
+    void testSample5(){ // addNewUser rejects a flagged/inappropriate username
+        UserRegisterDto flagged = validDto("hack", "hack@test.com");
 
-        UserRegisterDto nullPassword = new UserRegisterDto();
-        nullPassword.setUsername("CoolGamer99");
-        nullPassword.setEmail("cool@test.com");
+        assertThatThrownBy(() -> userService.addNewUser(flagged))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("inappropriate");
+    }
+
+    @Test
+    void testSample6(){ // addNewUser rejects a missing or weak password
+        UserRegisterDto nullPassword = validDto("CoolGamer99", "cool@test.com");
         nullPassword.setPassword(null);
-        nullPassword.setBirthDate(LocalDate.of(2000, 1, 1));
+
         assertThatThrownBy(() -> userService.addNewUser(nullPassword))
                 .hasMessageContaining("Password must be at least 8 characters");
+    }
 
-        UserRegisterDto dupeEmail = new UserRegisterDto();
-        dupeEmail.setUsername("CoolGamer99");
-        dupeEmail.setEmail("taken@test.com");
-        dupeEmail.setPassword("Passw0rd!");
-        dupeEmail.setBirthDate(LocalDate.of(2000, 1, 1));
+    @Test
+    void testSample7(){ // addNewUser rejects an email thats already registered
+        UserRegisterDto dupeEmail = validDto("CoolGamer99", "taken@test.com");
         when(userRepository.existsByEmail("taken@test.com")).thenReturn(true);
-        assertThatThrownBy(() -> userService.addNewUser(dupeEmail)).isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("already exists");
 
-        UserRegisterDto noBirthDate = new UserRegisterDto();
-        noBirthDate.setUsername("CoolGamer99");
-        noBirthDate.setEmail("cool2@test.com");
-        noBirthDate.setPassword("Passw0rd!");
+        assertThatThrownBy(() -> userService.addNewUser(dupeEmail))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("already exists");
+    }
+
+    @Test
+    void testSample8(){ // addNewUser rejects a missing birth date
+        UserRegisterDto noBirthDate = validDto("CoolGamer99", "cool2@test.com");
         noBirthDate.setBirthDate(null);
-        assertThatThrownBy(() -> userService.addNewUser(noBirthDate)).isInstanceOf(IllegalArgumentException.class)
+
+        assertThatThrownBy(() -> userService.addNewUser(noBirthDate))
+                .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Birth date");
     }
 
     @Test
-    void testSample6() throws Exception { // addNewUser
-        UserRegisterDto dto = new UserRegisterDto();
-        dto.setUsername("CoolGamer99");
-        dto.setEmail("cool3@test.com");
-        dto.setPassword("Passw0rd!");
-        dto.setBirthDate(LocalDate.of(2000, 1, 1));
+    void testSample9(){ // addNewUser on a taken username offers 3 unique still available suggestions instead
+        UserRegisterDto dto = validDto("CoolGamer99", "cool4@test.com");
+        when(userRepository.existsByUsername("CoolGamer99")).thenReturn(true);
+
+        assertThatThrownBy(() -> userService.addNewUser(dto))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Username is already taken")
+                .satisfies(ex -> {
+                    String message = ex.getMessage();
+                    String suggestionList = message.substring(message.indexOf(": ") + 2);
+                    List<String> suggestions = Arrays.asList(suggestionList.split(", "));
+
+                    assertThat(suggestions).hasSize(3);
+                    assertThat(suggestions).doesNotHaveDuplicates();
+                });
+    }
+
+    @Test
+    void testSample10() throws Exception { // addNewUser persists a new user with a hashed password and salt
+        UserRegisterDto dto = validDto("CoolGamer99", "cool3@test.com");
 
         userService.addNewUser(dto);
 
@@ -136,7 +159,7 @@ public class UserServiceTest{
     }
 
     @Test
-    void testSample7(){ // createGuestUser builds and saves a guest account
+    void testSample11(){ // createGuestUser builds and saves a guest account
         when(userRepository.save(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
 
         User guest = userService.createGuestUser();
@@ -151,7 +174,7 @@ public class UserServiceTest{
     }
 
     @Test
-    void testSample8(){ // getProfileByUsername returns a dto when the user exists
+    void testSample12(){ // getProfileByUsername returns a dto when the user exists
         User user = new User();
         user.setId(5L);
         user.setUsername("CoolGamer99");
@@ -167,7 +190,7 @@ public class UserServiceTest{
     }
 
     @Test
-    void testSample9(){ // getProfileByUsername throws when the username doesn't exist
+    void testSample13(){ // getProfileByUsername throws when the username doesn't exist
         when(userRepository.findByUsername("ghost")).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> userService.getProfileByUsername("ghost"))
@@ -176,7 +199,7 @@ public class UserServiceTest{
     }
 
     @Test
-    void testSample10(){ // searchUsers maps every match to a profile dto
+    void testSample14(){ // searchUsers maps every match to a profile dto
         User u1 = new User();
         u1.setId(1L); u1.setUsername("Alice"); u1.setRole(Role.USER);
         User u2 = new User();
@@ -190,7 +213,7 @@ public class UserServiceTest{
     }
 
     @Test
-    void testSample11(){ // searchUsers returns an empty list when nothing matches
+    void testSample15(){ // searchUsers returns an empty list when nothing matches
         when(userRepository.findByUsernameContainingIgnoreCase("zzz")).thenReturn(List.of());
 
         List<UserProfileResponse> results = userService.searchUsers("zzz");

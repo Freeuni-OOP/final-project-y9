@@ -75,7 +75,7 @@ public class ChallengeServiceTest {
     @Test
     public void testSample1(){ // sending challenge works with correct target
         when(friendshipRepository.findBySenderIdAndReceiverId(1L, 2L))
-                .thenReturn(new Friendship(1L, 2L, "Accepted"));
+                .thenReturn(new Friendship(1L, 2L, "ACCEPTED"));
         when(gameRecordService.findBest(1L, "Sudoku", 99L))
                 .thenReturn(Optional.of(gameRecord));
         when(userRepository.findById(2L)).thenReturn(Optional.of(receiver));
@@ -89,6 +89,20 @@ public class ChallengeServiceTest {
         assertThat(result.getExpiresAt()).isAfter(LocalDateTime.now());
         assertThat(result.getSender()).isEqualTo(sender);
         assertThat(result.getReceiver()).isEqualTo(receiver);
+    }
+
+    @Test
+    public void testSample1b(){ // being friends the other way around still counts
+        when(friendshipRepository.findBySenderIdAndReceiverId(1L, 2L)).thenReturn(null);
+        when(friendshipRepository.findBySenderIdAndReceiverId(2L, 1L))
+                .thenReturn(new Friendship(2L, 1L, "ACCEPTED"));
+        when(gameRecordService.findBest(1L, "Sudoku", 99L)).thenReturn(Optional.of(gameRecord));
+        when(userRepository.findById(2L)).thenReturn(Optional.of(receiver));
+        when(gameChallengeRepository.save(any(GameChallenge.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        GameChallenge result = challengeService.sendChallenge(1L, 2L, "Sudoku", 99L);
+
+        assertThat(result.getStatus()).isEqualTo(GameChallengeStatus.PENDING);
     }
 
     @Test
@@ -191,54 +205,72 @@ public class ChallengeServiceTest {
     }
 
     @Test
-    public void testSample9(){// testing all Exceptions
-        // when they aren't friends
+    public void testSample9(){ // sendChallenge refuses strangers
         when(friendshipRepository.findBySenderIdAndReceiverId(1L, 2L)).thenReturn(null);
         when(friendshipRepository.findBySenderIdAndReceiverId(2L, 1L)).thenReturn(null);
+
         assertThatThrownBy(() -> challengeService.sendChallenge(1L, 2L, "Sudoku", 99L))
                 .isInstanceOf(RuntimeException.class).hasMessageContaining("friends");
+    }
 
-        // not played yet
-        when(friendshipRepository.findBySenderIdAndReceiverId(1L, 2L)).thenReturn(new Friendship(1L, 2L, "Accepted"));
+    @Test
+    public void testSample10(){ // sendChallenge refuses when the sender has no record to challenge with
+        when(friendshipRepository.findBySenderIdAndReceiverId(1L, 2L)).thenReturn(new Friendship(1L, 2L, "ACCEPTED"));
         when(gameRecordService.findBest(1L, "Sudoku", 99L)).thenReturn(Optional.empty());
+
         assertThatThrownBy(() -> challengeService.sendChallenge(1L, 2L, "Sudoku", 99L))
                 .isInstanceOf(RuntimeException.class).hasMessageContaining("record");
+    }
 
-        //user doesn't exist
+    @Test
+    public void testSample11(){ // sendChallenge refuses when the receiver doesnt exist
+        when(friendshipRepository.findBySenderIdAndReceiverId(1L, 2L)).thenReturn(new Friendship(1L, 2L, "ACCEPTED"));
         when(gameRecordService.findBest(1L, "Sudoku", 99L)).thenReturn(Optional.of(gameRecord));
         when(userRepository.findById(2L)).thenReturn(Optional.empty());
         assertThatThrownBy(() -> challengeService.sendChallenge(1L, 2L, "Sudoku", 99L))
                 .isInstanceOf(RuntimeException.class).hasMessageContaining("User");
+    }
 
-        //No such Challenge exists
+    @Test
+    public void testSample12(){ // respondToChallenge refuses an unknown challenge id
         when(gameChallengeRepository.findById(100L)).thenReturn(Optional.empty());
         assertThatThrownBy(() -> challengeService.respondToChallenge(100L, 2L, true))
                 .isInstanceOf(RuntimeException.class).hasMessageContaining("Challenge");
+    }
 
-        // only receiver can accept challenge
+    @Test
+    public void testSample13(){ // respondToChallenge refuses anyone but the actual receiver
         GameChallenge challenge = new GameChallenge(sender, receiver, gameRecord, LocalDateTime.now().plusDays(1));
         challenge.setId(101L);
         when(gameChallengeRepository.findById(101L)).thenReturn(Optional.of(challenge));
         assertThatThrownBy(() -> challengeService.respondToChallenge(101L, 943L, true))
                 .isInstanceOf(RuntimeException.class).hasMessageContaining("receiver");
+    }
 
-        //haven't been accepted
+    @Test
+    public void testSample14(){ // submitAttempt refuses a challenge that hasnt been accepted yet
         GameChallenge challenge1 = new GameChallenge(sender, receiver, gameRecord, LocalDateTime.now().plusDays(1));
         challenge1.setId(102L);
         when(gameChallengeRepository.findById(102L)).thenReturn(Optional.of(challenge1));
+
         assertThatThrownBy(() -> challengeService.submitAttempt(102L, 2L, 42.0, 99L))
                 .isInstanceOf(RuntimeException.class).hasMessageContaining("waiting");
+    }
 
-        //challenge expired
+    @Test
+    public void testSample15(){ // submitAttempt on a since expired challenge auto expires it and refuses
         GameChallenge nowExpired = new GameChallenge(sender, receiver, gameRecord, LocalDateTime.now().minusMinutes(1));
         nowExpired.setId(103L);
         nowExpired.setStatus(GameChallengeStatus.ACCEPTED);
         when(gameChallengeRepository.findById(103L)).thenReturn(Optional.of(nowExpired));
+        when(gameChallengeRepository.save(any(GameChallenge.class))).thenAnswer(inv -> inv.getArgument(0));
         assertThatThrownBy(() -> challengeService.submitAttempt(103L, 2L, 42.0, 99L))
                 .isInstanceOf(RuntimeException.class).hasMessageContaining("expired");
         assertThat(nowExpired.getStatus()).isEqualTo(GameChallengeStatus.EXPIRED);
+    }
 
-        // there is no such game
+    @Test
+    public void testSample16(){ // submitAttempt refuses when theres no evaluator registered for the target game
         Game tetris = new Game();
         tetris.setId(2L);
         tetris.setTitle("Tetris");
