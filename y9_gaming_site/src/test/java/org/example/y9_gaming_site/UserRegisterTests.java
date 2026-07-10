@@ -2,8 +2,7 @@ package org.example.y9_gaming_site;
 
 import junit.framework.TestCase;
 import org.example.y9_gaming_site.security.ContentModerator;
-import org.example.y9_gaming_site.security.TokenUtil;
-import org.example.y9_gaming_site.service.FileStorageService;
+import org.example.y9_gaming_site.profile.FileStorageService;
 import org.example.y9_gaming_site.user.User;
 import org.example.y9_gaming_site.user.UserService;
 import org.example.y9_gaming_site.user.UserRepository;

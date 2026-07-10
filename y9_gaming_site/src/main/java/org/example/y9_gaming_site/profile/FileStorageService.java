@@ -1,4 +1,4 @@
-package org.example.y9_gaming_site.service;
+package org.example.y9_gaming_site.profile;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;

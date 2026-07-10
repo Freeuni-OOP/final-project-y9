@@ -1,4 +1,4 @@
-import org.example.y9_gaming_site.service.FileStorageService;
+import org.example.y9_gaming_site.profile.FileStorageService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockMultipartFile;

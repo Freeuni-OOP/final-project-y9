@@ -1,4 +1,4 @@
-package org.example.y9_gaming_site.controller;
+package org.example.y9_gaming_site.profile;
 
 import org.example.y9_gaming_site.user.User;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;

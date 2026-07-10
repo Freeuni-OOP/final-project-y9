@@ -1,9 +1,9 @@
 package org.example.y9_gaming_site.user;
 
-import org.example.y9_gaming_site.dto.UserProfileResponse;
+import org.example.y9_gaming_site.profile.UserProfileResponse;
 import org.example.y9_gaming_site.security.ContentModerator;
 import org.example.y9_gaming_site.security.PasswordUtil;
-import org.example.y9_gaming_site.service.FileStorageService;
+import org.example.y9_gaming_site.profile.FileStorageService;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 

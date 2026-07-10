@@ -1,5 +1,5 @@
-import org.example.y9_gaming_site.dto.UserProfileResponse;
-import org.example.y9_gaming_site.service.FileStorageService;
+import org.example.y9_gaming_site.profile.UserProfileResponse;
+import org.example.y9_gaming_site.profile.FileStorageService;
 import org.example.y9_gaming_site.user.Role;
 import org.example.y9_gaming_site.user.User;
 import org.example.y9_gaming_site.user.UserRegisterDto;

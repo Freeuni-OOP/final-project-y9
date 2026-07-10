@@ -235,7 +235,7 @@ async function load(endpoint, method) {
     setMessage("");
     try {
         const res = await fetch(endpoint, { method, headers: authHeaders(method === "POST") });
-        if (myToken !== loadToken) return; // a newer load started while this was in flight
+        if (myToken !== loadToken) return;
         if (res.status === 401 || res.status === 403) {
             setMessage("გთხოვთ გაიაროთ ავტორიზაცია", "lose");
             return;

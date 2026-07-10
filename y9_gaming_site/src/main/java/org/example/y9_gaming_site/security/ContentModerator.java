@@ -7,7 +7,7 @@ public class ContentModerator {
     private static final Set<String> TOXIC_WORDS = new HashSet<>();
 
     static {
-        try (java.io.InputStream is = ContentModerator.class.getResourceAsStream("/bad_words.txt");
+        try (java.io.InputStream is = ContentModerator.class.getResourceAsStream("/wordlists/bad_words.txt");
              java.io.BufferedReader reader = new java.io.BufferedReader(new java.io.InputStreamReader(is))) {
             if (is != null) {
                 String line;

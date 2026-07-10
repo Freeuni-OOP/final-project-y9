@@ -2,6 +2,7 @@ package org.example.y9_gaming_site.gameRecord;
 
 import org.example.y9_gaming_site.game.Game;
 import org.example.y9_gaming_site.game.GameRepository;
+import org.example.y9_gaming_site.user.Role;
 import org.example.y9_gaming_site.user.User;
 import org.example.y9_gaming_site.user.UserRepository;
 import org.springframework.stereotype.Service;
@@ -70,7 +71,7 @@ public class GameRecordService {
         }else {
             candidates = gameRecordRepository.findByGameIdAndContextId(game.getId(), contextId);
         }
-
+        candidates.removeIf(gameRecord -> gameRecord.getUser().getRole() == Role.GUEST);
         return sortedByEvaluator(candidates, gameKey, limit);
     }
 
@@ -78,6 +79,7 @@ public class GameRecordService {
     public List<GameRecord> findLeaderboardSince(String gameKey, LocalDateTime since, int limit) {
         Game game = gameRepository.findByTitle(gameKey).orElseThrow(() -> new RuntimeException("No game found"));
         List<GameRecord> candidates = gameRecordRepository.findByGameIdAndRecordedAtAfter(game.getId(), since);
+        candidates.removeIf(gameRecord -> gameRecord.getUser().getRole() == Role.GUEST);
         return sortedByEvaluator(candidates, gameKey, limit);
     }
 

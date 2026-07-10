@@ -1,4 +1,4 @@
-package org.example.y9_gaming_site.controller;
+package org.example.y9_gaming_site.profile;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;

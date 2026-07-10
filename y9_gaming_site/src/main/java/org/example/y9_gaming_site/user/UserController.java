@@ -1,6 +1,6 @@
 package org.example.y9_gaming_site.user;
 
-import org.example.y9_gaming_site.dto.AvatarUploadResponse;
+import org.example.y9_gaming_site.profile.AvatarUploadResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
