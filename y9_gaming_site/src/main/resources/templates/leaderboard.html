@@ -15,8 +15,9 @@
 </head>
 <body>
 <nav th:replace="~{fragments/navbar :: navbar(active='leaderboard')}"></nav>
-<script th:src="@{/js/navbar.js}"></script>
-<script th:src="@{/js/streak.js}"></script>
+<div th:replace="~{fragments/Notifications :: Notifications}"></div>
+<script th:src="@{/js/streak.js}">
+<script src="/js/navbar.js"></script>
 
 
 
@@ -58,5 +59,6 @@
 </div>
 
 <script src="/js/leaderboard.js"></script>
+<script src="/js/Notification.js"></script>
 </body>
 </html>

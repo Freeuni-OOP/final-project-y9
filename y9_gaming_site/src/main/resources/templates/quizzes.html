@@ -189,7 +189,7 @@
 </head>
 <body>
 <nav th:replace="~{fragments/navbar :: navbar(active='quizzes')}"></nav>
-
+<div th:replace="~{fragments/Notifications :: Notifications}"></div>
 
 <main class="container">
     <h1 class="hub-title">🧠 Knowledge Vault 🧠</h1>
@@ -300,5 +300,6 @@
         window.location.href = "/login";
     }
 </script>
+<script src="/js/Notification.js"></script>
 </body>
 </html>
