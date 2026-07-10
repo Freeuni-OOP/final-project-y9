@@ -60,9 +60,7 @@ public class JokerGameState {
         currRound++;
         dealer = (currRound - 1) % players.size();
 
-        if (isFirstRound) {
-            currPlayer = (dealer + 1) % players.size();
-        }
+        currPlayer = (dealer + 1) % players.size();
 
         players.forEach(JokerPlayer::resetRoundInfo);
         room.shuffle();

@@ -31,18 +31,22 @@ public class JokerTrick {
             return true;
         }
 
-        if(card.getIsJoker())return true; //jocker always valid
+        if(card.getIsJoker()) return true; //joker always valid
 
         if(ledJokerCall.equals("HIGH")){
             // A Joker was led HIGH. Players must follow the declared suit if they have it.
-            //"vishi kozirebi"(an arakozirebi gaachnia ra ityvis)
             boolean hasDeclaredSuit = player.hasSuit(ledSuit);
             if(hasDeclaredSuit){
-                if(!card.getSuit().equals(ledSuit))return false;
-                int maxValInHand=player.getCardList().stream().
-                        filter(c->!c.getIsJoker()&&c.getSuit().equals(ledSuit)).
-                        mapToInt(Card::getValue).max().orElse(0);
-                return card.getValue()==maxValInHand;
+                if(!card.getSuit().equals(ledSuit)) return false;
+
+                // ვპოულობთ ხელში არსებულ მაქსიმალურ კარტს ამ სუიტში
+                int maxValInHand = player.getCardList().stream()
+                        .filter(c -> !c.getIsJoker() && c.getSuit().equals(ledSuit))
+                        .mapToInt(Card::getValue)
+                        .max()
+                        .orElse(0);
+
+                return card.getValue().intValue() == maxValInHand;
             }
 
             //If they don't have the declared suit they must play a trump if they have one.
@@ -53,7 +57,7 @@ public class JokerTrick {
                 }
             }
             return true;
-        }else{ // A normal card or a LOW Joker was led. Standard trick rules apply.
+        } else { // A normal card or a LOW Joker was led. Standard trick rules apply.
             boolean haveLedSuit = player.hasSuit(ledSuit);
             if (haveLedSuit) {
                 return card.getSuit().equals(ledSuit);
@@ -70,23 +74,28 @@ public class JokerTrick {
     }
 
     public void playCard(JokerPlayer player, Card card, String jokerCall, String declaredSuit){
+
         if (!isValCard(player, card, jokerCall, declaredSuit)) {
             throw new IllegalArgumentException(player.getUsername() + " played an illegal card: " + card);
         }
 
+
         if(playedCards.isEmpty()){
             if(card.getIsJoker()){
-                this.ledJokerCall=jokerCall;
-                this.ledSuit=declaredSuit;
-            }else{
-                this.ledJokerCall="NONE";
-                this.ledSuit=card.getSuit();
+                this.ledJokerCall = jokerCall;
+                this.ledSuit = declaredSuit;
+            } else {
+                this.ledJokerCall = "NONE";
+                this.ledSuit = card.getSuit();
             }
         }
-        player.removeCard(card);
-        playedCards.add(new PlayedCard(player, card, jokerCall, card.getIsJoker() ? ledSuit : "NONE"));
-    }
 
+
+        playedCards.add(new PlayedCard(player, card, jokerCall, card.getIsJoker() ? ledSuit : "NONE"));
+
+
+        player.removeCard(card);
+    }
     public JokerPlayer winner() {
         if (playedCards.isEmpty()) return null;
         PlayedCard winnerCard=playedCards.get(0);
@@ -98,38 +107,38 @@ public class JokerTrick {
     }
 
     private PlayedCard evaluateTwoCards(PlayedCard winnerCard, PlayedCard currCard) {
-        //if both are jokers last one wins
+        // 1. თუ ორივე ჯოკერია, ბოლო ჩამოგდებული HIGH ჯოკერი ყოველთვის იგებს.
         if (winnerCard.card().getIsJoker() && currCard.card().getIsJoker()) {
-            if(currCard.jokerCall().equals("HIGH")) return currCard;
+            if (currCard.jokerCall().equals("HIGH")) return currCard;
             return winnerCard;
         }
-        if(winnerCard.card().getIsJoker() && winnerCard.jokerCall().equals("HIGH")){
-            //HIGH Joker loses if it asked for a non-trump suit, and challenger cuts with a trump card!
-            if(!ledSuit.equals(trumpSuit) && currCard.card().getSuit().equals(trumpSuit)){
-                return currCard;
-            }
+
+        // 2. თუ მაგიდაზე უკვე დევს მოგებული HIGH ჯოკერი, მას ჩვეულებრივი კოზირი ვერ მოუგებს.
+        if (winnerCard.card().getIsJoker() && winnerCard.jokerCall().equals("HIGH")) {
+            return winnerCard;
         }
 
-        if(currCard.card().getIsJoker() && currCard.jokerCall().equals("HIGH")){
+        // 3. თუ ახალი ჩამოსული ბარათია HIGH ჯოკერი, ის ავტომატურად უგებს ნებისმიერ ჩვეულებრივ კარტს (მათ შორის კოზირსაც).
+        if (currCard.card().getIsJoker() && currCard.jokerCall().equals("HIGH")) {
             return currCard;
         }
-        if(currCard.card().getIsJoker() && currCard.jokerCall().equals("LOW")){
+
+        // 4. LOW ჯოკერის წესები
+        if (currCard.card().getIsJoker() && currCard.jokerCall().equals("LOW")) {
             return winnerCard;
         }
-        if(winnerCard.card().getIsJoker() && winnerCard.jokerCall().equals("LOW")){
-            // if joker was led it wins by default unless other card follows the declared suit or trumps
-            if(currCard.card().getSuit().equals(ledSuit) || currCard.card().getSuit().equals(trumpSuit)){
+        if (winnerCard.card().getIsJoker() && winnerCard.jokerCall().equals("LOW")) {
+            if (currCard.card().getSuit().equals(ledSuit) || currCard.card().getSuit().equals(trumpSuit)) {
                 return currCard;
             }
             return winnerCard;
         }
 
-        //just two normal cards
+        // 5. ორი ჩვეულებრივი კარტის შედარება
         int bestVal = cardVal(winnerCard.card());
         int challengerVal = cardVal(currCard.card());
 
         return (challengerVal > bestVal) ? currCard : winnerCard;
-
     }
 
 
