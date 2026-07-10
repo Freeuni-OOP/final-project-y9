@@ -80,8 +80,12 @@ async function loadProfile() {
         const profile = await response.json();
         if (usernameDisplay) usernameDisplay.textContent = profile.username;
 
-        if (profile.avatarUrl && avatarImg) {
-            avatarImg.src = profile.avatarUrl;
+        if (avatarImg) {
+            avatarImg.src = profile.avatarUrl || "/img/avatars/default.png";
+            avatarImg.onerror = function () {
+                this.onerror = null;
+                this.src = "/img/avatars/default.png";
+            };
         }
 
         const loggedInUsername = localStorage.getItem("username");
