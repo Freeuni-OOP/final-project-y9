@@ -69,6 +69,13 @@ async function determineInitialRouting() {
     if (challengeId) {
         fetchPuzzleData(`/api/sudoku/board?challengeId=${challengeId}`, "🏆 Friend Challenge Mode");
     } else {
+        const today = new Date().toISOString().slice(0, 10);
+        if (localStorage.getItem(`sudoku_completed_${today}`) === 'true') {
+            showToast("You have already completed or revealed today's Daily Sudoku!", "warn");
+            document.getElementById('sudoku-grid').innerHTML =
+                `<p style="color:#e194d5; padding: 20px; grid-column: 1/-1; text-align:center; font-weight:bold;">✓ Today's puzzle is completed. Come back tomorrow!</p>`;
+            return;
+        }
         fetchPuzzleData("/api/sudoku/daily", "📅 Daily Puzzle Challenge");
     }
 }
@@ -153,6 +160,24 @@ function assembleGridElements(boardDefinition) {
             highlightMatchingNumbers(this.value);
         };
 
+        cell.addEventListener('keydown', (e) => {
+            const index = parseInt(cell.dataset.index, 10);
+            const row = Math.floor(index / 9);
+            const col = index % 9;
+            let targetIndex = null;
+
+            if (e.key === 'ArrowUp' && row > 0) targetIndex = index - 9;
+            if (e.key === 'ArrowDown' && row < 8) targetIndex = index + 9;
+            if (e.key === 'ArrowLeft' && col > 0) targetIndex = index - 1;
+            if (e.key === 'ArrowRight' && col < 8) targetIndex = index + 1;
+
+            if (targetIndex !== null) {
+                e.preventDefault();
+                const nextCell = container.querySelector(`.sudoku-cell[data-index="${targetIndex}"]`);
+                if (nextCell) nextCell.focus();
+            }
+        });
+
         cell.addEventListener('focus', () => {
             if (isGameOver) return;
             highlightMatchingNumbers(cell.value);
@@ -178,7 +203,6 @@ function assembleGridElements(boardDefinition) {
         container.appendChild(cell);
     }
 }
-
 function evaluateCellAccuracy(cell) {
     const idx = parseInt(cell.dataset.index, 10);
     const val = cell.value.trim();
@@ -250,6 +274,12 @@ function triggerSudokuLoss() {
     isGameOver = true;
     clearInterval(timerInterval);
 
+    const urlParams = new URLSearchParams(window.location.search);
+    if (!urlParams.get('challengeId') && window.location.pathname.includes('/sudoku')) {
+        const today = new Date().toISOString().slice(0, 10);
+        localStorage.setItem(`sudoku_completed_${today}`, 'true');
+    }
+
     showToast("Too many mistakes! Game Over. Revealing the solution...", "error");
 
     const cells = document.querySelectorAll('.sudoku-cell');
@@ -288,13 +318,36 @@ function runBoardAutoCheckScan() {
     });
 }
 
-function triggerBoardCellHint() {
+async function triggerBoardCellHint() {
     if (isGameOver || !currentSolution) return;
     if (hintsUsed >= MAX_HINTS) {
         showToast("You have already exhausted your 3 available hints for this puzzle challenge session!", "warn");
         return;
     }
+    try {
+        const token = localStorage.getItem('token');
+        const headers = { "Content-Type": "application/json" };
+        if (token) headers["Authorization"] = `Bearer ${token}`;
 
+        const res = await fetch("/api/sudoku/hint-cost", {
+            method: "POST",
+            headers: headers
+        });
+
+        if (!res.ok) {
+            const errData = await res.json();
+            showToast(errData.error || "Failed to purchase hint.", "error");
+            return; // no points ->no hints my friend
+        }
+
+        const data = await res.json();
+        showToast(`Hint unlocked! -10 Points (Remaining: ${data.remainingPoints})`, "success");
+
+    } catch (err) {
+        console.error("Point deduction failed:", err);
+        showToast("server error while charging points.", "error");
+        return;
+    }
     let targetCell = document.querySelector('.sudoku-cell.focused-cell');
 
     if (!targetCell || targetCell.classList.contains('is-clue') || targetCell.value === currentSolution[parseInt(targetCell.dataset.index, 10)]) {
@@ -384,13 +437,20 @@ async function submitSolutionCheck() {
 
     if (currentSolution === submissionString) {
         clearInterval(timerInterval);
+
+        const urlParams = new URLSearchParams(window.location.search);
+        if (!urlParams.get('challengeId') && window.location.pathname.includes('/sudoku')) {
+            const today = new Date().toISOString().slice(0, 10);
+            localStorage.setItem(`sudoku_completed_${today}`, 'true');
+        }
+
         showToast(`Perfect! You solved the puzzle in ${document.getElementById('sudoku-timer').innerText}!`, "success");
         if (window.sendTimeAnalytics) {
             window.sendTimeAnalytics(activePuzzleId, "Sudoku", "BOARD_PUZZLE", secondsElapsed);
         }
         reportSolveForAchievements();
     } else {
-        showToast("There are some mistakes on your board. Keep tracking!", "error");
+        showToast("There are some mistakes on your board. Keep solving!", "error");
     }
 }
 
@@ -422,6 +482,13 @@ function giveUpAndReveal() {
 
     isGameOver = true;
     clearInterval(timerInterval);
+
+    const urlParams = new URLSearchParams(window.location.search);
+    if (!urlParams.get('challengeId') && window.location.pathname.includes('/sudoku')) {
+        const today = new Date().toISOString().slice(0, 10);
+        localStorage.setItem(`sudoku_completed_${today}`, 'true');
+    }
+
     const cells = document.querySelectorAll('.sudoku-cell');
 
     cells.forEach((cell, index) => {
