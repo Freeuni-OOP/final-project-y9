@@ -48,7 +48,7 @@ public class NotificationService {
             throw new RuntimeException("Friendship not found");
         }
 
-        Friendship friendship = friendshipRepository.findBySenderIdAndReceiverId(notification.getSenderId(), notification.getUserId());
+        Friendship friendship = friendshipRepository.findById(notification.getFriendshipId()).orElseThrow();
         if (friendship == null) {
             throw new RuntimeException("Friend request not found");
         }

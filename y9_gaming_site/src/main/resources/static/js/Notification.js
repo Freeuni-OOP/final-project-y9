@@ -8,7 +8,7 @@ async function initNotifications(){
 
     try {
         const res = await fetch("/api/users/me", {
-            headers: {"Authorization": "Bearer " + token}
+            headers: {"Authorization": "Bearer " + localStorage.getItem("token")}
         });
         if (!res.ok) {
             return;
@@ -30,7 +30,9 @@ async function checkUnreadCount(){
     }
 
     try {
-        const res = await fetch("/notifications/unread-count/" + currentUserId);
+        const res = await fetch("/notifications/unread-count/" + currentUserId,
+            {headers: {"Authorization": "Bearer " + localStorage.getItem("token")}
+        });
         if (!res.ok) {
             return;
         }
@@ -50,7 +52,9 @@ async function checkUnreadCount(){
 }
 
 async function toggleNotifications(){
+
     const dropdown = document.getElementById("notification-dropdown");
+
     if(!dropdown){
         return;
     }
@@ -65,8 +69,10 @@ async function toggleNotifications(){
 
     if(currentUserId) {
         await fetch("/notifications/mark-read/" + currentUserId, {
-            method: "POST"
-        });
+            method: "POST"},
+            {
+                headers: {"Authorization": "Bearer " + localStorage.getItem("token")}
+            });
         document.getElementById("bell-badge").style.display = "none";
     }
 }
@@ -80,7 +86,9 @@ async function loadNotifications(){
     dropdown.innerHTML = `<div class = 'notification-dropdown-title'>🔔 notifications</div>`;
 
     try {
-        const res = await fetch("/notifications/" + currentUserId);
+        const res = await fetch("/notifications/user/" + currentUserId,
+            {headers: {"Authorization": "Bearer " + localStorage.getItem("token")}
+            });
         if (!res.ok) {
             return;
         }
@@ -135,10 +143,12 @@ async function loadNotifications(){
 async function acceptFriend(notificationId, item){
     try {
         const res = await fetch("/notifications/accept/" + notificationId, {
-            method: "POST"
-        });
+            method: "POST"},
+            {headers: {"Authorization": "Bearer " + localStorage.getItem("token")}
+            });
         if (res.ok) {
             item.innerHTML = `<p style = 'color:#9a4eab;'>✅ friendship accepted</p>`;
+            await checkUnreadCount();
         }
     }catch (e){
         console.log("Error accepting friend request:", e);
@@ -148,8 +158,9 @@ async function acceptFriend(notificationId, item){
 async function declineFriend(notificationId, item){
     try {
         const res = await fetch("/notifications/decline/" + notificationId, {
-            method: "POST"
-        });
+            method: "POST"},
+            {headers: {"Authorization": "Bearer " + localStorage.getItem("token")}
+            });
         if (res.ok) {
             item.remove();
             checkUnreadCount();
