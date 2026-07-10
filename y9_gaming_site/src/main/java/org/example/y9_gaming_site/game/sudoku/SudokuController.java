@@ -52,4 +52,6 @@ public class SudokuController {
         Long userId = ((User) authentication.getPrincipal()).getId();
         return ResponseEntity.ok(sudokuService.submitSolve(userId, puzzleId, request.secondsTaken()));
     }
+
+
 }
