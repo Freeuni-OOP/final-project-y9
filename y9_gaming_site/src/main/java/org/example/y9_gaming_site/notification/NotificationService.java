@@ -40,11 +40,10 @@ public class NotificationService {
     public void acceptFriendship(Long notificationId) {
         Notification notification = notificationRepository.findById(notificationId).orElse(null);
 
-        if(notification == null){
+        if (notification == null) {
             throw new RuntimeException("Notification not found");
         }
-
-        if(notification.getFriendshipId() == null){
+        if (notification.getFriendshipId() == null) {
             throw new RuntimeException("Friendship not found");
         }
 
@@ -56,9 +55,22 @@ public class NotificationService {
         friendship.setStatus("ACCEPTED");
         friendshipRepository.save(friendship);
 
+        //notify the sendeerrr as welll
+        Long accepterId = notification.getUserId();
+        Long originalSenderId = notification.getSenderId();
+        User accepter = userRepository.findById(accepterId).orElseThrow();
+
+        Notification acceptedNotification = new Notification(
+                originalSenderId,
+                accepterId,
+                "FRIEND_ACCEPTED",
+                accepter.getUsername() + " accepted your friend request",
+                friendship.getId()
+        );
+        notificationRepository.save(acceptedNotification);
+
         notification.setRead(true);
         notificationRepository.save(notification);
-
         notificationRepository.delete(notification);
     }
 

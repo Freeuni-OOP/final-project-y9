@@ -1,12 +1,10 @@
 let currentUserId = null;
 
-
 async function initNotifications(){
     const token = localStorage.getItem("token");
     if(!token){
         return;
     }
-
 
     try {
         const res = await fetch("/api/users/me", {
@@ -16,10 +14,8 @@ async function initNotifications(){
             return;
         }
 
-
         const me = await res.json();
         currentUserId = me.id;
-
 
         await checkUnreadCount();
         setInterval(checkUnreadCount, 30000);
@@ -28,69 +24,62 @@ async function initNotifications(){
     }
 }
 
-
 async function checkUnreadCount(){
     if(!currentUserId){
         return;
     }
 
-
     try {
-        const res = await fetch("/notifications/unread-count/" + currentUserId,
-            {headers: {"Authorization": "Bearer " + localStorage.getItem("token")}
-            });
+        const res = await fetch("/notifications/unread-count/" + currentUserId, {
+            headers: {"Authorization": "Bearer " + localStorage.getItem("token")}
+        });
         if (!res.ok) {
             return;
         }
 
-
         const count = await res.json();
         const badge = document.getElementById("bell-badge");
 
-
-        if (count > 0) {
-            badge.textContent = count;
-            badge.style.display = "block";
-        } else {
-            badge.style.display = "none";
+        if (badge) {
+            if (count > 0) {
+                badge.textContent = count;
+                badge.style.display = "block";
+            } else {
+                badge.style.display = "none";
+            }
         }
     }catch (e){
         console.log("Error checking unread count:", e);
     }
 }
 
-
 async function toggleNotifications(){
-
-
     const dropdown = document.getElementById("notification-dropdown");
-
 
     if(!dropdown){
         return;
     }
-
 
     if(dropdown.style.display === "block"){
         dropdown.style.display = "none";
         return;
     }
 
-
     dropdown.style.display = "block";
     await loadNotifications();
 
-
     if(currentUserId) {
+        // FIXED: Combined method and headers into a single options object
         await fetch("/notifications/mark-read/" + currentUserId, {
-                method: "POST"},
-            {
-                headers: {"Authorization": "Bearer " + localStorage.getItem("token")}
-            });
-        document.getElementById("bell-badge").style.display = "none";
+            method: "POST",
+            headers: {"Authorization": "Bearer " + localStorage.getItem("token")}
+        });
+        const badge = document.getElementById("bell-badge");
+        if(badge) {
+            badge.style.display = "none";
+        }
     }
 }
-
 
 async function loadNotifications(){
     const dropdown = document.getElementById("notification-dropdown");
@@ -98,40 +87,32 @@ async function loadNotifications(){
         return;
     }
 
-
-    dropdown.innerHTML = `<div class = 'notification-dropdown-title'>🔔 notifications</div>`;
-
+    dropdown.innerHTML = `<div class='notification-dropdown-title'>🔔 notifications</div>`;
 
     try {
-        const res = await fetch("/notifications/user/" + currentUserId,
-            {headers: {"Authorization": "Bearer " + localStorage.getItem("token")}
-            });
+        const res = await fetch("/notifications/user/" + currentUserId, {
+            headers: {"Authorization": "Bearer " + localStorage.getItem("token")}
+        });
         if (!res.ok) {
             return;
         }
 
-
         const list = await res.json();
 
-
         if (list.length === 0) {
-            dropdown.innerHTML += `<div class = 'notification-empty'>no notification</div>`;
+            dropdown.innerHTML += `<div class='notification-empty'>no notification</div>`;
             return;
         }
-
 
         for (let i = 0; i < list.length; i++) {
             const n = list[i];
 
-
             const item = document.createElement("div");
             item.className = "notification-item";
-
 
             const msg = document.createElement("p");
             msg.textContent = n.message;
             item.appendChild(msg);
-
 
             if(n.type === "NEW_MESSAGE"){
                 item.classList.add("clickable-notification");
@@ -140,6 +121,10 @@ async function loadNotifications(){
                 };
             }
 
+            // Added support for rendering the static accepted notification
+            if(n.type === "FRIEND_ACCEPTED"){
+                item.classList.add("static-notification");
+            }
 
             if (n.type === "FRIEND_REQUEST") {
                 const acceptBtn = document.createElement("button");
@@ -149,7 +134,6 @@ async function loadNotifications(){
                     acceptFriend(n.id, item);
                 };
 
-
                 const declineBtn = document.createElement("button");
                 declineBtn.className = "notif-decline-btn";
                 declineBtn.textContent = "Decline";
@@ -157,14 +141,12 @@ async function loadNotifications(){
                     declineFriend(n.id, item);
                 };
 
-
                 const actions = document.createElement("div");
                 actions.className = "notif-actions";
                 actions.appendChild(acceptBtn);
                 actions.appendChild(declineBtn);
                 item.appendChild(actions);
             }
-
 
             dropdown.appendChild(item);
         }
@@ -174,15 +156,15 @@ async function loadNotifications(){
     }
 }
 
-
 async function acceptFriend(notificationId, item){
     try {
+        // FIXED: Combined method and headers into a single options object
         const res = await fetch("/notifications/accept/" + notificationId, {
-                method: "POST"},
-            {headers: {"Authorization": "Bearer " + localStorage.getItem("token")}
-            });
+            method: "POST",
+            headers: {"Authorization": "Bearer " + localStorage.getItem("token")}
+        });
         if (res.ok) {
-            item.innerHTML = `<p style = 'color:#9a4eab;'>✅ friendship accepted</p>`;
+            item.innerHTML = `<p style='color:#9a4eab;'>✅ friendship accepted</p>`;
             await checkUnreadCount();
         }
     }catch (e){
@@ -190,32 +172,29 @@ async function acceptFriend(notificationId, item){
     }
 }
 
-
 async function declineFriend(notificationId, item){
     try {
+        // FIXED: Combined method and headers into a single options object
         const res = await fetch("/notifications/decline/" + notificationId, {
-                method: "POST"},
-            {headers: {"Authorization": "Bearer " + localStorage.getItem("token")}
-            });
+            method: "POST",
+            headers: {"Authorization": "Bearer " + localStorage.getItem("token")}
+        });
         if (res.ok) {
             item.remove();
-            checkUnreadCount();
+            await checkUnreadCount();
         }
     }catch (e){
         console.log("Error declining friend request:", e);
     }
 }
 
-
 document.addEventListener("click", function (e){
     const bell = document.querySelector(".navbar__bell");
     const dropdown = document.getElementById("notification-dropdown");
 
-
     if(!bell || !dropdown){
         return;
     }
-
 
     if(!bell.contains(e.target) && !dropdown.contains(e.target)) {
         dropdown.style.display = "none";
@@ -230,8 +209,8 @@ document.addEventListener("DOMContentLoaded", function (){
 
     if(roomIdFromUrl) {
         const roomId = parseInt(roomIdFromUrl, 10);
-
-        openChatById(roomId);
+        if (typeof openChatById === "function") {
+            openChatById(roomId);
+        }
     }
 });
-
