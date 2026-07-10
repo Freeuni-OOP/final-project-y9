@@ -14,7 +14,7 @@
     <div class="navbar__user">
         <div class="navbar__bell" onclick="toggleNotifications()">
             🔔
-            <span id="bell-badge" class="bell-badge"> 0 </span>
+            <span id="bell-badge" class="bell-badge"></span>
         </div>
         <a id="nav-profile-link" href="/profile" class="navbar__profile-link">
             <img id="nav-avatar" class="navbar__avatar" src="/img/avatars/default.png" alt="avatar" />
@@ -23,11 +23,10 @@
         <a href="#" onclick="logout(); return false;" class="navbar__logout">Log out</a>
     </div>
 </nav>
-<div id="notification-dropdown" class="notification-dropdown" style="display: none;">
+<div id="notification-dropdown" class="notification-dropdown">
     <div class="notification-dropdown-title">🔔 Notifications</div>
     <div class="notification-empty">loading...</div>
 </div>
 
-<script src="/js/Notification.js"></script>
 </body>
 </html>

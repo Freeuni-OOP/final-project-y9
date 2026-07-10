@@ -10,7 +10,10 @@
 
 </head>
     <nav th:replace="~{fragments/navbar :: navbar(active='home')}"></nav>
-<div id="notification-dropdown" class="notification-dropdown"></div>
+<div id="notification-dropdown" class="notification-dropdown">
+    <div class="notification-dropdown-title">🔔 Notifications</div>
+    <div class="notification-empty">loading...</div>
+</div>
 
 <div class="search-wrapper">
     <input type="text" id="search-input" placeholder="🔍 search game or person..." autocomplete="off" oninput="onSearch(this.value)">
@@ -301,6 +304,7 @@
     });
 </script>
 <script src = "/js/Search.js"></script>
+<script src="/js/Notification.js"></script>
 </body>
 </html>
 
