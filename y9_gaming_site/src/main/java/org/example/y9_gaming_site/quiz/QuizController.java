@@ -73,7 +73,13 @@ public class QuizController {
                              @RequestParam("correctAnswer") List<String> correctAnswers,
                              @RequestParam("wrongAnswers") List<String> wrongAnswers,
                              @RequestParam("questionImage") List<MultipartFile> images,
+                             Authentication authentication,
                              RedirectAttributes redirectAttributes) throws IOException {
+
+        if (authentication == null || !(authentication.getPrincipal() instanceof User)) {
+            throw new RuntimeException("Unauthorized user attempting to create a quiz.");
+        }
+        Long creatorId = ((User) authentication.getPrincipal()).getId();
 
         Files.createDirectories(Paths.get(UPLOAD_DIR));
         List<String> imagePaths = new ArrayList<>();
@@ -90,9 +96,21 @@ public class QuizController {
         }
 
         quizService.createQuiz(title, category, description, timeLimit,
-                questionTexts, correctAnswers, wrongAnswers, imagePaths);
+                questionTexts, correctAnswers, wrongAnswers, imagePaths, creatorId);
 
         redirectAttributes.addFlashAttribute("message", "Quiz published!");
         return "redirect:/home";
+    }
+
+    @GetMapping("/my")
+    public ResponseEntity<List<QuizSummary>> getMyQuizzes(Authentication authentication) {
+
+        if (authentication == null || !(authentication.getPrincipal() instanceof User)) {
+            return ResponseEntity.status(401).build();
+        }
+
+        Long creatorId = ((User) authentication.getPrincipal()).getId();
+
+        return ResponseEntity.ok(quizService.getQuizSummariesByCreator(creatorId));
     }
 }

@@ -23,7 +23,7 @@ public class Quiz {
     private String description;
 
     @Column(nullable = false)
-    private String category; // GEOGRAPHY, SCIENCE, ENTERTAINMENT
+    private String category; // GEOGRAPHY, SCIENCE, ENTERTAINMENT, your quizzes
 
     @Column(name = "icon_url")
     private String iconUrl;

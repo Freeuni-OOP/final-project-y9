@@ -23,7 +23,6 @@ public class QuizService {
         this.achievementService = achievementService;
     }
 
-    // Lightweight list for the browse/filter grid — no questions_blob or images parsing.
     public List<QuizSummary> getAllQuizSummaries() {
         String sql = "SELECT id, title, category, description, time_limit_seconds FROM quizzes";
         return jdbcTemplate.query(sql, (rs, rowNum) -> new QuizSummary(
@@ -46,7 +45,6 @@ public class QuizService {
         ), category);
     }
 
-    // Full quiz (with questions + images) — only fetched when actually starting a quiz.
     public List<Quiz> getAllQuizzes() {
         String sql = "SELECT * FROM quizzes";
         return jdbcTemplate.query(sql, (rs, rowNum) -> {
@@ -108,7 +106,7 @@ public class QuizService {
 
     public void createQuiz(String title, String category, String description, int timeLimit,
                            List<String> questionTexts, List<String> correctAnswers,
-                           List<String> wrongAnswers, List<String> imagePaths) {
+                           List<String> wrongAnswers, List<String> imagePaths, Long creatorId) {
 
         List<String> questions = new ArrayList<>();
         for (int i = 0; i < questionTexts.size(); i++) {
@@ -130,8 +128,8 @@ public class QuizService {
                 .map(p -> "\"" + (p == null ? "" : p.replace("\\", "\\\\").replace("\"", "\\\"")) + "\"")
                 .collect(java.util.stream.Collectors.joining(",", "[", "]"));
 
-        String sql = "INSERT INTO quizzes (title, category, description, time_limit_seconds, questions_blob, images, created_at) VALUES (?, ?, ?, ?, ?, ?, NOW())";
-        jdbcTemplate.update(sql, title, category, description, timeLimit, questionsBlob, imagesJson);
+        String sql = "INSERT INTO quizzes (title, category, description, time_limit_seconds, questions_blob, images, creator_id, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, NOW())";
+        jdbcTemplate.update(sql, title, category, description, timeLimit, questionsBlob, imagesJson, creatorId);
     }
 
     public void deleteQuiz(Long quizId) {
@@ -150,5 +148,22 @@ public class QuizService {
 
     private void grant(Long userId, String code, List<UnlockedAchievementDto> unlocked) {
         achievementService.grantByCode(userId, code).ifPresent(a -> unlocked.add(UnlockedAchievementDto.from(a)));
+    }
+
+    public List<QuizSummary> getQuizSummariesByCreator(Long creatorId) {
+        String sql = """
+        SELECT id, title, category, description, time_limit_seconds
+        FROM quizzes
+        WHERE creator_id = ?
+        ORDER BY created_at DESC
+        """;
+
+        return jdbcTemplate.query(sql, (rs, rowNum) -> new QuizSummary(
+                rs.getLong("id"),
+                rs.getString("title"),
+                rs.getString("category"),
+                rs.getString("description"),
+                rs.getInt("time_limit_seconds")
+        ), creatorId);
     }
 }
