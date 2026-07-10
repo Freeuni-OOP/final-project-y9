@@ -36,7 +36,7 @@ function updateNavbar(user){
     const navUser = document.getElementById('nav-username');
     const navAvatar = document.getElementById('nav-avatar');
     const navProfileLink = document.getElementById('nav-profile-link')
-
+    const adminLink = document.getElementById('adminLink');
     if (navUser) {
         navUser.textContent = user.username;
     }
@@ -62,7 +62,7 @@ function updateNavbar(user){
     }
 
     // NEW: load streak once we know the user's id
-    if (user.id && typeof loadStreak === 'function') {
+    if (user.id ) {
         loadStreak(user.id);
     }
 }
