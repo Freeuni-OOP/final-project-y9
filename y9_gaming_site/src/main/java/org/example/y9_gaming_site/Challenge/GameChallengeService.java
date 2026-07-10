@@ -124,11 +124,11 @@ public class GameChallengeService {
 
     private boolean theyAreFriends(Long userId, Long receiverId) {
         Friendship forward = friendshipRepository.findBySenderIdAndReceiverId(userId, receiverId);
-        if(forward != null && "Accepted".equals(forward.getStatus())) {
+        if(forward != null && "ACCEPTED".equalsIgnoreCase(forward.getStatus())) {
             return true;
         }
         Friendship backward = friendshipRepository.findBySenderIdAndReceiverId(receiverId, userId);
-        return backward != null && "Accepted".equals(backward.getStatus());
+        return backward != null && "ACCEPTED".equalsIgnoreCase(backward.getStatus());
     }
 }
 

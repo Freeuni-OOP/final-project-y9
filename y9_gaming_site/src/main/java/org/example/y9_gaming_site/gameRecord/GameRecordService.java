@@ -67,9 +67,9 @@ public class GameRecordService {
         Game game = gameRepository.findByTitle(gameKey).orElseThrow(() -> new RuntimeException("No game found"));
         List<GameRecord> candidates;
         if(contextId == null) {
-            candidates = gameRecordRepository.findByGameId(game.getId());
+            candidates = new java.util.ArrayList<>(gameRecordRepository.findByGameId(game.getId()));
         }else {
-            candidates = gameRecordRepository.findByGameIdAndContextId(game.getId(), contextId);
+            candidates = new java.util.ArrayList<>(gameRecordRepository.findByGameIdAndContextId(game.getId(), contextId));
         }
         candidates.removeIf(gameRecord -> gameRecord.getUser().getRole() == Role.GUEST);
         return sortedByEvaluator(candidates, gameKey, limit);
@@ -78,7 +78,7 @@ public class GameRecordService {
     // same as findLeaderboard but only counting records from limit
     public List<GameRecord> findLeaderboardSince(String gameKey, LocalDateTime since, int limit) {
         Game game = gameRepository.findByTitle(gameKey).orElseThrow(() -> new RuntimeException("No game found"));
-        List<GameRecord> candidates = gameRecordRepository.findByGameIdAndRecordedAtAfter(game.getId(), since);
+        List<GameRecord> candidates = new java.util.ArrayList<>(gameRecordRepository.findByGameIdAndRecordedAtAfter(game.getId(), since));
         candidates.removeIf(gameRecord -> gameRecord.getUser().getRole() == Role.GUEST);
         return sortedByEvaluator(candidates, gameKey, limit);
     }
