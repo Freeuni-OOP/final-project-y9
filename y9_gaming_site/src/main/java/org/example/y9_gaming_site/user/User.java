@@ -30,6 +30,9 @@ public class User {
 
     private boolean isBanned;
 
+    @Column(nullable = false, columnDefinition = "INT NOT NULL DEFAULT 0")
+    private int points = 0;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role = Role.USER;
@@ -64,6 +67,8 @@ public class User {
     public Role getRole() { return role; }
     public void setRole(Role role) { this.role = role; }
 
+    public int getPoints() { return points; }
+    public void setPoints(int points) { this.points = points; }
 
 
     public int getAge() {
