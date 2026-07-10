@@ -244,6 +244,10 @@ function loadDaily() {
 }
 
 function loadPractice() {
+    if (localStorage.getItem('role') === 'GUEST') {
+        showInfoToast('You have to log in');
+        return;
+    }
     subEl.textContent = "ვარჯიში";
     load(`${API}/practice`, "POST");
 }

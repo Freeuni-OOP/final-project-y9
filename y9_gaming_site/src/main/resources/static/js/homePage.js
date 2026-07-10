@@ -10,6 +10,7 @@ document.addEventListener("DOMContentLoaded", () => {
         window.location.href = "/login";
         return;
     }
+
     loadHomeStats();
     //navbar is doing loaduserProfiles function
 });

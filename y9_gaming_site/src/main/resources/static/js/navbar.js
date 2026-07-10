@@ -1,3 +1,37 @@
+function showInfoToast(message) {
+    let style = document.getElementById('info-toast-style');
+    if (!style) {
+        style = document.createElement('style');
+        style.id = 'info-toast-style';
+        style.textContent = `
+#info-toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
+.info-toast { min-width: 220px; max-width: 320px; padding: 14px 16px; border-radius: 12px; background: rgba(41, 20, 48, 0.92); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 1px solid rgba(192, 38, 211, 0.4); box-shadow: 0 0 20px rgba(192, 38, 211, 0.35), 0 8px 24px rgba(0, 0, 0, 0.35); transform: translateX(120%); opacity: 0; transition: transform 0.35s ease, opacity 0.35s ease; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 0.9rem; font-weight: 600; color: #fff; }
+.info-toast.show { transform: translateX(0); opacity: 1; }
+.info-toast.hide { transform: translateX(120%); opacity: 0; }
+@media (max-width: 480px) { #info-toast-container { left: 12px; right: 12px; top: 12px; } .info-toast { max-width: none; } }`;
+        document.head.appendChild(style);
+    }
+
+    let container = document.getElementById('info-toast-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'info-toast-container';
+        document.body.appendChild(container);
+    }
+
+    const toast = document.createElement('div');
+    toast.className = 'info-toast';
+    toast.textContent = message;
+    container.appendChild(toast);
+
+    requestAnimationFrame(() => toast.classList.add('show'));
+    setTimeout(() => {
+        toast.classList.remove('show');
+        toast.classList.add('hide');
+        setTimeout(() => toast.remove(), 400);
+    }, 3200);
+}
+
 function updateNavbar(user){
     const navUser = document.getElementById('nav-username');
     const navAvatar = document.getElementById('nav-avatar');
@@ -16,6 +50,12 @@ function updateNavbar(user){
     }
     if (navProfileLink) {
         navProfileLink.href = '/profile/' + user.id;
+        navProfileLink.onclick = function (e) {
+            if (user.role === 'GUEST') {
+                e.preventDefault();
+                showInfoToast('You have to log in');
+            }
+        };
     }
     if (adminLink && user.role === 'ADMIN') {
         adminLink.style.display = 'block';
