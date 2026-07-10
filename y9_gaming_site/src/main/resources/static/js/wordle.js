@@ -10,8 +10,15 @@ let status = "IN_PROGRESS";
 let currentRow = 0;
 let currentGuess = "";
 let busy = false;
+let loadToken = 0;
 
-let boardEl, kbEl, msgEl, subEl;
+let boardEl, kbEl, msgEl, subEl, dailyBtn, practiceBtn;
+
+function setBusy(value) {
+    busy = value;
+    if (dailyBtn) dailyBtn.disabled = value;
+    if (practiceBtn) practiceBtn.disabled = value;
+}
 
 function authHeaders(json = true) {
     const h = {};
@@ -174,13 +181,15 @@ async function submitGuess() {
         shakeRow();
         return;
     }
-    busy = true;
+    const myToken = ++loadToken;
+    setBusy(true);
     try {
         const res = await fetch(`${API}/${puzzleId}/guess`, {
             method: "POST",
             headers: authHeaders(true),
             body: JSON.stringify({ guess: currentGuess })
         });
+        if (myToken !== loadToken) return;
         if (res.status === 401 || res.status === 403) {
             setMessage("გთხოვთ გაიაროთ ავტორიზაცია", "lose");
             return;
@@ -204,11 +213,12 @@ async function submitGuess() {
             window.showAchievementToasts(state.newAchievements);
         }
     } catch (err) {
+        if (myToken !== loadToken) return;
         console.error("guess failed:", err);
         setMessage("კავშირის შეცდომა");
         shakeRow();
     } finally {
-        busy = false;
+        if (myToken === loadToken) setBusy(false);
     }
 }
 
@@ -220,10 +230,12 @@ document.addEventListener("keydown", (e) => {
 });
 
 async function load(endpoint, method) {
-    busy = true;
+    const myToken = ++loadToken;
+    setBusy(true);
     setMessage("");
     try {
         const res = await fetch(endpoint, { method, headers: authHeaders(method === "POST") });
+        if (myToken !== loadToken) return; // a newer load started while this was in flight
         if (res.status === 401 || res.status === 403) {
             setMessage("გთხოვთ გაიაროთ ავტორიზაცია", "lose");
             return;
@@ -231,10 +243,11 @@ async function load(endpoint, method) {
         if (!res.ok) throw new Error("load failed: " + res.status);
         render(await res.json());
     } catch (err) {
+        if (myToken !== loadToken) return;
         console.error("load failed:", err);
         setMessage("თამაში ვერ ჩაიტვირთა", "lose");
     } finally {
-        busy = false;
+        if (myToken === loadToken) setBusy(false);
     }
 }
 
@@ -257,6 +270,8 @@ document.addEventListener("DOMContentLoaded", () => {
     kbEl = document.getElementById("keyboard");
     msgEl = document.getElementById("msg");
     subEl = document.getElementById("sub");
+    dailyBtn = document.getElementById("daily-btn");
+    practiceBtn = document.getElementById("practice-btn");
 
     buildBoard();
     buildKeyboard();

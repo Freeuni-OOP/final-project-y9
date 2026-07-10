@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -15,4 +16,5 @@ public interface WordlePuzzleRepository extends JpaRepository<WordlePuzzle, Long
     @Query("SELECT p.answerWord FROM WordlePuzzle p WHERE p.puzzleDate IS NOT NULL")
     List<String> findAnswerWordByPuzzleDateIsNotNull();
 
+    List<WordlePuzzle> findByPuzzleDateIsNullAndCreatedAtBefore(LocalDateTime cutoff);
 }

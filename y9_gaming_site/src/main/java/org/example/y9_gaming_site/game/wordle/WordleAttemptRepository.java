@@ -1,6 +1,7 @@
 package org.example.y9_gaming_site.game.wordle;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -18,4 +19,8 @@ public interface WordleAttemptRepository extends JpaRepository<WordleAttempt, Lo
             "WHERE wa.user.id = :userId AND wa.status = :status AND wa.puzzle.puzzleDate IS NOT NULL " +
             "ORDER BY wa.puzzle.puzzleDate DESC")
     List<LocalDate> findWonDailyPuzzleDatesDesc(@Param("userId") Long userId, @Param("status") AttemptStatus status);
+
+    @Modifying
+    @Query("DELETE FROM WordleAttempt wa WHERE wa.puzzle.id IN :puzzleIds")
+    void deleteByPuzzleIdIn(@Param("puzzleIds") List<Long> puzzleIds);
 }
