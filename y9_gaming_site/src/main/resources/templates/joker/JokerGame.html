@@ -36,9 +36,18 @@
       <div class="joker-info-value" id="statusDisplay">—</div>
     </div>
 
-    <button id="startBtn" class="joker-btn joker-btn--primary" style="display:none; width:auto; padding:8px 20px;" onclick="startGame()">
-      თამაშის დაწყება ▶
-    </button>
+    <div style="margin-left:auto; display:flex; align-items:center; gap:12px;">
+      <span id="roomTypeBadge" class="joker-room-type-badge">—</span>
+
+      <button id="startBtn" class="joker-btn joker-btn--primary" style="display:none; width:auto; padding:8px 20px;" onclick="startGame()">
+        თამაშის დაწყება ▶
+      </button>
+
+      <button id="leaveBtn" class="joker-btn joker-btn--danger" style="display:none; width:auto; padding:8px 16px;" onclick="leaveRoom()">
+        გასვლა ✕
+      </button>
+    </div>
+
   </div>
 
   <div id="gameMsg" class="joker-msg"></div>

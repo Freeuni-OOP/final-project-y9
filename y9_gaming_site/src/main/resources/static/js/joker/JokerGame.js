@@ -47,10 +47,9 @@ async function loadState() {
 
 // --- WebSocket (STOMP) ---
 function connectWebSocket() {
-    // SockJS + STOMP
     const socket = new SockJS("/ws");
-    const stompClient = Stomp.client(socket); // loaded via CDN in HTML
-    //stompClient.debug = null; // silence logs
+    const stompClient = Stomp.over(socket);
+    //stompClient.debug = null;
 
     stompClient.connect({}, () => {
         stompClient.subscribe(`/topic/joker/${roomCode}`, (message) => {
@@ -75,6 +74,12 @@ function handleWsEvent(event) {
             window.showAchievementToasts(me.newAchievements);
         }
     }
+    if (event.type === "NEW_ROUND") {
+        // loadState() ისედაც ხდება ყოველ event-ზე, ასე რომ დამატებითი არაფერი არ გჭირდება
+        // მაგრამ თუ გინდა სპეციალური მესიჯი:
+        setMsg("🎴 ახალი რაუნდი დაიწყო!", "success");
+        setTimeout(() => setMsg("", ""), 2000);
+    }
 }
 
 // --- Render ---
@@ -98,6 +103,16 @@ function render() {
     const isHost  = players.length > 0 && players[0].userId === myUserId;
     const isFull  = players.length === gameState.config?.players;
     const startBtn = document.getElementById("startBtn");
+    const badge = document.getElementById("roomTypeBadge");
+    if (badge) {
+        const isPublic = gameState.config?.allowRandoms;
+        badge.textContent = isPublic ? "საჯარო" : "კერძო";
+        badge.className = "joker-room-type-badge " + (isPublic ? "public" : "private");
+    }
+    const leaveBtn = document.getElementById("leaveBtn");
+    if (leaveBtn) {
+        leaveBtn.style.display = (status === "WAITING") ? "block" : "none";
+    }
     startBtn.style.display = (isHost && status === "WAITING" && isFull) ? "block" : "none";
 
     // players list
@@ -112,11 +127,11 @@ function render() {
     // bid panel
     const isMyTurn  = players[currPlayerIdx]?.userId === myUserId;
     const myPlayer  = players.find(p => p.userId === myUserId);
-    const notBidYet = myPlayer && myPlayer.prophecy < 0;
-    document.getElementById("bidPanel").classList.toggle("hidden", !(status === "BIDDING" && isMyTurn && notBidYet));
 
-    if (status === "BIDDING" && isMyTurn && notBidYet) {
-        const players = gameState.players || [];
+    const showBidPanel = (status === "BIDDING" && isMyTurn);
+    document.getElementById("bidPanel").classList.toggle("hidden", !showBidPanel);
+
+    if (showBidPanel) {
         const totalCards = gameState.currRound; // მიმდინარე რაუნდის კარტები
 
         // 1. ვითვლით უკვე თქმული ბიდების ჯამს და რამდენი მოთამაშე დარჩა
@@ -165,26 +180,83 @@ function render() {
 
     // hand cards
     renderHand(myPlayer?.cardList || [], status, isMyTurn);
+
+    // status message — always computed last so it's not overwritten by anything else
+    if (status === "WAITING") {
+        setMsg("⏳ ველოდებით მოთამაშეების შევსებას მაგიდასთან...", "info");
+    }
+    else if (status === "BIDDING") {
+        if (isMyTurn) {
+            // შეტყობინება უშუალოდ იმ იუზერისთვის, ვისი პრედიქციის დროც არის
+            setMsg("🔮 შენი პრედიქციის დროა! აირჩიე ციფრი ქვემოთ პანელზე და დააჭირე დადასტურებას.", "success");
+        } else {
+            // შეტყობინება ყველასთვის, თუ ვინ ფიქრობს ამ წამს
+            const thinkingPlayer = players[currPlayerIdx]?.username || "მოთამაშე";
+            setMsg(`💭 ფიქრობს პრედიქციაზე: ${thinkingPlayer}...`, "info");
+        }
+    }
+    else if (status === "PLAYING") {
+        if (isMyTurn) {
+            setMsg("🃏 შენი ჩამოსვლის დროა! აირჩიე კარტი შენი ხელიდან.", "success");
+        } else {
+            const activePlayer = players[currPlayerIdx]?.username || "მოთამაშე";
+            setMsg(`🕐 ჩამოდის კარტს: ${activePlayer}...`, "info");
+        }
+    }
+    else if (status === "ROUND_END") {
+        setMsg("🏁 რაუნდი დასრულდა! ითვლება ქულები...", "info");
+    }
 }
 
 function renderPlayers(players, currPlayerIdx, status) {
     const list = document.getElementById("playersList");
     list.innerHTML = "";
+
+    const dealerIdx = gameState.dealer;
+
     players.forEach((p, i) => {
         const div = document.createElement("div");
-        div.className = "joker-player-row" + (i === currPlayerIdx && status !== "WAITING" ? " active-turn" : "");
-        const prophecyText = p.prophecy >= 0 ? `პროფეცია: ${p.prophecy}` : "ჯერ არ უბიდია";
+
+        // თუ მოთამაშის ჯერია, ვანთებთ ეკრანზე
+        const isCurrentTurn = (i === currPlayerIdx && status !== "WAITING");
+        div.className = "joker-player-row" + (isCurrentTurn ? " active-turn" : "");
+
+        // დამრიგებლის ნიშნაკი
+        const dealerBadge = (i === dealerIdx) ? `<span class="dealer-badge" style="color:var(--gold); font-size:0.75rem; margin-left:6px;">👑 დამრიგებელი</span>` : "";
+
+        // დინამიური ტექსტი: თუ თამაში ჯერ BIDDING ფაზაშია და იუზერმა უკვე თქვა, გამოვაჩინოთ, თორემ — "ფიქრობს..."
+        // (თუ მიმდინარე ინდექსი მასზე წინაა, ესე იგი უკვე თქვა)
+        let prophecyStatus = "ფიქრობს...";
+
+        // თუ თამაშის სტატუსი უკვე PLAYING-ია, ბიდები ყველასი ვიცით
+        if (status === "PLAYING" || status === "ROUND_END") {
+            prophecyStatus = `ბიდი: ${p.prophecy}`;
+        } else if (status === "BIDDING") {
+            // ბიდინგის დროს გამოვაჩინოთ მხოლოდ მათთვის, ვინც უკვე თქვა
+            if (i !== currPlayerIdx && p.prophecy >= 0) {
+                prophecyStatus = `ბიდი: ${p.prophecy}`;
+            }
+        }
+
+        // რეალურად წაყვანილი ხელები მიმდინარე რაუნდში
+        const takenTricksText = `წაყვანილი: ${p.current}`;
+
         div.innerHTML = `
             <div>
-                <div class="joker-player-name">${p.username} ${p.userId === myUserId ? "(შენ)" : ""}</div>
-                <div class="joker-player-bid">${prophecyText} · ხელი: ${p.current}</div>
+                <div class="joker-player-name">
+                    ${p.username} ${p.userId === myUserId ? "(შენ)" : ""} 
+                    ${dealerBadge}
+                </div>
+                <div class="joker-player-bid" style="font-size:0.85rem; color:#aaa;">
+                    <span style="color:var(--gold);">${prophecyStatus}</span> | ${takenTricksText}
+                </div>
             </div>
-            <div class="joker-player-score">${p.totalScore} ქ.</div>
+            <div class="joker-player-score" style="font-weight:bold; color:#fff;">${p.totalScore} ქ.</div>
         `;
         list.appendChild(div);
     });
 
-    // empty slots
+    // ცარიელი სლოტები
     const required = gameState.config?.players || 4;
     for (let i = players.length; i < required; i++) {
         const div = document.createElement("div");
@@ -438,51 +510,20 @@ function valueDisplay(value) {
     return { 11: "J", 12: "Q", 13: "K", 14: "A" }[value] || String(value);
 }
 
-function renderPlayers(players, currPlayerIdx, status) {
-    const list = document.getElementById("playersList");
-    list.innerHTML = "";
-
-    // ვიღებთ ბექენდიდან დამრიგებლის ინდექსს
-    const dealerIdx = gameState.dealer;
-
-    players.forEach((p, i) => {
-        const div = document.createElement("div");
-
-        // თუ მოთამაშის ინდექსი ემთხვევა მიმდინარე რიგს, ვადებთ ანთებულ კლასს
-        const isCurrentTurn = (i === currPlayerIdx && status !== "WAITING");
-        div.className = "joker-player-row" + (isCurrentTurn ? " active-turn" : "");
-
-        // 1. ვამოწმებთ არის თუ არა დამრიგებელი
-        const dealerBadge = (i === dealerIdx) ? `<span class="dealer-badge" style="color:var(--gold); font-size:0.75rem; margin-left:6px;">👑 დაარიგა</span>` : "";
-
-        // 2. ბიდების (პროფეციის) და მიმდინარე წაყვანილი ხელების ტექსტი
-        const prophecyText = p.prophecy >= 0 ? `ბიდი: ${p.prophecy}` : "ფიქრობს...";
-        const currentTricksText = `წაყვანილი: ${p.current}`;
-
-        div.innerHTML = `
-            <div>
-                <div class="joker-player-name">
-                    ${p.username} ${p.userId === myUserId ? "(შენ)" : ""} 
-                    ${dealerBadge}
-                </div>
-                <div class="joker-player-bid">${prophecyText} · ${currentTricksText}</div>
-            </div>
-            <div class="joker-player-score">${p.totalScore} ქ.</div>
-        `;
-        list.appendChild(div);
-
-        // 3. სპეციალური შეტყობინება, თუ ჩემი ჯერია ჩამოსვლის
-        if (isCurrentTurn && p.userId === myUserId) {
-            setMsg("🔮 შენი ჯერია, იმოქმედე!", "success");
+async function leaveRoom() {
+    const token = localStorage.getItem("token");
+    try {
+        const res = await fetch(`${API}/${roomCode}/leave`, {
+            method: "POST",
+            headers: { "Authorization": `Bearer ${token}` }
+        });
+        if (res.ok) {
+            window.location.href = "/joker";
+        } else {
+            const err = await res.text();
+            setMsg(err || "შეცდომა", "error");
         }
-    });
-
-    // ცარიელი სლოტების ვიზუალი (თუ ვინმე აკლია)
-    const required = gameState.config?.players || 4;
-    for (let i = players.length; i < required; i++) {
-        const div = document.createElement("div");
-        div.className = "joker-player-slot empty";
-        div.innerHTML = `<div class="joker-slot-dot empty"></div><span style="color:#555;">ლოდინი...</span>`;
-        list.appendChild(div);
+    } catch (e) {
+        setMsg("კავშირის შეცდომა", "error");
     }
 }

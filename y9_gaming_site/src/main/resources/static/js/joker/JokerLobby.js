@@ -1,25 +1,37 @@
 const API = "/api/joker";
 
 // --- State Variables ---
-let selectedPlayerCount = "THREE";
-let selectedRoundOption = "SHORT_8";
-let selectedJokerAmount = 1;
-let selectedAllowRandoms = true;
+let selectedPlayerCount = null;
+let selectedRoundOption = null;
+let selectedJokerAmount = null;
+let selectedAllowRandoms = null;
 
 // --- Wizard State ---
 let currentStep = 1;
 const totalSteps = 4;
 
 // --- Sub-View Switcher Logic ---
-function switchView(viewId) {
+function switchView(viewId, clickedButton = null) {
     setMsg("", "");
 
-    // დეაქტივაცია ყველა პანელის
+    if (viewId === 'view-main') {
+        document.querySelectorAll('.joker-menu-btn').forEach(b => b.classList.remove('active'));
+    }
+
+    // 1. თუ მენიუს ღილაკს დავაჭირეთ, ვმართავთ მის ანთებას (როგორც კითხვებზე)
+    if (clickedButton) {
+        document.querySelectorAll('.joker-menu-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        clickedButton.classList.add('active');
+    }
+
+    // 2. დეაქტივაცია ყველა პანელის
     document.querySelectorAll('.view-panel').forEach(panel => {
         panel.classList.remove('active');
     });
 
-    // გააქტიურება სასურველი პანელის
+    // 3. გააქტიურება სასურველი პანელის
     const activePanel = document.getElementById(viewId);
     if (activePanel) {
         activePanel.classList.add('active');
@@ -29,16 +41,19 @@ function switchView(viewId) {
     const subtitle = document.getElementById('panel-subtitle');
     if (viewId === 'view-create') {
         subtitle.textContent = "ახალი თამაშის პარამეტრები";
-        resetWizard(); // ყოველ შესვლაზე ვიზარდი იწყება თავიდან
+        resetWizard();
     }
     else if (viewId === 'view-browse') {
         subtitle.textContent = "აქტიური საჯარო ოთახები";
         loadLobbies();
     }
-    else if (viewId === 'view-join') subtitle.textContent = "შეუერთდით მეგობრის პარტიას";
-    else subtitle.textContent = "აირჩიეთ მოქმედება გასაგრძელებლად";
+    else if (viewId === 'view-join') {
+        subtitle.textContent = "შეუერთდით მეგობრის პარტიას";
+    }
+    else {
+        subtitle.textContent = "აირჩიეთ მოქმედება გასაგრძელებლად";
+    }
 }
-
 // --- Wizard ნავიგაციის ფუნქციები ---
 function updateWizardUI() {
     // 1. ნაბიჯების დამალვა/ჩვენება
@@ -76,11 +91,17 @@ function updateWizardUI() {
 }
 
 function handleWizardNext() {
+    if (currentStep === 1 && !selectedPlayerCount) { setMsg(" გთხოვთ აირჩიოთ მოთამაშეების რაოდენობა", "error"); return; }
+    if (currentStep === 2 && !selectedRoundOption) { setMsg(" გთხოვთ აირჩიოთ რაუნდების რაოდენობა", "error"); return; }
+    if (currentStep === 3 && !selectedJokerAmount) { setMsg(" გთხოვთ აირჩიოთ ჯოკერების რაოდენობა", "error"); return; }
+    if (currentStep === 4 && selectedAllowRandoms === null) { setMsg(" გთხოვთ აირჩიოთ ოთახის ხილვადობა", "error"); return; }
+
+    setMsg("", ""); // თუ ყველაფერი აირჩია, შეცდომის მესიჯს ვშლით
+
     if (currentStep < totalSteps) {
         currentStep++;
         updateWizardUI();
     } else {
-        // თუ ბოლო ნაბიჯზე ვართ, პირდაპირ ვიძახებთ ოთახის შექმნის ფუნქციას
         createGame();
     }
 }
@@ -90,12 +111,22 @@ function handleWizardBack() {
         currentStep--;
         updateWizardUI();
     } else {
-        switchView('view-main'); // თუ პირველზეა, აბრუნებს მთავარ გვერდზე
+        // როცა პირველი ნაბიჯიდან ვბრუნდებით მთავარ მენიუში:
+        switchView('view-main');
+        document.querySelectorAll('.joker-menu-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
     }
 }
 
 function resetWizard() {
     currentStep = 1;
+    // ცვლადების დარესეტება default მნიშვნელობებზე, რომ toggle-ების ვიზუალი-JS ყოველთვის სინქრონში იყოს
+    selectedPlayerCount = null;
+    selectedRoundOption = null;
+    selectedJokerAmount = null;
+    selectedAllowRandoms = null;
+    document.querySelectorAll(".joker-toggle").forEach(b => b.classList.remove("active"));
     updateWizardUI();
 }
 
@@ -222,20 +253,6 @@ async function loadLobbies() {
     }
 }
 
-// --- Quick Client-Side Filter for Scrolling Area ---
-function filterLobbies() {
-    const filterText = document.getElementById("searchLobbyInput").value.trim().toUpperCase();
-    const items = document.querySelectorAll(".joker-lobby-item");
-
-    items.forEach(item => {
-        const itemCode = item.getAttribute("data-code") || "";
-        if (itemCode.includes(filterText)) {
-            item.style.display = "flex";
-        } else {
-            item.style.display = "none";
-        }
-    });
-}
 
 async function joinLobby(roomCode) {
     const token = localStorage.getItem("token");
@@ -247,6 +264,9 @@ async function joinLobby(roomCode) {
         if (!res.ok) {
             const err = await res.text();
             setMsg(err || "შეცდომა", "error");
+            if (res.status === 404) {
+                loadLobbies();
+            }
             return;
         }
         window.location.href = `/joker/${roomCode}`;

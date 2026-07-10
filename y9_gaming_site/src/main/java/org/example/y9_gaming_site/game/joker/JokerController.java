@@ -18,6 +18,7 @@ public class JokerController {
     private final JokerService jokerService;
     private final JokerWebSocketService jokerWebSocketService;
 
+
     // --- DTOs ---
 
     public record CreateGameRequest(
@@ -109,6 +110,14 @@ public class JokerController {
     ) {
         User user = (User) authentication.getPrincipal();
         jokerService.placeBid(roomCode, user.getId(), req.bid());
+
+        JokerGameState state = jokerService.getGameState(roomCode);
+        jokerWebSocketService.broadcastBidPlaced(roomCode, user.getUsername(), req.bid());
+
+        if (state.getStatus() == JokerGameState.GameStatus.PLAYING) {
+            jokerWebSocketService.broadcastBiddingComplete(roomCode, state);
+        }
+
         return ResponseEntity.ok().build();
     }
 
@@ -123,11 +132,33 @@ public class JokerController {
         String declared = (req.declaredSuit() == null) ? "NONE" : req.declaredSuit().toUpperCase();
         String suit = (req.suit() == null) ? "NONE" : req.suit().toUpperCase();
 
+        JokerGameState stateBefore = jokerService.getGameState(roomCode);
+        int playerCount = stateBefore.getPlayers().size();
+
         JokerTrick trick = jokerService.playCard(
                 roomCode, user.getId(),
                 suit, req.value(),
                 call, declared
         );
+
+        jokerWebSocketService.broadcastCardPlayed(roomCode, user.getUsername(),
+                /* actual played card */ trick.getPlayedCards().get(trick.getPlayedCards().size() - 1).card(),
+                call, declared);
+
+        JokerGameState state = jokerService.getGameState(roomCode);
+
+        // მნიშვნელოვანი: isComplete()-ით ვამოწმებთ, არა winner() != null-ით!
+        if (trick.isComplete(playerCount)) {
+            JokerPlayer winner = trick.winner();
+            jokerWebSocketService.broadcastTrickWon(roomCode, winner.getUsername());
+
+            if (state.getStatus() == JokerGameState.GameStatus.ROUND_END) {
+                jokerWebSocketService.broadcastRoundEnd(roomCode, state);
+            } else if (state.getStatus() == JokerGameState.GameStatus.FINISHED) {
+                jokerWebSocketService.broadcastGameOver(roomCode, state);
+            }
+        }
+
         return ResponseEntity.ok(trick);
     }
 
@@ -140,6 +171,9 @@ public class JokerController {
         User user = (User) authentication.getPrincipal();
         String suit = (req.suit() == null) ? "NONE" : req.suit().toUpperCase();
         jokerService.setTrumpSuit(roomCode, user.getId(), suit);
+
+        jokerWebSocketService.broadcastTrumpSet(roomCode, suit);
+
         return ResponseEntity.ok().build();
     }
 
@@ -148,5 +182,24 @@ public class JokerController {
             @PathVariable String roomCode
     ) {
         return ResponseEntity.ok(jokerService.getGameState(roomCode));
+    }
+
+    @PostMapping("/{roomCode}/leave")
+    public ResponseEntity<Void> leaveGame(
+            Authentication authentication,
+            @PathVariable String roomCode
+    ) {
+        User user = (User) authentication.getPrincipal();
+        jokerService.leaveGame(roomCode, user.getId());
+
+        // დარჩენილ მოთამაშეებს ვატყობინებთ, თუ ოთახი ჯერ არ წაშლილა
+        try {
+            JokerGameState state = jokerService.getGameState(roomCode);
+            jokerWebSocketService.broadcastPlayerJoined(roomCode, state); // ვიყენებთ ამავე event-ს, მოთამაშეების სია განახლდეს
+        } catch (IllegalArgumentException ignored) {
+            // ოთახი უკვე წაშლილია, broadcast არ სჭირდება
+        }
+
+        return ResponseEntity.ok().build();
     }
 }
