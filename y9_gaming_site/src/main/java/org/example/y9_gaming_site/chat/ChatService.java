@@ -60,7 +60,7 @@ public class ChatService {
         return savedRoom;
     }
 
-    // Specifically for 1-on-1 private messaging between friends
+    //for two people, one on one
     public ChatRoom openPrivateRoom(Long user1Id, Long user2Id) {
         if (!isFriend(user1Id, user2Id)) {
             throw new RuntimeException("Users are not friends");
@@ -71,19 +71,15 @@ public class ChatService {
         if (chatExisting != null) {
             return chatExisting;
         }
-
-        // Create a basic private chatroom container
         ChatRoom chatRoom = new ChatRoom(null, "PRIVATE");
         ChatRoom savedRoom = chatroomRepository.save(chatRoom);
-
-        // Bind both friends to it
         chatroomMemberRepository.save(new ChatroomMember(savedRoom.getId(), user1Id));
         chatroomMemberRepository.save(new ChatroomMember(savedRoom.getId(), user2Id));
 
         return savedRoom;
     }
 
-    //if chat already exist, this method will return room
+    //if chat ecists
     private ChatRoom findExistingPrivateRoom(Long user1Id, Long user2Id) {
         List<ChatroomMember> roomofUser1 = chatroomMemberRepository.findByUserId(user1Id);
         for (ChatroomMember member : roomofUser1) {
@@ -114,7 +110,6 @@ public class ChatService {
     }
 
     public Message messageSender(Long senderId, Long roomId, String message) {
-        // Validation: Verify the sender actually belongs to this room
         chatroomMemberRepository.findByRoomIdAndUserId(roomId, senderId)
                 .orElseThrow(() -> new RuntimeException("You are not a member of this chatroom"));
 

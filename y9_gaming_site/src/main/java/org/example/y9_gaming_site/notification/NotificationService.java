@@ -4,6 +4,7 @@ import org.example.y9_gaming_site.friendship.Friendship;
 import org.example.y9_gaming_site.friendship.FriendshipRepository;
 import org.example.y9_gaming_site.user.User;
 import org.example.y9_gaming_site.user.UserRepository;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -93,6 +94,7 @@ public class NotificationService {
         notificationRepository.markAllAsReadByUserId(userId);
     }
 
+    @Async
     public void createMessageNotification(Long senderId, Long receiverId, Long roomId) {
         User sender = userRepository.findById(senderId).orElseThrow();
 
