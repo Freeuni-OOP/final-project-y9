@@ -15,6 +15,7 @@
 <body>
 
 <nav th:replace="~{fragments/navbar :: navbar(active='home')}"></nav>
+<div th:replace="~{fragments/Notifications :: Notifications}"></div>
 
 <div class="joker-game-wrap">
 
@@ -142,6 +143,7 @@
 <script th:src="@{/js/navbar.js}"></script>
 <script th:src="@{/js/streak.js}"></script>
 <script th:src="@{/js/achievement-toast.js}"></script>
-<script src="/js/joker/JokerGame.js"></script>
+<script src="/js/joker/JokerGame.js">
+  <script th:src="@{/js/Notification.js}"></script>
 </body>
 </html>
