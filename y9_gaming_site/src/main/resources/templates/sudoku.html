@@ -368,45 +368,45 @@
 
         <div class="actions-row">
             <button class="y9-btn" onclick="submitSolutionCheck()">Verify Solution</button>
-            <button class="y9-btn y9-btn--alt" onclick="generateChallengeLink()">Challenge Friend</button>
-            <button class="y9-btn y9-btn--alt" onclick="openDifficultyModal()">Infinite Mode</button>
-            <button class="y9-btn y9-btn--alt" onclick="showGameRules('SUDOKU')">Rules</button>
-            <button class="y9-btn y9-btn--alt" style="border-color: rgba(255, 107, 157, 0.4); color: #ff6b9d;" onclick="giveUpAndReveal()">Reveal Solution 🏳️</button>
-        </div>
-    </div>
+            <!-- <button class="y9-btn y9-btn--alt" onclick="generateChallengeLink()">Challenge Friend</button>-->
+             <button class="y9-btn y9-btn--alt" onclick="openDifficultyModal()">Infinite Mode</button>
+             <button class="y9-btn y9-btn--alt" onclick="showGameRules('SUDOKU')">Rules</button>
+             <button class="y9-btn y9-btn--alt" style="border-color: rgba(255, 107, 157, 0.4); color: #ff6b9d;" onclick="giveUpAndReveal()">Reveal Solution 🏳️</button>
+         </div>
+     </div>
 
-    <div class="dashboard-card sudoku-controls-card">
-        <h3>Game Assistant</h3>
-        <div class="controls-action-row">
-            <button id="hint-btn" class="y9-btn hint-btn" onclick="triggerBoardCellHint()">
-                💡 Get Hint (3/3 left)
-            </button>
+     <div class="dashboard-card sudoku-controls-card">
+         <h3>Game Assistant</h3>
+         <div class="controls-action-row">
+             <button id="hint-btn" class="y9-btn hint-btn" onclick="triggerBoardCellHint()">
+                 💡 Get Hint (3/3 left)
+             </button>
 
-            <label class="autocheck-toggle-label">
-                <input type="checkbox" id="auto-check-toggle">
-                <span class="custom-toggle-slider"></span>
-                Auto Check
-            </label>
-        </div>
-    </div>
-</main>
+             <label class="autocheck-toggle-label">
+                 <input type="checkbox" id="auto-check-toggle">
+                 <span class="custom-toggle-slider"></span>
+                 Auto Check
+             </label>
+         </div>
+     </div>
+ </main>
 
-<div id="difficulty-modal" class="modal-overlay" onclick="closeDifficultyModal()">
-    <div class="difficulty-card" onclick="event.stopPropagation()">
-        <h2>Select Difficulty</h2>
-        <div class="difficulty-grid">
-            <button class="y9-btn" onclick="selectDifficulty('EASY')">Easy </button>
-            <button class="y9-btn" onclick="selectDifficulty('MEDIUM')">Medium </button>
-            <button class="y9-btn" onclick="selectDifficulty('HARD')">Hard </button>
-        </div>
-        <button class="y9-btn y9-btn--alt" style="margin-top: 10px;" onclick="closeDifficultyModal()">Cancel</button>
-    </div>
-</div>
+ <div id="difficulty-modal" class="modal-overlay" onclick="closeDifficultyModal()">
+     <div class="difficulty-card" onclick="event.stopPropagation()">
+         <h2>Select Difficulty</h2>
+         <div class="difficulty-grid">
+             <button class="y9-btn" onclick="selectDifficulty('EASY')">Easy </button>
+             <button class="y9-btn" onclick="selectDifficulty('MEDIUM')">Medium </button>
+             <button class="y9-btn" onclick="selectDifficulty('HARD')">Hard </button>
+         </div>
+         <button class="y9-btn y9-btn--alt" style="margin-top: 10px;" onclick="closeDifficultyModal()">Cancel</button>
+     </div>
+ </div>
 
-<script th:src="@{/js/navbar.js}"></script>
-<script th:src="@{/js/streak.js}"></script>
-<script th:src="@{/js/rules-modal.js}"></script>
-<script src="/js/sudoku.js"></script>
-<script th:src="@{/js/Notification.js}"></script>
-</body>
-</html>
+ <script th:src="@{/js/navbar.js}"></script>
+ <script th:src="@{/js/streak.js}"></script>
+ <script th:src="@{/js/rules-modal.js}"></script>
+ <script src="/js/sudoku.js"></script>
+ <script th:src="@{/js/Notification.js}"></script>
+ </body>
+ </html>

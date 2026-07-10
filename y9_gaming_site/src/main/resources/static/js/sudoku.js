@@ -504,10 +504,10 @@ function giveUpAndReveal() {
     showToast("Game Over. Solution grid values filled out completely.", "info");
 }
 
-function generateChallengeLink() {
-    if (!activePuzzleId) return;
-    const challengeUrl = `${window.location.origin}/sudoku?challengeId=${activePuzzleId}`;
-    navigator.clipboard.writeText(challengeUrl).then(() => {
-        showToast("Challenge Link copied to clipboard!", "success");
-    });
-}
+// function generateChallengeLink() {
+//     if (!activePuzzleId) return;
+//     const challengeUrl = `${window.location.origin}/sudoku?challengeId=${activePuzzleId}`;
+//     navigator.clipboard.writeText(challengeUrl).then(() => {
+//         showToast("Challenge Link copied to clipboard!", "success");
+//     });
+// }
