@@ -1,4 +1,4 @@
-package org.example.y9_gaming_site;
+package org.example.y9_gaming_site.UserTests;
 
 import jakarta.servlet.http.HttpServletResponse;
 import junit.framework.TestCase;

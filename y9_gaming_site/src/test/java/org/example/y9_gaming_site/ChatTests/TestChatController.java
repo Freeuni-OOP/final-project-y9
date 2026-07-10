@@ -1,4 +1,4 @@
-package org.example.y9_gaming_site;
+package org.example.y9_gaming_site.ChatTests;
 
 import junit.framework.TestCase;
 import org.example.y9_gaming_site.chat.*;

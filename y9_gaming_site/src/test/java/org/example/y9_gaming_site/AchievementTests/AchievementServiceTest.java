@@ -1,8 +1,7 @@
-package org.example.y9_gaming_site;
+package org.example.y9_gaming_site.AchievementTests;
 
 import org.example.y9_gaming_site.achievement.*;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 

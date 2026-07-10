@@ -1,4 +1,4 @@
-package org.example.y9_gaming_site;
+package org.example.y9_gaming_site.ChatTests;
 
 import junit.framework.TestCase;
 import org.example.y9_gaming_site.chat.*;
@@ -8,7 +8,6 @@ import org.example.y9_gaming_site.notification.NotificationService;
 import org.example.y9_gaming_site.user.User;
 import org.example.y9_gaming_site.user.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
-import org.mockito.Mockito;
 
 import java.util.ArrayList;
 import java.util.List;
