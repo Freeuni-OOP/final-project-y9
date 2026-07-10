@@ -1,20 +1,13 @@
-package org.example.y9_gaming_site;
+package org.example.y9_gaming_site.adminTests;
 
 import junit.framework.TestCase;
 import org.example.y9_gaming_site.admin.*;
 import org.example.y9_gaming_site.game.GameRepository;
-import org.example.y9_gaming_site.streak.StreakService;
 import org.example.y9_gaming_site.user.Role;
 import org.example.y9_gaming_site.user.User;
 import org.example.y9_gaming_site.user.UserRepository;
-import org.example.y9_gaming_site.user.UserService;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.nio.file.AccessDeniedException;
