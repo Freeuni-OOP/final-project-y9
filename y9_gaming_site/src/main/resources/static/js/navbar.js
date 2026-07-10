@@ -57,7 +57,5 @@ async function logout() {
 
 
 document.addEventListener('DOMContentLoaded', function (){
-    if(window.location.pathname.indexOf('/profile') === -1){
-        loadNavProfile();
-    }
+    loadNavProfile();
 });
