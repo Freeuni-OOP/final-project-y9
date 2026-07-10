@@ -58,6 +58,8 @@ public class NotificationService {
 
         notification.setRead(true);
         notificationRepository.save(notification);
+
+        notificationRepository.delete(notification);
     }
 
     @Transactional

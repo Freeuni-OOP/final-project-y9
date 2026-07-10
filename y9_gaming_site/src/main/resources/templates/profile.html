@@ -12,6 +12,7 @@
 <body>
 
 <nav th:replace="~{fragments/navbar :: navbar(active='profile')}"></nav>
+<div th:replace="~{fragments/Notifications :: Notifications}"></div>
 
 <div class="dashboard-container">
 
@@ -119,5 +120,6 @@
 </script>
 <script th:src="@{/js/navbar.js}"></script>
 <script th:src="@{/js/profile.js}"></script>
+<script src="/js/Notification.js"></script>
 </body>
 </html>
