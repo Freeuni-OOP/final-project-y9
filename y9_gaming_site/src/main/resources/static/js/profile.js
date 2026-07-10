@@ -375,6 +375,11 @@ async function sendTimeAnalytics(id, title, category, seconds) {
 
 //startup order
 document.addEventListener("DOMContentLoaded", async () => {
+    if (localStorage.getItem("role") === "ADMIN") {
+        const adminLink = document.getElementById("adminLink");
+        if (adminLink) adminLink.style.display = "block";
+    }
+
     await prefetchGamesCatalog();
     loadProfile().catch(err => console.error(err));
     loadAchievements().catch(err => console.error(err));
