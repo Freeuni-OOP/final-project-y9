@@ -10,6 +10,7 @@ import org.example.y9_gaming_site.user.User;
 import org.example.y9_gaming_site.user.Role;
 import org.example.y9_gaming_site.user.UserRepository;
 import org.springframework.http.HttpStatus;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -27,6 +28,7 @@ public class WordleService {
 
     public static final String GAME_KEY = "WORDLE";
     public static final int MAX_GUESSES = 6;
+    public static final int PRACTICE_RETENTION_HOURS = 24;
 
     private final WordlePuzzleRepository wordlePuzzleRepository;
     private final WordleAttemptRepository wordleAttemptRepository;
@@ -61,6 +63,26 @@ public class WordleService {
     public WordlePuzzle practicePuzzle() {
         String answer = dict.pickWord(Set.of());
         return wordlePuzzleRepository.save(new WordlePuzzle(null, answer));
+    }
+
+    // deletes practice puzzles
+    public int cleanupOldPracticePuzzles() {
+        LocalDateTime cutoff = LocalDateTime.now().minusHours(PRACTICE_RETENTION_HOURS);
+        List<WordlePuzzle> stale = wordlePuzzleRepository.findByPuzzleDateIsNullAndCreatedAtBefore(cutoff);
+        if(stale.isEmpty()) return 0;
+
+        List<Long> staleIds = stale.stream().map(WordlePuzzle::getId).toList();
+        wordleAttemptRepository.deleteByPuzzleIdIn(staleIds);
+        wordlePuzzleRepository.deleteAllByIdInBatch(staleIds);
+        return staleIds.size();
+    }
+
+    @Scheduled(cron = "0 0 3 * * *")
+    public void scheduledPracticeCleanup() {
+        int removed = cleanupOldPracticePuzzles();
+        if(removed > 0) {
+            System.out.println("[Removed " + removed + " stale practice puzzles.");
+        }
     }
 
     public WordlePuzzle getPuzzleById(Long id) {
