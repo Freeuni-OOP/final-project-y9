@@ -7,6 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Bitcount+Grid+Double+Ink&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/homePage.css" />
     <link rel="stylesheet" th:href="@{/css/navbar.css}">
+    <link rel="stylesheet" th:href="@{/css/rules-modal.css}">
     <style>
         body {
             font-family: 'Segoe UI', sans-serif;
@@ -341,7 +342,7 @@
         }
     </style>
 </head>
-<body>
+<body data-game-key="SUDOKU">
 
 <nav th:replace="~{fragments/navbar :: navbar(active='home')}"></nav>
 
@@ -368,6 +369,7 @@
             <button class="y9-btn" onclick="submitSolutionCheck()">Verify Solution</button>
             <button class="y9-btn y9-btn--alt" onclick="generateChallengeLink()">Challenge Friend</button>
             <button class="y9-btn y9-btn--alt" onclick="openDifficultyModal()">Infinite Mode</button>
+            <button class="y9-btn y9-btn--alt" onclick="showGameRules('SUDOKU')">Rules</button>
             <button class="y9-btn y9-btn--alt" style="border-color: rgba(255, 107, 157, 0.4); color: #ff6b9d;" onclick="giveUpAndReveal()">Reveal Solution 🏳️</button>
         </div>
     </div>
@@ -402,6 +404,7 @@
 
 <script th:src="@{/js/navbar.js}"></script>
 <script th:src="@{/js/streak.js}"></script>
+<script th:src="@{/js/rules-modal.js}"></script>
 <script src="/js/sudoku.js"></script>
 </body>
 </html>
