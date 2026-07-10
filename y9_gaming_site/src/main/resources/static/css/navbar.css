@@ -228,3 +228,10 @@
 .navbar{
     position: relative;
 }
+
+.clickable-notification{
+    cursor: pointer;
+}
+.clickable-notification:hover p{
+    color: #b327c9;
+}

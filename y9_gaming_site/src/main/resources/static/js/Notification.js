@@ -1,10 +1,12 @@
 let currentUserId = null;
 
+
 async function initNotifications(){
     const token = localStorage.getItem("token");
     if(!token){
         return;
     }
+
 
     try {
         const res = await fetch("/api/users/me", {
@@ -14,8 +16,10 @@ async function initNotifications(){
             return;
         }
 
+
         const me = await res.json();
         currentUserId = me.id;
+
 
         await checkUnreadCount();
         setInterval(checkUnreadCount, 30000);
@@ -24,21 +28,25 @@ async function initNotifications(){
     }
 }
 
+
 async function checkUnreadCount(){
     if(!currentUserId){
         return;
     }
 
+
     try {
         const res = await fetch("/notifications/unread-count/" + currentUserId,
             {headers: {"Authorization": "Bearer " + localStorage.getItem("token")}
-        });
+            });
         if (!res.ok) {
             return;
         }
 
+
         const count = await res.json();
         const badge = document.getElementById("bell-badge");
+
 
         if (count > 0) {
             badge.textContent = count;
@@ -51,25 +59,31 @@ async function checkUnreadCount(){
     }
 }
 
+
 async function toggleNotifications(){
 
+
     const dropdown = document.getElementById("notification-dropdown");
+
 
     if(!dropdown){
         return;
     }
+
 
     if(dropdown.style.display === "block"){
         dropdown.style.display = "none";
         return;
     }
 
+
     dropdown.style.display = "block";
     await loadNotifications();
 
+
     if(currentUserId) {
         await fetch("/notifications/mark-read/" + currentUserId, {
-            method: "POST"},
+                method: "POST"},
             {
                 headers: {"Authorization": "Bearer " + localStorage.getItem("token")}
             });
@@ -77,13 +91,16 @@ async function toggleNotifications(){
     }
 }
 
+
 async function loadNotifications(){
     const dropdown = document.getElementById("notification-dropdown");
     if(!dropdown || !currentUserId){
         return;
     }
 
+
     dropdown.innerHTML = `<div class = 'notification-dropdown-title'>🔔 notifications</div>`;
+
 
     try {
         const res = await fetch("/notifications/user/" + currentUserId,
@@ -93,22 +110,36 @@ async function loadNotifications(){
             return;
         }
 
+
         const list = await res.json();
+
 
         if (list.length === 0) {
             dropdown.innerHTML += `<div class = 'notification-empty'>no notification</div>`;
             return;
         }
 
+
         for (let i = 0; i < list.length; i++) {
             const n = list[i];
+
 
             const item = document.createElement("div");
             item.className = "notification-item";
 
+
             const msg = document.createElement("p");
             msg.textContent = n.message;
             item.appendChild(msg);
+
+
+            if(n.type === "NEW_MESSAGE"){
+                item.classList.add("clickable-notification");
+                item.onclick = function (){
+                    window.location.href = `/chat?roomId=${n.roomId}`;
+                };
+            }
+
 
             if (n.type === "FRIEND_REQUEST") {
                 const acceptBtn = document.createElement("button");
@@ -118,6 +149,7 @@ async function loadNotifications(){
                     acceptFriend(n.id, item);
                 };
 
+
                 const declineBtn = document.createElement("button");
                 declineBtn.className = "notif-decline-btn";
                 declineBtn.textContent = "Decline";
@@ -125,12 +157,14 @@ async function loadNotifications(){
                     declineFriend(n.id, item);
                 };
 
+
                 const actions = document.createElement("div");
                 actions.className = "notif-actions";
                 actions.appendChild(acceptBtn);
                 actions.appendChild(declineBtn);
                 item.appendChild(actions);
             }
+
 
             dropdown.appendChild(item);
         }
@@ -140,10 +174,11 @@ async function loadNotifications(){
     }
 }
 
+
 async function acceptFriend(notificationId, item){
     try {
         const res = await fetch("/notifications/accept/" + notificationId, {
-            method: "POST"},
+                method: "POST"},
             {headers: {"Authorization": "Bearer " + localStorage.getItem("token")}
             });
         if (res.ok) {
@@ -155,10 +190,11 @@ async function acceptFriend(notificationId, item){
     }
 }
 
+
 async function declineFriend(notificationId, item){
     try {
         const res = await fetch("/notifications/decline/" + notificationId, {
-            method: "POST"},
+                method: "POST"},
             {headers: {"Authorization": "Bearer " + localStorage.getItem("token")}
             });
         if (res.ok) {
@@ -170,13 +206,16 @@ async function declineFriend(notificationId, item){
     }
 }
 
+
 document.addEventListener("click", function (e){
     const bell = document.querySelector(".navbar__bell");
     const dropdown = document.getElementById("notification-dropdown");
 
+
     if(!bell || !dropdown){
         return;
     }
+
 
     if(!bell.contains(e.target) && !dropdown.contains(e.target)) {
         dropdown.style.display = "none";
@@ -184,3 +223,15 @@ document.addEventListener("click", function (e){
 });
 
 document.addEventListener("DOMContentLoaded", initNotifications);
+
+document.addEventListener("DOMContentLoaded", function (){
+    const urlParams = new URLSearchParams(window.location.search);
+    const roomIdFromUrl = urlParams.get('roomId');
+
+    if(roomIdFromUrl) {
+        const roomId = parseInt(roomIdFromUrl, 10);
+
+        openChatById(roomId);
+    }
+});
+
