@@ -4,6 +4,7 @@ import org.example.y9_gaming_site.friendship.Friendship;
 import org.example.y9_gaming_site.friendship.FriendshipRepository;
 import org.example.y9_gaming_site.notification.NotificationRepository;
 import org.example.y9_gaming_site.notification.NotificationService;
+import org.example.y9_gaming_site.security.ContentModerator;
 import org.example.y9_gaming_site.user.User;
 import org.example.y9_gaming_site.user.UserRepository;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -20,6 +21,8 @@ import java.util.Map;
 
 @Service
 public class ChatService {
+    private static final String VIOLATION_MESSAGE = "This message violated our guidelines";
+
     private final MessageRepository messageRepository;
     private final ChatroomRepository chatroomRepository;
     private final FriendshipRepository friendshipRepository;
@@ -36,7 +39,6 @@ public class ChatService {
         this.notificationService = notificationService;
     }
 
-    //finding user by username, returns id and username seperatly, not whole object
     public Map<String, Object> findUserByUsername(String username) {
         User user = userRepository.findByUsername(username).orElse(null);
         if (user == null) {
@@ -48,38 +50,35 @@ public class ChatService {
         return map;
     }
 
-    // Opens a new group or lobby chatroom and adds the creator
     public ChatRoom createGroupRoom(String roomName, String type, List<Long> memberIds) {
         ChatRoom chatRoom = new ChatRoom(roomName, type);
         ChatRoom savedRoom = chatroomRepository.save(chatRoom);
 
-        // Add all specified members to the room
         for (Long userId : memberIds) {
             chatroomMemberRepository.save(new ChatroomMember(savedRoom.getId(), userId));
         }
         return savedRoom;
     }
 
-    //for two people, one on one
     public ChatRoom openPrivateRoom(Long user1Id, Long user2Id) {
         if (!isFriend(user1Id, user2Id)) {
             throw new RuntimeException("Users are not friends");
         }
 
-        //if chat already exist, old chat will continue
         ChatRoom chatExisting = findExistingPrivateRoom(user1Id, user2Id);
         if (chatExisting != null) {
             return chatExisting;
         }
+
         ChatRoom chatRoom = new ChatRoom(null, "PRIVATE");
         ChatRoom savedRoom = chatroomRepository.save(chatRoom);
+
         chatroomMemberRepository.save(new ChatroomMember(savedRoom.getId(), user1Id));
         chatroomMemberRepository.save(new ChatroomMember(savedRoom.getId(), user2Id));
 
         return savedRoom;
     }
 
-    //if chat ecists
     private ChatRoom findExistingPrivateRoom(Long user1Id, Long user2Id) {
         List<ChatroomMember> roomofUser1 = chatroomMemberRepository.findByUserId(user1Id);
         for (ChatroomMember member : roomofUser1) {
@@ -113,20 +112,46 @@ public class ChatService {
         chatroomMemberRepository.findByRoomIdAndUserId(roomId, senderId)
                 .orElseThrow(() -> new RuntimeException("You are not a member of this chatroom"));
 
+        List<ChatroomMember> members = chatroomMemberRepository.findByRoomId(roomId);
+
+        boolean hasMinorRecipient = false;
+        for (ChatroomMember member : members) {
+            if (!member.getUserId().equals(senderId)) {
+                User recipient = userRepository.findById(member.getUserId()).orElse(null);
+                if (recipient != null && isMinor(recipient.getBirthDate())) {
+                    hasMinorRecipient = true;
+                    break;
+                }
+            }
+        }
+
+        boolean flagged = hasMinorRecipient && ContentModerator.isFlagged(message);
+
         Message messageEntity = new Message();
         messageEntity.setSenderId(senderId);
         messageEntity.setRoomId(roomId);
         messageEntity.setMessage(message);
         messageEntity.setTimestamp(LocalDateTime.now());
-        Message savedMessage =  messageRepository.save(messageEntity);
+        messageEntity.setFlagged(flagged);
+        Message savedMessage = messageRepository.save(messageEntity);
 
-        List<ChatroomMember> members = chatroomMemberRepository.findByRoomId(roomId);
         for (ChatroomMember member : members) {
             if(!member.getUserId().equals(senderId)) {
                 notificationService.createMessageNotification(senderId, member.getUserId(), roomId);
             }
         }
+
+        if (flagged) {
+            savedMessage.setMessage(VIOLATION_MESSAGE);
+        }
         return savedMessage;
+    }
+
+    private boolean isMinor(java.time.LocalDate birthDate) {
+        if (birthDate == null) {
+            return false;
+        }
+        return java.time.Period.between(birthDate, java.time.LocalDate.now()).getYears() < 18;
     }
 
     public List<Map<String, Object>> getMessages(Long roomId) {
@@ -145,27 +170,15 @@ public class ChatService {
                 }
                 userName.put(senderId, username);
             }
-                Map<String, Object> dto = new HashMap<>();
-                dto.put("id", message.getId());
-                dto.put("senderId", message.getSenderId());
-                dto.put("senderUsername", username);
-                dto.put("message", message.getMessage());
-                dto.put("timestamp", message.getTimestamp());
-                result.add(dto);
-            }
-            return result;
+            Map<String, Object> dto = new HashMap<>();
+            dto.put("id", message.getId());
+            dto.put("senderId", message.getSenderId());
+            dto.put("senderUsername", username);
+            dto.put("message", message.isFlagged() ? VIOLATION_MESSAGE : message.getMessage());
+            dto.put("flagged", message.isFlagged());
+            dto.put("timestamp", message.getTimestamp());
+            result.add(dto);
         }
+        return result;
+    }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-

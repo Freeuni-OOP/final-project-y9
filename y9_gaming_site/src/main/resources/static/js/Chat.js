@@ -222,6 +222,7 @@ async function openRoomRequest(url, options){
         }
 
         const room = await res.json();
+
         if (room.id !== roomId) {
             renderedMessageIds = new Set();
             const box = document.getElementById("messages");
@@ -256,6 +257,9 @@ function renderMessage(m, box){
         div.appendChild(nameElem);
     }
 
+    if(m.flagged){
+        div.style.color = "red";
+    }
     div.appendChild(document.createTextNode(m.message));
     box.appendChild(div);
 }
@@ -267,7 +271,6 @@ async function loadMessages(){
     const messages = await res.json();
     const box = document.getElementById("messages");
 
-    //only if not already rendered, KACHOW
     let appendedAny = false;
     for(let i = 0; i < messages.length; i++){
         const m = messages[i];
@@ -288,6 +291,7 @@ async function sendMessage(){
     const input = document.getElementById("messageInput");
     const text = input.value.trim();
     if(!text) return;
+
     input.value = "";
     const box = document.getElementById("messages");
     const tempDiv = document.createElement("div");
@@ -314,6 +318,11 @@ async function sendMessage(){
         if (res.ok) {
             const saved = await res.json();
             renderedMessageIds.add(saved.id);
+            if(saved.flagged){
+                tempDiv.textContent = "";
+                tempDiv.style.color = "red";
+                tempDiv.appendChild(document.createTextNode(saved.message));
+            }
             tempDiv.style.opacity = "1";
         } else {
             tempDiv.style.opacity = "1";
