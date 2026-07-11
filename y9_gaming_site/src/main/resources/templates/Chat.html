@@ -36,14 +36,19 @@
 
 
             <label>Group name</label>
-            <input type="text" id="groupName">
+            <input type="text" id="groupName" placeholder="Enter group name...">
 
+            <label>Group Members</label>
 
-            <label>Friend usernames, separated by commas</label>
-            <input type="text" id="groupUserNames">
+            <div class="group-members-selection">
+                <button type="button" class="chat-btn" style="margin-top: 0;" onclick="toggleFriendDropdown()">➕ Add Member</button>
 
+                <div id="friendDropdown" class="chat-search-results" style="display:none; position: absolute; width: 100%;"></div>
+            </div>
 
-            <button class="chat-btn" onclick="createGroup()">Create group</button>
+            <div id="selectedMembersGroup" style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px"></div>
+
+            <button class="chat-btn" style="margin-top: 20px;" onclick="createGroup()">Create group</button>
         </div>
     </div>
 
