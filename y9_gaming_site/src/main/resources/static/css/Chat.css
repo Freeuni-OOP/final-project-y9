@@ -329,3 +329,8 @@ body{
         min-width: 100%;
     }
 }
+
+.group-members-selection{
+    position: relative;
+    width: 100%;
+}

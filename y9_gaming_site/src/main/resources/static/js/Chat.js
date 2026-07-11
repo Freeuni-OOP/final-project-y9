@@ -4,8 +4,22 @@ let MyUserId = null;
 let MyUsername = null;
 let roomId = null;
 let pollTimer = null;
+let selectedMemberIds = [];
+let renderedMessageIds = new Set();
 
 document.addEventListener("DOMContentLoaded", loadMyIdentity);
+
+document.addEventListener("DOMContentLoaded", function (){
+    const input = document.getElementById("messageInput");
+    if(input){
+        input.addEventListener("keydown", function (e){
+            if(e.key === "Enter"){
+                sendMessage();
+            }
+        });
+    }
+});
+
 
 async function loadMyIdentity(){
     const token = localStorage.getItem('token');
@@ -118,7 +132,7 @@ async function runFriendSearch(query){
         console.log(e);
     }
 
-    matches = matches.filter(u => u.username !== MyUsername);
+    matches = matches.filter(function (u){return u.username !== MyUsername});
 
     if(matches.length === 0){
         result.innerHTML = "<div class='chat-search-empty'>no friends match</div>";
@@ -159,48 +173,6 @@ document.addEventListener("click", function (e){
     }
 });
 
-async function createGroup(){
-    if(!MyUserId){
-        alert("Reload page");
-        return;
-    }
-    const groupName = document.getElementById("groupName").value.trim() || "group";
-    const raw = document.getElementById("groupUserNames").value.trim();
-    if(!raw){
-        alert("write list one username");
-        return;
-    }
-    const parts = raw.split(",");
-    const usernames = [];
-    for(let i=0; i< parts.length; i++){
-        const trimmed = parts[i].trim();
-        if(trimmed.length>0){
-            usernames.push(trimmed);
-        }
-    }
-    const memberIds = [MyUserId];
-
-    for(const username of usernames){
-        const id = await resolveUsername(username);
-        if(!id){
-            return;
-        }
-        memberIds.push(id);
-    }
-
-    const token = localStorage.getItem("token");
-    const url = `/chat/create-group?name=${encodeURIComponent(groupName)}&type=GROUP`;
-    await openRoomRequest(url,{
-        method: "POST",
-        headers: {"Authorization": "Bearer " + token,
-            "Content-Type": "application/json"},
-        body: JSON.stringify(memberIds)
-    });
-
-    document.getElementById("groupName").value="";
-    document.getElementById("groupUserNames").value="";
-}
-
 async function openRoomRequest(url, options){
     try{
         if(!options.headers){
@@ -220,6 +192,12 @@ async function openRoomRequest(url, options){
         }
 
         const room = await res.json();
+
+        if (room.id !== roomId) {
+            renderedMessageIds = new Set();
+            const box = document.getElementById("messages");
+            if (box) box.innerHTML = "";
+        }
         roomId = room.id;
 
         document.getElementById("roomIdLabel").textContent = roomId;
@@ -236,38 +214,51 @@ async function openRoomRequest(url, options){
 }
 
 
+function renderMessage(m, box){
+    const isMine = String(m.senderId) === String(MyUserId);
+
+    const div = document.createElement("div");
+    div.className = "msg " + (isMine ? "mine" : "theirs");
+
+    if(!isMine){
+        const nameElem = document.createElement("div");
+        nameElem.className = "senderName";
+        nameElem.textContent = m.senderUsername;
+        div.appendChild(nameElem);
+    }
+
+    if(m.flagged){
+        div.style.color = "red";
+    }
+
+    div.appendChild(document.createTextNode(m.message));
+    box.appendChild(div);
+}
+
 async function loadMessages(){
+    if(!roomId){
+        return;
+    }
     const res = await fetch(`${API_BASE}/chat/${roomId}`);
     if(!res.ok) return;
 
     const messages = await res.json();
     const box = document.getElementById("messages");
-    box.innerHTML = "";
 
-    for(let i = 0; i< messages.length; i++){
+    let appendedAny = false;
+    for(let i = 0; i < messages.length; i++){
         const m = messages[i];
-        const isMine = String(m.senderId)  === String(MyUserId);
-
-        const div = document.createElement("div");
-        let cssClass;
-        if(isMine){
-            cssClass = "mine";
-        }else {
-            cssClass = "theirs";
+        if (renderedMessageIds.has(m.id)) {
+            continue;
         }
-        div.className = "msg " + cssClass;
-
-        if(!isMine){
-            const nameElem = document.createElement("div");
-            nameElem.className = "senderName";
-            nameElem.textContent = m.senderUsername;
-            div.appendChild(nameElem);
-        }
-
-        div.appendChild(document.createTextNode(m.message));
-        box.appendChild(div);
+        renderMessage(m, box);
+        renderedMessageIds.add(m.id);
+        appendedAny = true;
     }
-    box.scrollTop = box.scrollHeight;
+
+    if (appendedAny) {
+        box.scrollTop = box.scrollHeight;
+    }
 }
 
 async function sendMessage(){
@@ -275,20 +266,48 @@ async function sendMessage(){
     const text = input.value.trim();
     if(!text) return;
 
+    input.value = "";
+    const box = document.getElementById("messages");
+    const tempDiv = document.createElement("div");
+    tempDiv.className = "msg mine";
+    tempDiv.appendChild(document.createTextNode(text));
+    tempDiv.style.opacity = "0.6";
+    box.appendChild(tempDiv);
+    box.scrollTop = box.scrollHeight;
+
     const token = localStorage.getItem("token");
 
-    await fetch(`${API_BASE}/chat/send`, {
-        method: "POST",
-        headers: {"Authorization": "Bearer " + token,
-            "Content-Type":"application/json"},
-        body: JSON.stringify({
-            senderId: MyUserId,
-            roomId: roomId,
-            message: text
-        })
-    });
-    input.value = "";
-    loadMessages();
+    try {
+        const res = await fetch(`${API_BASE}/chat/send`, {
+            method: "POST",
+            headers: {"Authorization": "Bearer " + token,
+                "Content-Type":"application/json"},
+            body: JSON.stringify({
+                senderId: MyUserId,
+                roomId: roomId,
+                message: text
+            })
+        });
+
+        if (res.ok) {
+            const saved = await res.json();
+            renderedMessageIds.add(saved.id);
+            if(saved.flagged){
+                tempDiv.textContent = "";
+                tempDiv.style.color = "red";
+                tempDiv.appendChild(document.createTextNode(saved.message));
+            }
+            tempDiv.style.opacity = "1";
+        } else {
+            tempDiv.style.opacity = "1";
+            tempDiv.style.color = "red";
+            tempDiv.appendChild(document.createTextNode(" (failed to send)"));
+        }
+    } catch (e) {
+        tempDiv.style.opacity = "1";
+        tempDiv.style.color = "red";
+        tempDiv.appendChild(document.createTextNode(" (failed to send)"));
+    }
 }
 
 async function openChatById(id){
@@ -296,6 +315,11 @@ async function openChatById(id){
         console.error("User identity not loaded yet.")
     }
 
+    if (id !== roomId) {
+        renderedMessageIds = new Set();
+        const box = document.getElementById("messages");
+        if (box) box.innerHTML = "";
+    }
     roomId = id;
 
     document.getElementById("roomIdLabel").textContent=roomId;
@@ -306,3 +330,166 @@ async function openChatById(id){
     if(pollTimer) clearInterval(pollTimer);
     pollTimer = setInterval(loadMessages, 3000);
 }
+
+async function toggleFriendDropdown(){
+    const dropdown = document.getElementById("friendDropdown");
+
+    if(dropdown.style.display === "block"){
+        dropdown.style.display = "none";
+        return;
+    }
+
+    dropdown.innerHTML = "<div class='chat-search-empty'>Loading friends...</div>";
+    dropdown.style.display = "block";
+
+    const token = localStorage.getItem("token");
+    if(!token || !MyUserId)return;
+
+    try {
+        const res = await fetch(`${API_BASE}/friends/accepted/${MyUserId}`, {
+            headers: {"Authorization": `Bearer ${token}`}
+        });
+
+        const friendships = await res.json();
+
+        const availableFriendships = friendships.filter(function (f) {
+            if (f.senderId === MyUserId) {
+                return !selectedMemberIds.includes(f.receiverId);
+            } else {
+                return !selectedMemberIds.includes(f.senderId);
+            }
+        });
+
+        if(availableFriendships.length === 0){
+            dropdown.innerHTML = "<div class='chat-search-empty'>No friends available to add</div>";
+            return;
+        }
+
+        dropdown.innerHTML = "";
+
+        for(let i=0; i<availableFriendships.length; i++) {
+            const f = availableFriendships[i];
+
+            let friendId;
+            if (f.senderId === MyUserId) {
+                friendId = f.receiverId;
+            } else {
+                friendId = f.senderId;
+            }
+
+            const userRes = await fetch(`${API_BASE}/api/users/${friendId}`, {
+                headers: {"Authorization": `Bearer ${token}`}
+            });
+
+            if (userRes.ok) {
+                const friend = await userRes.json();
+
+                const item = document.createElement("div");
+                item.className = "chat-search-item";
+                item.style.display = "flex";
+                item.style.alignItems = "center";
+                item.style.gap = "10px";
+
+                item.onclick = function () {
+                    addMemberToGroupList(friend.id, friend.username);
+                    dropdown.style.display = "none";
+                };
+
+                const img = document.createElement("img");
+                img.src = friend.avatarUrl || "/img/avatars/default.png";
+                img.style.width = "24px";
+                img.style.height = "24px";
+                img.style.borderRadius = "50%";
+
+                const name = document.createElement("span");
+                name.textContent = friend.username;
+
+                item.appendChild(img);
+                item.appendChild(name);
+                dropdown.appendChild(item);
+            }
+        }
+    }catch (err){
+        console.error(err);
+        dropdown.innerHTML = "<div class='chat-search-empty'>Connection error</div>";
+    }
+}
+
+function addMemberToGroupList(id, username){
+    if(selectedMemberIds.includes(id)){
+        return;
+    }
+
+    selectedMemberIds.push(id);
+
+    const group = document.getElementById("selectedMembersGroup");
+
+    const badge = document.createElement("div");
+    badge.id = `member-badge-${id}`;
+    badge.style.background = "rgba(179, 39, 201, 0.25)";
+    badge.style.border = "1px solid #b327c9";
+    badge.style.borderRadius = "20px";
+    badge.style.padding = "5px 12px";
+    badge.style.fontSize = "13px";
+    badge.style.display = "flex";
+    badge.style.alignItems = "center";
+    badge.style.gap = "8px";
+    badge.style.color = "#fff";
+
+    badge.innerHTML = `<span>${escapeHtml(username)}</span>
+                       <span onclick="removeMemberFromGroupList(${id})" style="cursor:pointer; color:#ff6b9d; font-weight:bold:">✖️</span>`;
+
+    group.appendChild(badge);
+}
+
+function removeMemberFromGroupList(id){
+    for(let i=0; i<selectedMemberIds.length; i++){
+        if(selectedMemberIds[i] === id){
+            selectedMemberIds.splice(i, 1);
+            break;
+        }
+    }
+    const badge = document.getElementById(`member-badge-${id}`);
+    if(badge){
+        badge.remove();
+    }
+}
+
+async function createGroup(){
+    if(!MyUserId){
+        alert("Reload page");
+        return;
+    }
+
+    const groupName = document.getElementById("groupName").value.trim() || "Group Chat";
+
+    if(selectedMemberIds.length === 0){
+        alert("Please add at least one member to the group");
+        return;
+    }
+
+    const allMemberIds = [MyUserId, ...selectedMemberIds];
+
+    const token = localStorage.getItem("token");
+    const url = `/chat/create-group?name=${encodeURIComponent(groupName)}&type=GROUP`;
+    await openRoomRequest(url,{
+        method: "POST",
+        headers: {"Authorization": "Bearer " + token,
+            "Content-Type": "application/json"},
+        body: JSON.stringify(allMemberIds)
+    });
+
+    document.getElementById("groupName").value="";
+    document.getElementById("selectedMembersGroup").innerHTML = "";
+    selectedMemberIds = [];
+}
+
+document.addEventListener("click", function(e){
+    const selectionWrapper = document.querySelector(".group-members-selection");
+    if(selectionWrapper && !selectionWrapper.contains(e.target)){
+        const dropdown = document.getElementById("friendDropdown");
+        if(dropdown){
+            dropdown.style.display = "none";
+        }
+    }
+});
