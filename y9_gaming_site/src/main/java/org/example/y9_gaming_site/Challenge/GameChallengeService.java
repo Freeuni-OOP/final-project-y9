@@ -7,6 +7,7 @@ import org.example.y9_gaming_site.gameRecord.GameRecord;
 import org.example.y9_gaming_site.gameRecord.GameRecordService;
 import org.example.y9_gaming_site.gameRecord.GameResultEvaluator;
 import org.example.y9_gaming_site.gameRecord.GameResultEvaluatorRegistry;
+import org.example.y9_gaming_site.notification.NotificationService;
 import org.example.y9_gaming_site.user.User;
 import org.example.y9_gaming_site.user.UserRepository;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -14,6 +15,8 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Locale;
+import java.util.Optional;
 
 @Service
 public class GameChallengeService {
@@ -22,14 +25,17 @@ public class GameChallengeService {
     private final FriendshipRepository friendshipRepository;
     private final GameRecordService gameRecordService;
     private final GameResultEvaluatorRegistry gameResultEvaluatorRegistry;
+    private final NotificationService notificationService;
 
     public GameChallengeService(GameChallengeRepository challengeRepository, UserRepository userRepository,
-                                FriendshipRepository friendshipRepository, GameRecordService gameRecordService, GameResultEvaluatorRegistry gameResultEvaluatorRegistry) {
+                                FriendshipRepository friendshipRepository, GameRecordService gameRecordService,
+                                GameResultEvaluatorRegistry gameResultEvaluatorRegistry, NotificationService notificationService) {
         this.gameChallengeRepository = challengeRepository;
         this.userRepository = userRepository;
         this.friendshipRepository = friendshipRepository;
         this.gameRecordService = gameRecordService;
         this.gameResultEvaluatorRegistry = gameResultEvaluatorRegistry;
+        this.notificationService = notificationService;
     }
 
     public GameChallenge sendChallenge(Long senderId, Long receiverId, String gameKey, Long contextId) {
@@ -41,8 +47,14 @@ public class GameChallengeService {
         User receiver = userRepository.findById(receiverId).orElseThrow(()->new RuntimeException("No User found"));
         LocalDateTime expiresAt =  LocalDateTime.now().plusDays(7);
         GameChallenge gameChallenge = new GameChallenge(targetRecord.getUser(), receiver, targetRecord, expiresAt);
-        return gameChallengeRepository.save(gameChallenge);
+        GameChallenge saved = gameChallengeRepository.save(gameChallenge);
 
+        String gameTitle = targetRecord.getGame().getTitle();
+        String message = targetRecord.getUser().getUsername() + " challenged you to beat their"
+                + gameTitle + " score (" + formatScore(gameTitle, targetRecord.getValue()) + ")";
+        notificationService.createGameChallenge(receiver.getId(), targetRecord.getUser().getId(), saved.getId(), message);
+
+        return saved;
     }
 
     public GameChallenge respondToChallenge(Long challengeId, Long receiverId, boolean accept) {
@@ -63,7 +75,15 @@ public class GameChallengeService {
             challenge.setStatus(GameChallengeStatus.DECLINED);
             challenge.setResolvedAt(LocalDateTime.now());
         }
-        return gameChallengeRepository.save(challenge);
+        GameChallenge saved = gameChallengeRepository.save(challenge);
+
+        notificationService.resolvePendingChallengeNotification(saved.getId());
+        if(accept) {
+            String gameTitle = saved.getTargRecord().getGame().getTitle();
+            notificationService.createGameChallengeAccepted(saved.getSender().getId(), saved.getReceiver().getId(),
+                    saved.getReceiver().getUsername() + " accepted your " + gameTitle + " challenge");
+        }
+        return saved;
     }
 
     public GameChallenge submitAttempt(Long challengeId, Long submittingUserId, double value, Long contextId) {
@@ -96,7 +116,19 @@ public class GameChallengeService {
         challenge.setWinner(winner);
         challenge.setStatus(GameChallengeStatus.COMPLETED);
         challenge.setResolvedAt(LocalDateTime.now());
-        return gameChallengeRepository.save(challenge);
+        GameChallenge saved = gameChallengeRepository.save(challenge);
+
+        boolean receiverWon = winner.getId().equals(saved.getReceiver().getId());
+        String receiverMsg = receiverWon
+                ? "You beat " + saved.getSender().getUsername() + " " + gameKey + " score"
+                : saved.getSender().getUsername() + " kept their " + gameKey + " score \u2014 you didn't beat it this time.";
+        String senderMsg = receiverWon
+                ? saved.getReceiver().getUsername() + " beat your " + gameKey + " score"
+                : "You held onto your " + gameKey + " score against " + saved.getReceiver().getUsername() + "!";
+        notificationService.createGameChallengeResult(saved.getReceiver().getId(), saved.getSender().getId(), receiverMsg);
+        notificationService.createGameChallengeResult(saved.getSender().getId(), saved.getReceiver().getId(), senderMsg);
+
+        return saved;
     }
 
     @Scheduled(cron = "0 0 * * * *")
@@ -116,10 +148,28 @@ public class GameChallengeService {
         return gameChallengeRepository.findBySenderIdOrReceiverId(userId, userId);
     }
 
+    public Optional<GameChallenge> findById(Long id) {
+        return gameChallengeRepository.findById(id);
+    }
+
     private GameChallenge expire(GameChallenge challenge) {
         challenge.setStatus(GameChallengeStatus.EXPIRED);
         challenge.setResolvedAt(LocalDateTime.now());
-        return gameChallengeRepository.save(challenge);
+        GameChallenge saved = gameChallengeRepository.save(challenge);
+        notificationService.resolvePendingChallengeNotification(saved.getId());
+        return saved;
+    }
+
+    private String formatScore(String gameKey, double value) {
+        String key = gameKey == null ? "" : gameKey.toUpperCase(Locale.ROOT);
+        if(key.contains("WORDLE")) {
+            long guesses = Math.round(value);
+            return guesses + (guesses == 1 ? " guess" : " guesses");
+        }
+        if(key.contains("SUDOKU")) {
+            return Math.round(value) + "s";
+        }
+        return (value == Math.rint(value)) ? String.valueOf((long) value) : String.valueOf(value);
     }
 
     private boolean theyAreFriends(Long userId, Long receiverId) {

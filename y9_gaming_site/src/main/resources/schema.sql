@@ -245,11 +245,14 @@ CREATE TABLE IF NOT EXISTS notifications(
                                             user_id BIGINT NOT NULL,
                                             sender_id BIGINT NOT NULL,
                                             friendship_id BIGINT,
+                                            room_id BIGINT,
+                                            challenge_id BIGINT,
                                             type VARCHAR(50) NOT NULL,
     message VARCHAR(255) NOT NULL,
     is_read BOOLEAN DEFAULT FALSE,
     date_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (friendship_id) REFERENCES friendships(id) ON DELETE CASCADE
+   FOREIGN KEY (friendship_id) REFERENCES friendships(id) ON DELETE CASCADE,
+   FOREIGN KEY (challenge_id) REFERENCES game_challenges(id) ON DELETE CASCADE
     );

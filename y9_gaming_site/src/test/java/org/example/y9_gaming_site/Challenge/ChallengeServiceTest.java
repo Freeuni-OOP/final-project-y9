@@ -7,6 +7,7 @@ import org.example.y9_gaming_site.gameRecord.GameRecord;
 import org.example.y9_gaming_site.gameRecord.GameRecordService;
 import org.example.y9_gaming_site.gameRecord.GameResultEvaluator;
 import org.example.y9_gaming_site.gameRecord.GameResultEvaluatorRegistry;
+import org.example.y9_gaming_site.notification.NotificationService;
 import org.example.y9_gaming_site.user.User;
 import org.example.y9_gaming_site.user.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,6 +36,8 @@ public class ChallengeServiceTest {
     private UserRepository userRepository;
     @Mock
     private GameRecordService gameRecordService;
+    @Mock
+    private NotificationService notificationService;
 
     private GameResultEvaluatorRegistry gameResultEvaluatorRegistry;
     private GameChallengeService challengeService;
@@ -60,7 +63,7 @@ public class ChallengeServiceTest {
     void setUp() {
         gameResultEvaluatorRegistry = new GameResultEvaluatorRegistry(List.of(lowerWins));
         challengeService = new GameChallengeService(gameChallengeRepository,
-                userRepository,friendshipRepository ,gameRecordService, gameResultEvaluatorRegistry);
+                userRepository,friendshipRepository ,gameRecordService, gameResultEvaluatorRegistry, notificationService);
         sender = new User();
         sender.setId(1L);
         receiver = new User();

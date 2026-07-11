@@ -15,6 +15,7 @@ let loadToken = 0;
 let hints = [];
 let pointsBalance = 0;
 let knownPositions = new Set();
+let activeGameChallengeId = null;
 
 let boardEl, kbEl, msgEl, subEl, dailyBtn, practiceBtn, hintBtn, pointsEl;
 
@@ -241,6 +242,14 @@ async function submitGuess() {
         if (window.showAchievementToasts && state.newAchievements && state.newAchievements.length) {
             window.showAchievementToasts(state.newAchievements);
         }
+        if (state.status === "WON") {
+            const guessCount = (state.guesses || []).length;
+            if (activeGameChallengeId && window.submitChallengeAttempt) {
+                window.submitChallengeAttempt(activeGameChallengeId, guessCount);
+            } else if (window.offerGameChallenge) {
+                window.offerGameChallenge("WORDLE", puzzleId, guessCount);
+            }
+        }
     } catch (err) {
         if (myToken !== loadToken) return;
         console.error("guess failed:", err);
@@ -329,6 +338,11 @@ function loadDaily() {
     load(`${API}/daily`, "GET");
 }
 
+function loadChallenge(challengePuzzleId) {
+    subEl.textContent = "\uD83C\uDFC6 მეგობრის გამოწვევა";
+    load(`${API}/${challengePuzzleId}`, "GET");
+}
+
 function loadPractice() {
     if (localStorage.getItem('role') === 'GUEST') {
         showInfoToast('You have to log in');
@@ -351,6 +365,12 @@ document.addEventListener("DOMContentLoaded", () => {
     buildBoard();
     buildKeyboard();
 
-    const mode = new URLSearchParams(location.search).get("mode");
-    if (mode === "practice") loadPractice(); else loadDaily();
+    const params = new URLSearchParams(location.search);
+    const mode = params.get("mode");
+    const challengePuzzleId = params.get("challengeId");
+    activeGameChallengeId = params.get("gcid");
+
+    if (challengePuzzleId) loadChallenge(challengePuzzleId);
+    else if (mode === "practice") loadPractice();
+    else loadDaily();
 });

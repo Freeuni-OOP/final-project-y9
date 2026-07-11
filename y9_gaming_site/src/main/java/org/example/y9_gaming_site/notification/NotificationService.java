@@ -29,6 +29,27 @@ public class NotificationService {
         notificationRepository.save(notification);
     }
 
+    public void createGameChallenge(Long receiverId, Long senderId, Long challengeId, String message) {
+        Notification notification = new Notification(receiverId, senderId, "GAME_CHALLENGE", message, null);
+        notification.setChallengeId(challengeId);
+        notificationRepository.save(notification);
+    }
+
+    public void createGameChallengeAccepted(Long recipientId, Long otherUserId, String message) {
+        Notification notification = new Notification(recipientId, otherUserId, "GAME_CHALLENGE_ACCEPTED", message, null);
+        notificationRepository.save(notification);
+    }
+
+    public void createGameChallengeResult(Long recipientId, Long otherUserId, String message) {
+        Notification notification = new Notification(recipientId, otherUserId, "GAME_CHALLENGE_RESULT", message, null);
+        notificationRepository.save(notification);
+    }
+
+    @Transactional
+    public void resolvePendingChallengeNotification(Long challengeId) {
+        notificationRepository.deleteByChallengeIdAndType(challengeId, "GAME_CHALLENGE");
+    }
+
     public List<Notification> getNotifications(Long userId) {
         return notificationRepository.findByUserIdOrderByDateTimeDesc(userId);
     }

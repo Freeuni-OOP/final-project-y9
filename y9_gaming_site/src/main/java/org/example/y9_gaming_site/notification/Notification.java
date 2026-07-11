@@ -26,6 +26,8 @@ public class Notification {
     private Long friendshipId;
     @Column(name = "room_id")
     private Long roomId;
+    @Column(name = "challenge_id")
+    private Long challengeId;
 
     public Notification() {}
 
@@ -109,6 +111,13 @@ public class Notification {
     }
     public void setRoomId(Long roomId) {
         this.roomId = roomId;
+    }
+
+    public Long getChallengeId() {
+        return challengeId;
+    }
+    public void setChallengeId(Long challengeId) {
+        this.challengeId = challengeId;
     }
 }
 
