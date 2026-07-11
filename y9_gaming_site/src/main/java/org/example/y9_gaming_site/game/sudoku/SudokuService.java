@@ -6,6 +6,7 @@ import org.example.y9_gaming_site.game.sudoku.SudokuPuzzleRepository;
 import org.example.y9_gaming_site.game.sudoku.SudokuPuzzle;
 import org.example.y9_gaming_site.game.wordle.WordlePuzzle;
 import org.example.y9_gaming_site.gameRecord.GameRecordService;
+import org.example.y9_gaming_site.user.PointsService;
 import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.*;
@@ -14,16 +15,20 @@ import java.util.*;
 public class SudokuService {
 
     public static final String GAME_KEY = "SUDOKU";
+    private static final int HINT_COST = 10;
     private final SudokuPuzzleRepository sudokuPuzzleRepository;
     private final AchievementService achievementService;
     private final GameRecordService gameRecordService;
+    private final PointsService pointsService;
 
     public SudokuService(SudokuPuzzleRepository sudokuPuzzleRepository,
                          AchievementService achievementService,
-                         GameRecordService gameRecordService) {
+                         GameRecordService gameRecordService,
+                         PointsService pointsService) {
         this.sudokuPuzzleRepository = sudokuPuzzleRepository;
         this.achievementService = achievementService;
         this.gameRecordService = gameRecordService;
+        this.pointsService = pointsService;
     }
 
     //todays puzzle, if not found medium puzzle
@@ -63,8 +68,11 @@ public class SudokuService {
                 .orElse(false);
     }
 
-    public SudokuPuzzleRepository getSudokuPuzzleRepository() {
-        return this.sudokuPuzzleRepository;
+    public SudokuPuzzleRepository getSudokuPuzzleRepository() {return this.sudokuPuzzleRepository;}
+
+    public int chargeHint(Long userId) {
+        pointsService.spend(userId, HINT_COST);
+        return pointsService.getBalance(userId);
     }
 
     public SudokuSolveResponse submitSolve(Long userId, Long puzzleId, int secondsTaken) {
