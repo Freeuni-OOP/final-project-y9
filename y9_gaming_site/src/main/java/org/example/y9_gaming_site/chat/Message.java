@@ -55,6 +55,16 @@ public class Message {
     public void setTimestamp(LocalDateTime timestamp) {
         this.timestamp = timestamp;
     }
+
+    @Column(name = "flagged")
+    private boolean flagged;
+
+    public boolean isFlagged() {
+        return flagged;
+    }
+    public void setFlagged(boolean flagged) {
+        this.flagged = flagged;
+    }
 }
 
 
