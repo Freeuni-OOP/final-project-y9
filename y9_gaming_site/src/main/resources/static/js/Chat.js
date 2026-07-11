@@ -9,6 +9,16 @@ let renderedMessageIds = new Set();
 
 document.addEventListener("DOMContentLoaded", loadMyIdentity);
 
+function escapeHtml(text) {
+    if(!text){
+        return "";
+    }
+
+
+    return text.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#39;");
+}
+
+
 document.addEventListener("DOMContentLoaded", function (){
     const input = document.getElementById("messageInput");
     if(input){
@@ -443,7 +453,7 @@ function addMemberToGroupList(id, username){
     badge.style.color = "#fff";
 
     badge.innerHTML = `<span>${escapeHtml(username)}</span>
-                       <span onclick="removeMemberFromGroupList(${id})" style="cursor:pointer; color:#ff6b9d; font-weight:bold:">✖️</span>`;
+                  <span onclick="removeMemberFromGroupList(${id})" style="cursor:pointer; color:#ff6b9d; font-weight:bold:">✖️</span>`;
 
     group.appendChild(badge);
 }
