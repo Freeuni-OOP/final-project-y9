@@ -420,8 +420,8 @@ async function loadFriendSection(){
             return;
         }
 
-        friendshipStatus = await statusRes.text();
-        friendshipStatus = friendshipStatus.replace(/"/g, "");
+        let rawStatus = await statusRes.text();
+        friendshipStatus = rawStatus.replace(/"/g, "").trim();
 
         const section = document.getElementById("friend-section");
         const btn = document.getElementById("friend-btn");
@@ -429,21 +429,103 @@ async function loadFriendSection(){
 
         section.style.display = "block";
 
-        if (friendshipStatus === "FRIENDS") {
-            btn.style.display = "none";
-            text.textContent = "✅ FRIENDS"
-        } else if (friendshipStatus === "PENDING") {
-            btn.style.display = "none";
-            text.textContent = "⏳ The request has been sent";
-        } else {
-            btn.textContent = "➕ Add friend";
-            btn.style.display = "block";
-        }
+        updateFriendStatus(friendshipStatus, btn, text);
+
     }catch (err){
         console.error(err);
     }
 }
 
+function updateFriendStatus(status, btn, text){
+    removeConfirmationButtons();
+
+    if(status === "FRIENDS"){
+        text.textContent = "✅ FRIENDS";
+        btn.textContent = "❌ Unfriend";
+        btn.style.display = "block";
+        btn.onclick = showUnfriendConfirmation;
+    }else if (status === "PENDING"){
+        text.textContent = "⏳ The request has been sent";
+        btn.textContent = "❌ Cancel / Decline request";
+        btn.style.display = "block";
+        btn.onclick = showUnfriendConfirmation;
+    }else{
+        text.textContent = "";
+        btn.textContent = "➕ Add friend";
+        btn.style.display = "block";
+        btn.onclick = handleFriendBtn;
+    }
+}
+
+function showUnfriendConfirmation(){
+    const btn = document.getElementById("friend-btn");
+    const textElem = document.getElementById("friend-status-text");
+
+    btn.style.display = "none";
+
+    textElem.textContent = "Are you sure you want to change friendship status";
+
+    const confirmationBox = document.createElement("div");
+    confirmationBox.id = "confirm-box";
+    confirmationBox.style.display = "flex";
+    confirmationBox.style.gap = "8px";
+    confirmationBox.style.marginTop = "8px";
+
+    const yesBtn = document.createElement("button");
+    yesBtn.className = "chat-btn";
+    yesBtn.style.background = "#ff6b9d";
+    yesBtn.style.marginTop = "0";
+    yesBtn.textContent = "Yes, Remove";
+    yesBtn.onclick = executeUnfriendAction;
+
+    const noBtn = document.createElement("button");
+    noBtn.className = "chat-btn";
+    noBtn.style.background = "#808080";
+    noBtn.style.marginTop = "0";
+    noBtn.textContent = "Cancel";
+    noBtn.onclick = function (){
+        updateFriendStatus(friendshipStatus, btn, textElem);
+    };
+
+    confirmationBox.appendChild(yesBtn)
+    confirmationBox.appendChild(noBtn);
+
+    btn.parentNode.insertBefore(confirmationBox, btn.nextSibling);
+}
+
+function removeConfirmationButtons(){
+    const box = document.getElementById("confirm-box");
+    if(box){
+        box.remove();
+    }
+}
+
+async function executeUnfriendAction(){
+    const token = localStorage.getItem("token");
+
+    try{
+        const res = await fetch(`/friends/remove?myId=${myId}&otherId=${userId}`,{
+            method: "DELETE",
+            headers: {
+                "Authorization": "Bearer " + token
+            }
+        });
+
+        if(!res.ok){
+            alert("Could not update friendship status.");
+            return;
+        }
+
+        friendshipStatus = "NONE";
+        const btn = document.getElementById("friend-btn");
+        const textElem = document.getElementById("friend-status-text");
+
+        updateFriendStatus(friendshipStatus, btn, textElem);
+    }catch (err){
+        alert("Connection error");
+    }
+
+}
 async function handleFriendBtn(){
     const token = localStorage.getItem("token");
 
@@ -464,9 +546,9 @@ async function handleFriendBtn(){
         }
 
         friendshipStatus = "PENDING";
-
-        document.getElementById("friend-btn").style.display = "none";
-        document.getElementById("friend-status-text").textContent = "⏳ The request has been sent";
+        const btn = document.getElementById("friend-btn");
+        const textElem = document.getElementById("friend-status-text");
+        updateFriendStatus(friendshipStatus, btn, textElem);
 
     }catch (err){
         alert("Connection error");

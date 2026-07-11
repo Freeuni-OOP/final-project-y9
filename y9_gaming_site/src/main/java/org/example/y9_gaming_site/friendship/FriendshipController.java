@@ -55,6 +55,11 @@ public class FriendshipController {
     public List<Friendship> getAcceptedFriendships(@PathVariable("userId") Long userId) {
         return service.getAcceptedFriendships(userId);
     }
+
+    @DeleteMapping("/remove")
+    public void removeFriendship(@RequestParam Long myId, @RequestParam Long otherId) {
+        service.removeFriendship(myId, otherId);
+    }
 }
 
 
