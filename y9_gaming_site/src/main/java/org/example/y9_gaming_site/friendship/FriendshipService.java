@@ -91,4 +91,18 @@ public class FriendshipService {
     public List<Friendship> getAcceptedFriendships(Long userId) {
         return friendshipRepository.findByStatusAndSenderIdOrStatusAndReceiverId("ACCEPTED", userId, "ACCEPTED", userId);
     }
+
+    @Transactional
+    public void removeFriendship(Long myId, Long otherId){
+        Friendship f1 = friendshipRepository.findBySenderIdAndReceiverId(myId,otherId);
+        Friendship f2 = friendshipRepository.findBySenderIdAndReceiverId(otherId,myId);
+
+        if(f1!=null){
+            friendshipRepository.delete(f1);
+        }else if(f2!=null){
+            friendshipRepository.delete(f2);
+        }else{
+            throw new IllegalArgumentException("No friendship found to remove");
+        }
+    }
 }
