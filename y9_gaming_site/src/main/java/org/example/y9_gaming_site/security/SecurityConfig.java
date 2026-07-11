@@ -42,6 +42,7 @@ public class SecurityConfig {
                         .requestMatchers("/home", "/stats/home").authenticated()
                         .requestMatchers("/sudoku", "/sudoku.html").authenticated()
                         .requestMatchers("/api/sudoku/**").authenticated()
+                        .requestMatchers("/api/challenges/**").authenticated()
                         .requestMatchers("/joker", "/joker/**").authenticated()
                         .requestMatchers("/api/joker/**").authenticated()
                         .requestMatchers("/ws/**").permitAll()

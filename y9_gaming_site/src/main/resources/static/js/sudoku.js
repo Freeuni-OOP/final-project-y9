@@ -2,6 +2,7 @@ let timerInterval = null;
 let secondsElapsed = 0;
 let activePuzzleId = null;
 let currentSolution = "";
+let activeGameChallengeId = null;
 
 let hintsUsed = 0;
 const MAX_HINTS = 3;
@@ -65,6 +66,7 @@ function updateMistakesUIVisibility() {
 async function determineInitialRouting() {
     const urlParams = new URLSearchParams(window.location.search);
     const challengeId = urlParams.get('challengeId');
+    activeGameChallengeId = urlParams.get('gcid');
 
     if (challengeId) {
         fetchPuzzleData(`/api/sudoku/board?challengeId=${challengeId}`, "🏆 Friend Challenge Mode");
@@ -449,6 +451,11 @@ async function submitSolutionCheck() {
             window.sendTimeAnalytics(activePuzzleId, "Sudoku", "BOARD_PUZZLE", secondsElapsed);
         }
         reportSolveForAchievements();
+        if (activeGameChallengeId && window.submitChallengeAttempt) {
+            window.submitChallengeAttempt(activeGameChallengeId, secondsElapsed);
+        } else if (window.offerGameChallenge) {
+            window.offerGameChallenge("SUDOKU", activePuzzleId, secondsElapsed);
+        }
     } else {
         showToast("There are some mistakes on your board. Keep solving!", "error");
     }

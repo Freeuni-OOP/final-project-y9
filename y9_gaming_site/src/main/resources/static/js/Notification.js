@@ -126,6 +126,32 @@ async function loadNotifications(){
                 item.classList.add("static-notification");
             }
 
+            if(n.type === "GAME_CHALLENGE_ACCEPTED" || n.type === "GAME_CHALLENGE_RESULT"){
+                item.classList.add("static-notification");
+            }
+
+            if (n.type === "GAME_CHALLENGE") {
+                const acceptBtn = document.createElement("button");
+                acceptBtn.className = "notif-accept-btn";
+                acceptBtn.textContent = "Accept";
+                acceptBtn.onclick = function () {
+                    acceptChallenge(n.challengeId, item);
+                };
+
+                const declineBtn = document.createElement("button");
+                declineBtn.className = "notif-decline-btn";
+                declineBtn.textContent = "Decline";
+                declineBtn.onclick = function () {
+                    declineChallenge(n.challengeId, item);
+                };
+
+                const actions = document.createElement("div");
+                actions.className = "notif-actions";
+                actions.appendChild(acceptBtn);
+                actions.appendChild(declineBtn);
+                item.appendChild(actions);
+            }
+
             if (n.type === "FRIEND_REQUEST") {
                 const acceptBtn = document.createElement("button");
                 acceptBtn.className = "notif-accept-btn";
@@ -185,6 +211,64 @@ async function declineFriend(notificationId, item){
         }
     }catch (e){
         console.log("Error declining friend request:", e);
+    }
+}
+
+async function acceptChallenge(challengeId, item){
+    try {
+        const res = await fetch("/api/challenges/" + challengeId + "/respond", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + localStorage.getItem("token")
+            },
+            body: JSON.stringify({accept: true})
+        });
+        if (res.ok) {
+            const dto = await res.json();
+            const playPath = dto.gameKey === "SUDOKU" ? "/sudoku" : "/wordle";
+            const playUrl = playPath + "?challengeId=" + dto.contextId + "&gcid=" + dto.id;
+
+            item.innerHTML = `<p style='color:#9a4eab;'>🏆 Accepted! Click to play →</p>`;
+            item.classList.add("clickable-notification");
+            item.onclick = function (){
+                window.location.href = playUrl;
+            };
+            await checkUnreadCount();
+        } else {
+            const msg = await res.text();
+            item.querySelector("p").insertAdjacentHTML("afterend",
+                `<p class="notif-error" style="color:#e07a7a; font-size: 0.85em;">${msg || "Could not accept — try again"}</p>`);
+        }
+    }catch (e){
+        console.log("Error accepting challenge:", e);
+        item.querySelector("p").insertAdjacentHTML("afterend",
+            `<p class="notif-error" style="color:#e07a7a; font-size: 0.85em;">Connection error — try again</p>`);
+    }
+}
+
+async function declineChallenge(challengeId, item){
+    try {
+        const res = await fetch("/api/challenges/" + challengeId + "/respond", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + localStorage.getItem("token")
+            },
+            body: JSON.stringify({accept: false})
+        });
+        if (res.ok) {
+            item.remove();
+            await checkUnreadCount();
+        } else {
+            const msg = await res.text();
+            item.querySelector("p").insertAdjacentHTML("afterend",
+                `<p class="notif-error" style="color:#e07a7a; font-size: 0.85em;">${msg || "Could not decline — try again"}</p>`);
+        }
+    }catch (e){
+        console.log("Error declining challenge:", e);
+        item.querySelector("p").insertAdjacentHTML("afterend",
+            `<p class="notif-error" style="color:#e07a7a; font-size: 0.85em;">Connection error — try again</p>`);
     }
 }
 
