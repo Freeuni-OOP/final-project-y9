@@ -72,7 +72,7 @@
                         <button class="btn btn-blue" type="submit">Set</button>
                     </form>
                     <form th:action="@{/admin/users/{id}/ban(id=${user.id})}" method="post" style="display:flex;gap:6px;align-items:center;">
-                        <input type="text" name="reason" placeholder="Reason">
+<!--                        <input type="text" name="reason" placeholder="Reason">-->
                         <button class="btn btn-orange" type="submit">Ban</button>
                     </form>
                     <form th:action="@{/admin/users/{id}/delete(id=${user.id})}" method="post"
