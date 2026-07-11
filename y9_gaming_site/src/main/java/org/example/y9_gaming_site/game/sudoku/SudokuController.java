@@ -1,10 +1,12 @@
 package org.example.y9_gaming_site.game.sudoku;
 
 import org.example.y9_gaming_site.user.User;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -53,5 +55,20 @@ public class SudokuController {
         return ResponseEntity.ok(sudokuService.submitSolve(userId, puzzleId, request.secondsTaken()));
     }
 
+    @PostMapping("/hint-cost")
+    public ResponseEntity<?> chargeHint(Authentication authentication) {
+        if (authentication == null || !(authentication.getPrincipal() instanceof User)) {
+            return ResponseEntity.status(401).body(Map.of("error", "Please log in"));
+        }
+        Long userId = ((User) authentication.getPrincipal()).getId();
+        try {
+            int remaining = sudokuService.chargeHint(userId);
+            return ResponseEntity.ok(Map.of("remainingPoints", remaining));
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.PAYMENT_REQUIRED).body(Map.of("error", "Not enough points"));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", "User not found"));
+        }
+    }
 
 }

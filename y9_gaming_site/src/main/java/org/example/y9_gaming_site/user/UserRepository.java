@@ -19,11 +19,11 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     List<User> findByUsernameContainingIgnoreCase(String query);
 
-    @Modifying
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("UPDATE User u SET u.points = u.points + :amount WHERE u.id = :userId")
     int addPoints(@Param("userId") Long userId, @Param("amount") int amount);
 
-    @Modifying
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("UPDATE User u SET u.points = u.points - :amount WHERE u.id = :userId AND u.points >= :amount")
     int spendPoints(@Param("userId") Long userId, @Param("amount") int amount);
 }

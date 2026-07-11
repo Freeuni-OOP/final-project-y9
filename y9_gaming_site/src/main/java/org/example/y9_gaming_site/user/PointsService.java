@@ -1,6 +1,7 @@
 package org.example.y9_gaming_site.user;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class PointsService {
@@ -24,18 +25,20 @@ public class PointsService {
         return getBalance(userId) >= amount;
     }
 
+    @Transactional
     public void spend(Long userId, int amount) {
-        User user = requireUser(userId);
-        if (user.getPoints() < amount) {
+        int updated = userRepository.spendPoints(userId, amount);
+        if (updated == 0) {
+            requireUser(userId);
             throw new IllegalStateException("Not enough points");
         }
-        user.setPoints(user.getPoints() - amount);
-        userRepository.save(user);
     }
 
+    @Transactional
     public void credit(Long userId, int amount) {
-        User user = requireUser(userId);
-        user.setPoints(user.getPoints() + amount);
-        userRepository.save(user);
+        int updated = userRepository.addPoints(userId, amount);
+        if (updated == 0) {
+            requireUser(userId); // throws IllegalArgumentException if the user doesnt exist
+        }
     }
 }
