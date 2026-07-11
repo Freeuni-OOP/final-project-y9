@@ -91,7 +91,7 @@ public class JokerTrick {
         }
 
 
-        playedCards.add(new PlayedCard(player, card, jokerCall, card.getIsJoker() ? ledSuit : "NONE"));
+        playedCards.add(new PlayedCard(player, card, jokerCall, declaredSuit));
 
 
         player.removeCard(card);
@@ -107,34 +107,45 @@ public class JokerTrick {
     }
 
     private PlayedCard evaluateTwoCards(PlayedCard winnerCard, PlayedCard currCard) {
-        // 1. თუ ორივე ჯოკერია, ბოლო ჩამოგდებული HIGH ჯოკერი ყოველთვის იგებს.
-        if (winnerCard.card().getIsJoker() && currCard.card().getIsJoker()) {
-            if (currCard.jokerCall().equals("HIGH")) return currCard;
-            return winnerCard;
-        }
-
-        // 2. თუ მაგიდაზე უკვე დევს მოგებული HIGH ჯოკერი, მას ჩვეულებრივი კოზირი ვერ მოუგებს.
-        if (winnerCard.card().getIsJoker() && winnerCard.jokerCall().equals("HIGH")) {
-            return winnerCard;
-        }
-
-        // 3. თუ ახალი ჩამოსული ბარათია HIGH ჯოკერი, ის ავტომატურად უგებს ნებისმიერ ჩვეულებრივ კარტს (მათ შორის კოზირსაც).
-        if (currCard.card().getIsJoker() && currCard.jokerCall().equals("HIGH")) {
-            return currCard;
-        }
-
-        // 4. LOW ჯოკერის წესები
-        if (currCard.card().getIsJoker() && currCard.jokerCall().equals("LOW")) {
-            return winnerCard;
-        }
-        if (winnerCard.card().getIsJoker() && winnerCard.jokerCall().equals("LOW")) {
-            if (currCard.card().getSuit().equals(ledSuit) || currCard.card().getSuit().equals(trumpSuit)) {
+        // 1. თუ მიმდინარე ლიდერი (winnerCard) არის HIGH ჯოკერი
+        if (winnerCard.card().getIsJoker() && "HIGH".equalsIgnoreCase(winnerCard.jokerCall())) {
+            // მას მხოლოდ მეორე HIGH ჯოკერი თუ მოუგებს
+            if (currCard.card().getIsJoker() && "HIGH".equalsIgnoreCase(currCard.jokerCall())) {
                 return currCard;
             }
             return winnerCard;
         }
 
-        // 5. ორი ჩვეულებრივი კარტის შედარება
+        // 2. თუ ახალი შემოსული კარტი (currCard) არის HIGH ჯოკერი
+        // რადგან პირველი პირობა გამოვარდა, ეს ნიშნავს რომ winnerCard არ ყოფილა HIGH ჯოკერი, ასე რომ ახალი HIGH ავტომატურად იგებს!
+        if (currCard.card().getIsJoker() && "HIGH".equalsIgnoreCase(currCard.jokerCall())) {
+            return currCard;
+        }
+
+        // 3. თუ ორივე LOW ჯოკერია
+        if (winnerCard.card().getIsJoker() && "LOW".equalsIgnoreCase(winnerCard.jokerCall()) &&
+                currCard.card().getIsJoker() && "LOW".equalsIgnoreCase(currCard.jokerCall())) {
+            // წესით, პირველი LOW ჯოკერი "უფრო დაბალია" (უფრო მეტად ეტენება), ასე რომ ძველი რჩება სატანებლად
+            return winnerCard;
+        }
+
+        // 4. თუ მაგიდაზე დევს LOW ჯოკერი (winnerCard) და ახალი კარტი ჩვეულებრივია
+        if (winnerCard.card().getIsJoker() && "LOW".equalsIgnoreCase(winnerCard.jokerCall())) {
+            // ჩვეულებრივი კარტი მოუგებს LOW ჯოკერს მხოლოდ მაშინ, თუ ის არის მოთხოვილი სუიტის (ledSuit) ან კოზირი (trumpSuit)
+            if (currCard.card().getSuit().equals(ledSuit) || currCard.card().getSuit().equals(trumpSuit)) {
+                return currCard;
+            }
+            // თუ არცერთი არ არის (მაგალითად გული მოითხოვა ჯოკერმა, კაცს არ ჰყავდა და აგური დადო), აგური ვერ მოუგებს და ისევ LOW ჯოკერს ეტენება!
+            return winnerCard;
+        }
+
+        // 5. თუ მაგიდაზე დევს ჩვეულებრივი კარტი და ახალი ჩამოსული არის LOW ჯოკერი
+        if (currCard.card().getIsJoker() && "LOW".equalsIgnoreCase(currCard.jokerCall())) {
+            // შემოჭრილი LOW ჯოკერი ვერასდროს ვერ უგებს უკვე მაგიდაზე დადებულ ჩვეულებრივ კარტს
+            return winnerCard;
+        }
+
+        // 6. თუ ორივე ჩვეულებრივი კარტია, ჩვეულებრივი მათემატიკური შედარება
         int bestVal = cardVal(winnerCard.card());
         int challengerVal = cardVal(currCard.card());
 
