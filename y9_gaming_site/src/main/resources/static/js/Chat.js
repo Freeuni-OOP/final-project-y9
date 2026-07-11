@@ -53,17 +53,23 @@ async function loadMyIdentity(){
 }
 
 async function resolveUsername(username){
-    const res = await fetch(`${API_BASE}/chat/find-user/${encodeURIComponent(username)}`);
-    if(!res.ok){
-        const text = await res.text();
-        alert(text || `This user does not exist: ${username}`);
-        return null;
+    try {
+        const res = await fetch(`${API_BASE}/chat/find-user/${encodeURIComponent(username)}`);
+        if (!res.ok) {
+            const text = await res.text();
+            showError(`This user does not exist: ${username} womp womp`);
+            return null;
+        }
+        const data = await res.json();
+        return data.id;
+    } catch (err) {
+        showError("Could not connect to the server. Please try again.");
     }
-    const data = await res.json();
-    return data.id;
+
 }
 
 async function openFriendChat(){
+    hideError();
     if(!MyUserId){
         alert("reload page");
         return;
@@ -187,7 +193,7 @@ async function openRoomRequest(url, options){
         const res = await fetch(`${API_BASE}${url}`, options);
         if(!res.ok){
             const text = await res.text();
-            alert(text || "Unable to open chat");
+            showError( "You are not friends with the user womp womp");
             return;
         }
 
@@ -456,6 +462,7 @@ function removeMemberFromGroupList(id){
 }
 
 async function createGroup(){
+    hideError();
     if(!MyUserId){
         alert("Reload page");
         return;
@@ -483,6 +490,16 @@ async function createGroup(){
     document.getElementById("selectedMembersGroup").innerHTML = "";
     selectedMemberIds = [];
 }
+
+function showError(message) {
+    document.getElementById('error-text').textContent = message;
+    document.getElementById('error-banner').style.display = 'block';
+}
+
+function hideError() {
+    document.getElementById('error-banner').style.display = 'none';
+}
+
 
 document.addEventListener("click", function(e){
     const selectionWrapper = document.querySelector(".group-members-selection");
