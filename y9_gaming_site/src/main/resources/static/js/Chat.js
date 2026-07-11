@@ -5,8 +5,20 @@ let MyUsername = null;
 let roomId = null;
 let pollTimer = null;
 let selectedMemberIds = [];
+let renderedMessageIds = new Set();
 
 document.addEventListener("DOMContentLoaded", loadMyIdentity);
+
+document.addEventListener("DOMContentLoaded", function (){
+    const input = document.getElementById("messageInput");
+    if(input){
+        input.addEventListener("keydown", function (e){
+            if(e.key === "Enter"){
+                sendMessage();
+            }
+        });
+    }
+});
 
 
 async function loadMyIdentity(){
@@ -180,6 +192,12 @@ async function openRoomRequest(url, options){
         }
 
         const room = await res.json();
+
+        if (room.id !== roomId) {
+            renderedMessageIds = new Set();
+            const box = document.getElementById("messages");
+            if (box) box.innerHTML = "";
+        }
         roomId = room.id;
 
         document.getElementById("roomIdLabel").textContent = roomId;
@@ -196,6 +214,27 @@ async function openRoomRequest(url, options){
 }
 
 
+function renderMessage(m, box){
+    const isMine = String(m.senderId) === String(MyUserId);
+
+    const div = document.createElement("div");
+    div.className = "msg " + (isMine ? "mine" : "theirs");
+
+    if(!isMine){
+        const nameElem = document.createElement("div");
+        nameElem.className = "senderName";
+        nameElem.textContent = m.senderUsername;
+        div.appendChild(nameElem);
+    }
+
+    if(m.flagged){
+        div.style.color = "red";
+    }
+
+    div.appendChild(document.createTextNode(m.message));
+    box.appendChild(div);
+}
+
 async function loadMessages(){
     if(!roomId){
         return;
@@ -205,32 +244,21 @@ async function loadMessages(){
 
     const messages = await res.json();
     const box = document.getElementById("messages");
-    box.innerHTML = "";
 
-    for(let i = 0; i< messages.length; i++){
+    let appendedAny = false;
+    for(let i = 0; i < messages.length; i++){
         const m = messages[i];
-        const isMine = String(m.senderId)  === String(MyUserId);
-
-        const div = document.createElement("div");
-        let cssClass;
-        if(isMine){
-            cssClass = "mine";
-        }else {
-            cssClass = "theirs";
+        if (renderedMessageIds.has(m.id)) {
+            continue;
         }
-        div.className = "msg " + cssClass;
-
-        if(!isMine){
-            const nameElem = document.createElement("div");
-            nameElem.className = "senderName";
-            nameElem.textContent = m.senderUsername;
-            div.appendChild(nameElem);
-        }
-
-        div.appendChild(document.createTextNode(m.message));
-        box.appendChild(div);
+        renderMessage(m, box);
+        renderedMessageIds.add(m.id);
+        appendedAny = true;
     }
-    box.scrollTop = box.scrollHeight;
+
+    if (appendedAny) {
+        box.scrollTop = box.scrollHeight;
+    }
 }
 
 async function sendMessage(){
@@ -238,20 +266,48 @@ async function sendMessage(){
     const text = input.value.trim();
     if(!text) return;
 
+    input.value = "";
+    const box = document.getElementById("messages");
+    const tempDiv = document.createElement("div");
+    tempDiv.className = "msg mine";
+    tempDiv.appendChild(document.createTextNode(text));
+    tempDiv.style.opacity = "0.6";
+    box.appendChild(tempDiv);
+    box.scrollTop = box.scrollHeight;
+
     const token = localStorage.getItem("token");
 
-    await fetch(`${API_BASE}/chat/send`, {
-        method: "POST",
-        headers: {"Authorization": "Bearer " + token,
-            "Content-Type":"application/json"},
-        body: JSON.stringify({
-            senderId: MyUserId,
-            roomId: roomId,
-            message: text
-        })
-    });
-    input.value = "";
-    loadMessages();
+    try {
+        const res = await fetch(`${API_BASE}/chat/send`, {
+            method: "POST",
+            headers: {"Authorization": "Bearer " + token,
+                "Content-Type":"application/json"},
+            body: JSON.stringify({
+                senderId: MyUserId,
+                roomId: roomId,
+                message: text
+            })
+        });
+
+        if (res.ok) {
+            const saved = await res.json();
+            renderedMessageIds.add(saved.id);
+            if(saved.flagged){
+                tempDiv.textContent = "";
+                tempDiv.style.color = "red";
+                tempDiv.appendChild(document.createTextNode(saved.message));
+            }
+            tempDiv.style.opacity = "1";
+        } else {
+            tempDiv.style.opacity = "1";
+            tempDiv.style.color = "red";
+            tempDiv.appendChild(document.createTextNode(" (failed to send)"));
+        }
+    } catch (e) {
+        tempDiv.style.opacity = "1";
+        tempDiv.style.color = "red";
+        tempDiv.appendChild(document.createTextNode(" (failed to send)"));
+    }
 }
 
 async function openChatById(id){
@@ -259,6 +315,11 @@ async function openChatById(id){
         console.error("User identity not loaded yet.")
     }
 
+    if (id !== roomId) {
+        renderedMessageIds = new Set();
+        const box = document.getElementById("messages");
+        if (box) box.innerHTML = "";
+    }
     roomId = id;
 
     document.getElementById("roomIdLabel").textContent=roomId;
